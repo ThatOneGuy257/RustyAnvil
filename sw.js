@@ -1,6 +1,6 @@
 // Rusty Anvil service worker: works offline, picks up updates when there's signal.
 const CACHE='rusty-anvil-5000ae1d81';
-const SHELL=['./','index.html','manifest.webmanifest','icons/icon-180.png','icons/icon-192.png','icons/icon-512.png','icons/maskable-512.png','icons/favicon-64.png'];
+const SHELL=['./','index.html','manifest.webmanifest'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('rusty-anvil-')&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 function timeout(ms){return new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),ms));}
