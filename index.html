@@ -246,6 +246,25 @@ table.ct-grid input.input{width:74px;height:34px;padding:4px 7px;font-family:var
 .tiles div{border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--panelAlt);display:flex;flex-direction:column;gap:2px}
 .tiles b{font-family:var(--mono);font-size:24px}
 .tiles span{font-size:12.5px;color:var(--inkSoft)}
+ol.top5{list-style:none;margin:4px 0 0;padding:0}
+ol.top5 li{display:grid;grid-template-columns:2rem minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+ol.top5 li:first-child{border-top:0}
+.t5n{font-family:var(--mono);color:var(--inkSoft);text-align:center}
+ol.top5 li:first-child .t5n{color:var(--navy);font-weight:600}
+.t5who{display:flex;flex-direction:column;min-width:0;font-weight:500}
+.t5who small{font-weight:400;font-size:12.5px;color:var(--inkSoft)}
+ol.top5 b{font-family:var(--mono);font-size:17px}
+.tiles.tiles3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.tiles3 b{font-size:21px}
+@media (max-width:560px){.tiles3 b{font-size:17px}.tiles3 div{padding:10px 8px}}
+.wk-table{width:100%}
+.wk-table td{vertical-align:middle;padding:6px 8px}
+.wk-table td:first-child{width:60%}
+.wk-name{display:block;font-weight:500}
+.wk-table small{font-size:12px}
+.wk-table .input{max-width:160px}
+.wk-bar{position:sticky;bottom:10px;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.45);padding:10px 14px}
+.tl-form{border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--panelAlt);margin-bottom:12px}
 figure.mini{margin:0}
 figure.mini figcaption{font-size:13px;color:var(--inkSoft);margin-bottom:4px}
 details.tbl,details.paste{margin-top:10px}
@@ -497,8 +516,8 @@ function ctScore(t, s){
   if(complete && t.totalMin!=null && sum<t.totalMin) fail=true;
   return {pts, total:n?sum:null, max, scaled:n?sum/(max||1)*500:null, fail, pass:complete&&!fail, complete, noTable};
 }
-function physWeight(k){ const w=(DATA.settings.physWeights||{})[k]; return w!=null ? +w : k==='aft'?70 : k==='cft'?30 : 50; }
-function physKeysOn(){ return PHYS_EVENTS.map(e=>e.k).filter(isOn); }
+function physWeight(k){ const w=(DATA.settings.physWeights||{})[k]; return w!=null ? +w : k==='aft'?70 : k==='cft'?30 : /^avg/.test(k)?20 : 50; }
+function physKeysOn(){ return [...PHYS_EVENTS, ...TIME_EVENTS].map(e=>e.k).filter(isOn); }
 
 const GRENADE_STEPS = ['Identify target','Proper grip','Thumb the clip','Twist, pull the pin','Re-identify target','Strike a pose','Frag out!','Hit the ground'];
 const TCCC_STEPS = [
@@ -545,12 +564,13 @@ function tcccGuideHtml(){
 /* ============================== state & storage ============================== */
 const STORE_KEY = 'teamTryoutScorebook_v1';
 const DEFAULT_GRENADES = ['M67 fragmentation grenade','MK3A2 offensive hand grenade','M84 stun grenade (flash-bang)','M18 colored smoke grenade','AN-M14 TH3 incendiary hand grenade','ABC-M7A2 / ABC-M7A3 riot control (CS) hand grenade'].join('\n');
-const DEFAULT_ENABLED = {aft:true, cft:false, cff:true, grenade:true, throw:true, tccc:true, fracture:false, burn:false, m249:false, m240b:false, m4:false, medevac:false, spot:false, salute:false};
+const DEFAULT_ENABLED = {aft:true, cft:false, cff:true, grenade:true, throw:true, tccc:true, fracture:false, burn:false, m249:false, m240b:false, m4:false, medevac:false, spot:false, salute:false, avgrun:false, avgruck:false};
 const DEFAULT_SETTINGS = {
   weights:{mdl:1,hrp:1,sdc:1,plk:1,run:1}, goPoints:50, physWeights:{aft:70, cft:30}, customTests:[],
   cftBest:1200, cftZero:1801, cutLine:14, minFemale:3, grenadeTotal:6, grenadeGo:6,
   grenadeList:DEFAULT_GRENADES, circleBonus:25, aftFailCut:true,
   enabled:Object.assign({}, DEFAULT_ENABLED), timeLimits:{m249:150, m240b:150, m4:150},
+  avgTimes:{run:{dist:2, best:720, zero:1080}, ruck:{dist:12, best:9000, zero:12600}},
   settingsVersion:5, adminPinHash:null, testerPinHash:null,
 };
 // Bring settings saved by older versions up to date without touching choices the admin made.
@@ -585,7 +605,8 @@ function migrateSettings(S){
     S.settingsVersion=5;
   }
   if(!Array.isArray(S.customTests)) S.customTests=[];
-  S.physWeights = Object.assign({aft:70, cft:30}, S.physWeights||{});
+  S.physWeights = Object.assign({aft:70, cft:30, avgrun:20, avgruck:20}, S.physWeights||{});
+  const av=S.avgTimes||{}; S.avgTimes={run:Object.assign({dist:2, best:720, zero:1080}, av.run||{}), ruck:Object.assign({dist:12, best:9000, zero:12600}, av.ruck||{})};
   S.enabled = Object.assign({}, DEFAULT_ENABLED, S.enabled||{});
   S.timeLimits = Object.assign({m249:150, m240b:150, m4:150}, S.timeLimits||{});
   return S;
@@ -613,6 +634,7 @@ function load(){
     DATA.settings = Object.assign(clone(DEFAULT_SETTINGS), {settingsVersion:0}, saved);
     DATA.settings.weights = Object.assign({mdl:1,hrp:1,sdc:1,plk:1,run:1}, saved.weights||{});
     DATA.soldiers.forEach(fixSoldier);
+    if(!Array.isArray(DATA.timeLogs)) DATA.timeLogs=[];
     migrateSettings(DATA.settings);
     if(PACKAGE_LOADED) save();
   }catch(e){}
@@ -682,8 +704,8 @@ function allKeys(){ return [...PHYS_EVENTS, ...ALL_SKILLS].map(e=>e.k); }
 function activeKeys(){ return isAdmin() || !STATE.graderEvents ? enabledKeys() : allKeys().filter(k=>STATE.graderEvents.includes(k)); }
 function isActive(k){ return activeKeys().includes(k); }
 function visFields(){ const a=activeKeys(); return FIELDS.filter(f=>a.includes(f.ev)); }
-function eventName(k){ const e=[...PHYS_EVENTS, ...ALL_SKILLS].find(x=>x.k===k); return e?e.name:k; }
-function eventShort(k){ const e=[...PHYS_EVENTS, ...ALL_SKILLS].find(x=>x.k===k); return e?e.short:k; }
+function eventName(k){ const e=[...PHYS_EVENTS, ...TIME_EVENTS, ...ALL_SKILLS].find(x=>x.k===k); return e?e.name:k; }
+function eventShort(k){ const e=[...PHYS_EVENTS, ...TIME_EVENTS, ...ALL_SKILLS].find(x=>x.k===k); return e?e.short:k; }
 function grenadeGo(s){ return s.grenade==null ? null : (s.grenade>=DATA.settings.grenadeGo ? 'go':'nogo'); }
 function skillResult(s,k){ return k==='grenade' ? grenadeGo(s) : (s[k]||null); }
 function score(s){
@@ -696,7 +718,8 @@ function score(s){
   const aftOn=isOn('aft'), cftOn=isOn('cft');
   const ct={}; customTests().forEach(t=>{ ct[t.id]=ctScore(t,s); });
   // Physical score (0-500): each PT test that counts, on a 500 scale, mixed by its weight. None on: Go points only.
-  const parts=physKeysOn().map(k=>[k, k==='aft'?aftW : k==='cft'?(cftPts==null?null:cftPts*5) : ct[ctByKey(k).id].scaled]);
+  const avg={run:avgTime(s,'run'), ruck:avgTime(s,'ruck')}, TE=k=>TIME_EVENTS.find(e=>e.k===k);
+  const parts=physKeysOn().map(k=>[k, k==='aft'?aftW : k==='cft'?(cftPts==null?null:cftPts*5) : TE(k)?(avg[TE(k).kind].pts==null?null:avg[TE(k).kind].pts*5) : ct[ctByKey(k).id].scaled]);
   let phys = null;
   if(parts.some(p=>p[1]!=null)){ const W=parts.map(p=>physWeight(p[0])), ws=W.reduce((a,b)=>a+b,0)||1; phys=parts.reduce((a,p,i)=>a+W[i]*(p[1]||0),0)/ws; }
   let gos=0, skillsDone=0;
@@ -710,11 +733,12 @@ function score(s){
   if(aftOn) EVENTS.forEach(e=>{ if(ev[e.k]==null) missing.push(e.short); });
   if(cftOn && s.cft==null) missing.push('CFT');
   customTests().forEach(t=>{ if(isOn(ctKey(t)) && !ct[t.id].complete) missing.push(t.short||t.name); });
+  timeEventsOn().forEach(e=>{ if(!avg[e.kind].n) missing.push(e.short); });
   SKILLS_ON().forEach(sk=>{ if(!skillResult(s,sk.k)) missing.push(sk.short); });
   // Which PT tests this soldier failed where failing is an automatic cut
   const cutBy=[]; if(aftFail && S.aftFailCut) cutBy.push('AFT');
   customTests().forEach(t=>{ if(isOn(ctKey(t)) && ct[t.id].fail && t.failCut) cutBy.push(t.short||t.name); });
-  return {ev, aftTotal, aftW, cftPts, ct, phys, gos, skillsDone, bonus, total, missing, aftFail, aftPass: n===5 && !aftFail, cutBy};
+  return {ev, aftTotal, aftW, cftPts, ct, avg, phys, gos, skillsDone, bonus, total, missing, aftFail, aftPass: n===5 && !aftFail, cutBy};
 }
 const VIEWS = {
   overall:{label:'Overall', sub:()=> physOn() ? 'Physical score plus Go points. Ties go to more Gos, then the faster 2-mile run.' : 'Go points only (AFT and CFT are turned off). Ties go to the faster 2-mile run.'},
@@ -852,6 +876,7 @@ function exportXlsx(){
       cols.push([`${t.short||t.name} ${e.name}${ty.time?'':e.unit?` (${e.unit})`:''}`,12,r=>{ const v=r.s[ctField(t,e)]; return v==null?'':ty.time?fmtTime(v):v; }],[`${t.short||t.name} ${e.name} pts`,10,r=>r.sc.ct[t.id].pts[e.id]??'']); });
     cols.push([`${t.short||t.name} total`,9,r=>r.sc.ct[t.id].total??''],[`${t.short||t.name} fail`,8,r=>r.sc.ct[t.id].fail?'Yes':'']);
   });
+  timeEventsOn().forEach(e=>cols.push([`${e.short} (${avgCfg(e.kind).dist} mi)`,12,r=>{ const a=r.sc.avg[e.kind]; return a.n?fmtLong(a.avg):''; }],[`${e.short} # logged`,9,r=>r.sc.avg[e.kind].n||''],[`${e.short} pts`,9,r=>r.sc.avg[e.kind].pts==null?'':+fmt1(r.sc.avg[e.kind].pts)]));
   if(physOn()) cols.push(['Physical score',11,r=>r.sc.phys==null?'':+fmt1(r.sc.phys)]);
   if(sk.length) cols.push(['Go points',9,r=>S.goPoints*r.sc.gos]);
   if(isOn('throw')) cols.push(['Circle bonus',11,r=>r.sc.bonus||0]);
@@ -913,12 +938,13 @@ function readImport(file){
     const soldiers = Array.isArray(inc) ? inc : inc && Array.isArray(inc.soldiers) ? inc.soldiers : null;
     if(!soldiers){ toast('That file is not a scorebook or fitness tracker export.'); return; }
     const plan = {added:[], filled:0, conflicts:[], scans:0, practice:0, settings: (!Array.isArray(inc) && inc.kind!=='soldier' && inc.settings) || null, file:file.name};
-    const working = clone(DATA.soldiers);
+    const working = clone(DATA.soldiers), idMap={};
     soldiers.forEach(raw=>{
       if(!raw || !raw.name) return;
       const s = normalizeIncoming(Object.assign({id:raw.id||uid()}, raw));
       const mine = working.find(x=>x.id===s.id) || working.find(x=>normName(x.name)===normName(s.name));
       if(!mine){ plan.added.push(s); plan.scans+=s.scans.length; plan.practice+=s.practice.length; return; }
+      idMap[s.id]=mine.id;
       mergeHealth(mine, s, plan);
       const fields=[];
       MERGE_KEYS.forEach(k=>{
@@ -930,6 +956,11 @@ function readImport(file){
       if(fields.length) plan.conflicts.push({id:mine.id, name:mine.name, fields});
     });
     plan.working = working;
+    // Rope bridge, ruck, and run times: add the ones this device doesn't have yet, pointed at the matching soldier here.
+    const have=new Set(timeLogs().map(e=>e.id));
+    plan.times = (Array.isArray(inc)||!Array.isArray(inc.timeLogs) ? [] : inc.timeLogs)
+      .filter(e=>e && e.id && TL_KINDS[e.kind] && e.sec>0 && !have.has(e.id))
+      .map(e=>Object.assign({}, e, e.sid && idMap[e.sid] ? {sid:idMap[e.sid]} : {}));
     if(!plan.conflicts.length){ applyImport(plan); }
     else { STATE.pendingImport = plan; STATE.tab='data'; render(); }
   };
@@ -940,12 +971,13 @@ function applyImport(plan){
   plan.conflicts.forEach(c=>{ const s=working.find(x=>x.id===c.id); c.fields.forEach(f=>{ if(f.choice==='theirs') s[f.k]=f.theirs; }); });
   plan.added.forEach(s=>working.push(s));
   DATA.soldiers = working;
+  (plan.times||[]).forEach(e=>timeLogs().push(e));
   let settingsNote='';
   if(plan.settings && !DATA.settings.adminPinHash && plan.settings.adminPinHash){
     DATA.settings = migrateSettings(Object.assign(clone(DEFAULT_SETTINGS), {settingsVersion:0}, plan.settings)); rebuildRegistry(); settingsNote=' Scoring settings and PINs came with the file.';
   }
   save(); STATE.pendingImport=null; STATE.grid=null;
-  toast(`Imported: ${plan.added.length} new, ${plan.filled} blank field(s) filled, ${plan.conflicts.length} conflict(s) resolved${plan.scans?`, ${plan.scans} scan(s)`:''}${plan.practice?`, ${plan.practice} practice entr${plan.practice===1?'y':'ies'}`:''}.${settingsNote}`);
+  toast(`Imported: ${plan.added.length} new, ${plan.filled} blank field(s) filled, ${plan.conflicts.length} conflict(s) resolved${plan.scans?`, ${plan.scans} scan(s)`:''}${plan.practice?`, ${plan.practice} practice entr${plan.practice===1?'y':'ies'}`:''}${plan.times&&plan.times.length?`, ${plan.times.length} logged time${plan.times.length===1?'':'s'}`:''}.${settingsNote}`);
   render();
 }
 
@@ -2327,7 +2359,7 @@ function render(){
   const admin=isAdmin();
   if(!admin && !STATE.graderEvents){ renderPick(app); return; }
   const tabs = admin
-    ? [['rank','Rankings'],['team','Team entry'],['one','Individual'],['health','Health'],['tests','Tests & rules'],['data','Export / import'],['settings','Settings']]
+    ? [['dash','Dashboard'],['rank','Rankings'],['team','Team entry'],['one','Individual'],['health','Health'],['tests','Tests & rules'],['data','Export / import'],['settings','Settings']]
     : [['team','Team entry'],['one','Individual'],['tests','Tests & rules'],['data','Export / import']];
   if(!tabs.some(t=>t[0]===STATE.tab)) STATE.tab = tabs[0][0];
   app.innerHTML = `
@@ -2337,11 +2369,11 @@ function render(){
     <div class="who"><span>${admin?'Admin':'Grader'} \u00B7 ${tryoutSoldiers().length} in tryout</span>${admin?'':`<button class="btn sm" id="chgEv" title="Grading: ${esc(activeKeys().map(eventShort).join(', '))}">Change events</button>`}<button class="btn sm" id="logout">Switch user</button></div>
   </header>
   <main class="main" id="content"></main>`;
-  app.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ STATE.tab=b.dataset.tab; render(); });
+  app.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ STATE.tab=b.dataset.tab; STATE.weekend=false; render(); });
   $('logout').onclick=()=>{ STATE.session=null; STATE.graderEvents=null; STATE.gate={step:'choose',error:''}; render(); };
   const ce=$('chgEv'); if(ce) ce.onclick=()=>{ STATE.graderEvents=null; render(); };
   const c=$('content');
-  ({rank:renderRank, team:renderTeam, one:renderOne, health:renderHealth, tests:renderTests, data:renderData, settings:renderSettings})[STATE.tab](c);
+  ({dash:renderDash, rank:renderRank, team:renderTeam, one:renderOne, health:renderHealth, tests:renderTests, data:renderData, settings:renderSettings})[STATE.tab](c);
 }
 
 /* ============================== grader: pick today's events ============================== */
@@ -2482,7 +2514,7 @@ function wireGate(){
     enter(g.step==='adminLogin'?'admin':'grader'); };
     $('gSubmit').onclick=go; $('pin').onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } }; }
 }
-function enter(role){ STATE.session={role}; STATE.tab = role==='admin' ? 'rank' : 'team'; STATE.grid=null; render(); }
+function enter(role){ STATE.session={role}; STATE.tab = role==='admin' ? 'dash' : 'team'; STATE.grid=null; render(); }
 
 /* ============================== rankings ============================== */
 function chip(r,label){ return `<span class="chip ${r==='go'?'go':r==='nogo'?'ng':'na'}" title="${label}: ${r==='go'?'Go':r==='nogo'?'No-Go':'not tested'}">${label}</span>`; }
@@ -2495,7 +2527,8 @@ function renderRank(c){
   const noCft = tryoutSoldiers().filter(s=>s.cft==null).length;
   const SK=SKILLS_ON(), aftOn=isOn('aft'), cftOn=isOn('cft');
   const CTS = customTests().filter(t=>isOn(ctKey(t)));
-  const NC = 6 + (SK.length?2:0) + (aftOn?6:0) + (cftOn?1:0) + CTS.length + (physOn()?1:0);
+  const TEs = timeEventsOn();
+  const NC = 6 + (SK.length?2:0) + (aftOn?6:0) + (cftOn?1:0) + CTS.length + TEs.length + (physOn()?1:0);
   let flag='';
   if(DATA.soldiers.length){
     flag = topF>=S.minFemale
@@ -2516,7 +2549,7 @@ function renderRank(c){
     <div class="panel" style="padding:8px 10px">
       ${rows.length ? `<div class="scroll"><table>
         <thead><tr><th class="num">#</th><th>Name</th><th>Sex</th><th class="num">Age</th>${SK.length?'<th>Skills</th><th class="num">Gos</th>':''}
-          ${aftOn?EVENTS.map(e=>`<th class="num" title="${e.name}">${e.short}</th>`).join('')+'<th class="num">AFT</th>':''}${cftOn?'<th class="num">CFT</th>':''}${CTS.map(t=>`<th class="num" title="${esc(t.name)}">${esc(t.short||t.name)}</th>`).join('')}${physOn()?'<th class="num">Physical</th>':''}<th class="num">Total</th><th></th></tr></thead>
+          ${aftOn?EVENTS.map(e=>`<th class="num" title="${e.name}">${e.short}</th>`).join('')+'<th class="num">AFT</th>':''}${cftOn?'<th class="num">CFT</th>':''}${CTS.map(t=>`<th class="num" title="${esc(t.name)}">${esc(t.short||t.name)}</th>`).join('')}${TEs.map(e=>`<th class="num" title="${e.name} (points)">${e.short}</th>`).join('')}${physOn()?'<th class="num">Physical</th>':''}<th class="num">Total</th><th></th></tr></thead>
         <tbody>${rows.map((r,i)=>{
           const s=r.s, sc=r.sc;
           const main = view==='run' ? `<td class="num">${s.run!=null?fmtTime(s.run):''}</td>` : '';
@@ -2530,6 +2563,7 @@ function renderRank(c){
             ${aftOn?EVENTS.map(e=>`<td class="num" title="${e.name}: ${fieldDisplay({type:e.time?'time':'int'},s[e.k])}">${sc.ev[e.k]??'<span class="soft">\u2013</span>'}</td>`).join('')+`<td class="num">${sc.aftTotal??'\u2013'}</td>`:''}
             ${cftOn?`<td class="num" title="${s.cft!=null?fmtTime(s.cft):''}">${sc.cftPts==null?'\u2013':fmt1(sc.cftPts)}</td>`:''}
             ${CTS.map(t=>{ const c=sc.ct[t.id]; return `<td class="num" title="${esc(t.events.map(e=>`${e.name}: ${c.pts[e.id]??'\u2013'}`).join(', '))}">${c.total??'<span class="soft">\u2013</span>'}</td>`; }).join('')}
+            ${TEs.map(e=>{ const a=sc.avg[e.kind]; return `<td class="num" title="${a.n?`Average ${a.dist} mi: ${fmtLong(a.avg)} over ${a.n}`:`No ${a.dist} mi ${e.kind}s logged`}">${a.pts==null?'<span class="soft">\u2013</span>':fmt1(a.pts)}</td>`; }).join('')}
             ${physOn()?`<td class="num">${sc.phys==null?'\u2013':fmt1(sc.phys)}</td>`:''}
             <td class="num"><b>${fmt1(sc.total)}</b></td>
             <td>${isCut(sc)?`<span class="badge b-bad">${esc(sc.cutBy.join(', '))} fail: cut</span> `:''}${sc.missing.length?`<span class="badge b-none" title="Missing: ${sc.missing.join(', ')}">${sc.missing.length} missing</span>`:''}</td>
@@ -2679,6 +2713,7 @@ function saveGrid(){
 /* ============================== individual ============================== */
 function renderOne(c){
   const admin=isAdmin(), list=sortedByName();
+  if(admin && STATE.weekend) return renderWeekend(c);
   let s = STATE.newMode ? null : soldierById(STATE.selectedId);
   if(!s && !STATE.newMode && list.length){ s=list[0]; STATE.selectedId=s.id; }
   const mode = s ? 'edit' : 'new';
@@ -2689,6 +2724,7 @@ function renderOne(c){
     <div class="stack" style="gap:10px">
       <input class="input" id="q" placeholder="Search name" aria-label="Search name">
       <button class="btn ${mode==='new'?'primary':''}" id="newS">+ New soldier</button>
+      ${admin?'<button class="btn" id="wkOpen">Log a weekend run or ruck</button>':''}
       <div class="list" id="list"></div>
     </div>
     <div class="stack">
@@ -2718,6 +2754,7 @@ function renderOne(c){
         <div id="oneMsg" style="margin-top:10px"></div>
       </div>
       ${sc?renderScoreCard(s,sc):''}
+      ${admin&&s?indivTimesHtml(s):''}
       ${admin&&s?`<h2 class="sect-h">Health and practice</h2>${healthProfileHtml(s,true)}`:''}
     </div>
   </div>`;
@@ -2726,8 +2763,10 @@ function renderOne(c){
     $('list').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{ STATE.selectedId=b.dataset.id; STATE.newMode=false; render(); }); };
   drawList(''); $('q').oninput=e=>drawList(e.target.value);
   $('newS').onclick=()=>{ STATE.newMode=true; STATE.selectedId=null; render(); };
+  const wk=$('wkOpen'); if(wk) wk.onclick=()=>{ STATE.weekend=true; if(STATE.wk) STATE.wk.flash=''; render(); window.scrollTo(0,0); };
   $('saveOne').onclick=()=>saveOne(s);
   if(admin && s) wireHealthProfile(s,true);
+  if(admin && s) wireIndivTimes(s);
   const d=$('delOne'); if(d) d.onclick=()=>{
     $('oneMsg').innerHTML=`<div class="note warn">Take ${esc(s.name)} out of the tryout? Their results, health scans, and practice history are kept, and you can put them back from Health. To delete them completely, use Delete person in Health. <div class="row" style="margin-top:8px"><button class="btn danger sm" id="delYes">Remove from tryout</button><button class="btn sm" id="delNo">Keep</button></div></div>`;
     $('delYes').onclick=()=>{ s.tryout=false; STATE.selectedId=null; STATE.grid=null; save(); toast(`${s.name} is out of the tryout.`); render(); };
@@ -2767,6 +2806,7 @@ function renderScoreCard(s,sc){
         <div class="kv"><span>Weighted AFT</span><span class="mono">${sc.aftW==null?'\u2013':fmt1(sc.aftW)}</span></div>
         <div class="kv"><span>CFT ${s.cft!=null?'('+fmtTime(s.cft)+')':''}</span><span class="mono">${sc.cftPts==null?'\u2013':fmt1(sc.cftPts)+' pts'}${isOn('cft')?'':' (not counted)'}</span></div>
         ${customTests().filter(t=>isOn(ctKey(t))).map(t=>{ const c=sc.ct[t.id]; return `<div class="kv"><span>${esc(t.name)}</span><span class="mono">${c.total??'\u2013'} / ${c.max} pts${c.fail?' <span class="badge b-bad">fails minimum</span>':c.pass?' <span class="badge b-good">passes</span>':''}</span></div>`; }).join('')}
+        ${timeEventsOn().map(e=>{ const a=sc.avg[e.kind]; return `<div class="kv"><span>${e.name} (${a.dist} mi${a.n?`, ${fmtLong(a.avg)} over ${a.n}`:''})</span><span class="mono">${a.pts==null?'\u2013':fmt1(a.pts)+' pts'}</span></div>`; }).join('')}
         <div class="kv"><span>Physical score</span><span class="mono">${sc.phys==null?'\u2013':fmt1(sc.phys)}</span></div>
         <div class="kv"><span>Gos \u00D7 ${S.goPoints}</span><span class="mono">${sc.gos} \u00D7 ${S.goPoints} = ${sc.gos*S.goPoints}</span></div>
         ${isOn('throw')?`<div class="kv"><span>Grenade in the circle</span><span class="mono">${s.circle==='yes'?'+'+sc.bonus:s.circle==='no'?'0':'\u2013'}</span></div>`:''}
@@ -3623,7 +3663,7 @@ function renderSettings(c){
     <div class="panel"><h2>Events that count</h2>
       <p class="sub">Check the events that are part of this tryout. Only checked events show up in the rankings, entry screens, test screens, and Excel file. Unchecking an event keeps any results already saved; they just stop counting.</p>
       <h3>Physical (points)</h3>
-      <div class="ev-grid">${PHYS_EVENTS.map(evBox).join('')}</div>
+      <div class="ev-grid">${[...PHYS_EVENTS, ...TIME_EVENTS].map(evBox).join('')}</div>
       <p class="sub" style="margin:8px 0 0;font-size:13px">With every PT test off, the ranking is Go points only. A test's automatic cut only applies while that test is on.</p>
       <div class="ct-list">
         ${customTests().map(t=>`<div class="ct-row"><div><b>${esc(t.name)}</b> <span class="soft">(${esc(t.short||'')}) \u00B7 ${t.events.length} event${t.events.length===1?'':'s'}</span></div>
@@ -3633,7 +3673,7 @@ function renderSettings(c){
       </div>
       <h3>Physical score mix</h3>
       <p class="sub">When more than one PT test counts, each is put on a 500-point scale and blended by these weights. Only checked tests are used.</p>
-      <div class="grid">${PHYS_EVENTS.map(e=>{ const on=physKeysOn(), ws=on.reduce((a,k)=>a+physWeight(k),0)||1; return `<label class="field"><span>${esc(e.short)} weight</span><input class="input" id="pw-${e.k}" inputmode="decimal" value="${physWeight(e.k)}"><span class="mono">${isOn(e.k)?fmt1(physWeight(e.k)/ws*100)+'% of physical':'not counted'}</span></label>`; }).join('')}</div>
+      <div class="grid">${[...PHYS_EVENTS, ...TIME_EVENTS].map(e=>{ const on=physKeysOn(), ws=on.reduce((a,k)=>a+physWeight(k),0)||1; return `<label class="field"><span>${esc(e.short)} weight</span><input class="input" id="pw-${e.k}" inputmode="decimal" value="${physWeight(e.k)}"><span class="mono">${isOn(e.k)?fmt1(physWeight(e.k)/ws*100)+'% of physical':'not counted'}</span></label>`; }).join('')}</div>
       <h3>Go / No-Go (${S.goPoints} points per Go)</h3>
       <div class="ev-grid">${ALL_SKILLS.map(evBox).join('')}</div>
       <h3>Weapon time limits</h3>
@@ -3660,6 +3700,13 @@ function renderSettings(c){
         <label class="field"><span>CFT time for 100 points</span><input class="input" id="s-best" value="${fmtTime(S.cftBest)}"></label>
         <label class="field"><span>CFT time for 0 points</span><input class="input" id="s-zero" value="${fmtTime(S.cftZero)}"></label>
       </div>
+      <h3>Average run and ruck times</h3>
+      <p class="sub">When "Average run time" or "Average ruck time" is checked under Events that count, each soldier's average at this distance is scored like the CFT and blended into the physical score by its weight. Only times at exactly this distance count. No times logged means 0 points.</p>
+      ${['run','ruck'].map(k=>{ const a=avgCfg(k), L=TL_KINDS[k]; return `<div class="grid" style="margin-bottom:10px">
+        <label class="field"><span>${L.label} distance (miles)</span><input class="input" inputmode="decimal" id="av-${k}-dist" value="${a.dist}"></label>
+        <label class="field"><span>${L.label} average for 100 points (${L.fmt})</span><input class="input" id="av-${k}-best" value="${fmtLong(a.best)}"></label>
+        <label class="field"><span>${L.label} average for 0 points (${L.fmt})</span><input class="input" id="av-${k}-zero" value="${fmtLong(a.zero)}"></label>
+      </div>`; }).join('')}
       <div class="row" style="margin-top:14px"><button class="btn primary" id="saveSet">Save settings</button><button class="btn sm" id="resetSet">Restore defaults</button></div>
       <div id="setMsg" style="margin-top:10px"></div>
     </div>
@@ -3684,13 +3731,17 @@ function renderSettings(c){
     if(!(cut>=1)||!Number.isInteger(cut)) msgs.push('Cut line must be a whole number, 1 or more.');
     if(!(minf>=0)||!Number.isInteger(minf)) msgs.push('Minimum women must be a whole number.');
     if(!(gTot>=1)||!Number.isInteger(gTot)||!(gGo>=0&&gGo<=gTot)) msgs.push('Grenade Go must be between 0 and the number shown.');
-    const pw={}; PHYS_EVENTS.forEach(e=>{ const el=$('pw-'+e.k); const v=+el.value; if(el.value.trim()===''||!(v>=0)) msgs.push(`${e.short} weight in the physical mix must be 0 or more.`); pw[e.k]=v; });
+    const pw={}; [...PHYS_EVENTS, ...TIME_EVENTS].forEach(e=>{ const el=$('pw-'+e.k); const v=+el.value; if(el.value.trim()===''||!(v>=0)) msgs.push(`${e.short} weight in the physical mix must be 0 or more.`); pw[e.k]=v; });
     if(!(best>0)||!(zero>0)||best>=zero) msgs.push('CFT times must be m:ss, with the 100-point time faster than the 0-point time.');
+    const avgT={}; ['run','ruck'].forEach(k=>{ const L=TL_KINDS[k].label, d=+$('av-'+k+'-dist').value, b=parseLong($('av-'+k+'-best').value), z=parseLong($('av-'+k+'-zero').value);
+      if(!(d>0&&d<100)) msgs.push(`${L} distance must be a number of miles.`);
+      if(!(b>0)||!(z>0)||b>=z) msgs.push(`${L} average times must be ${TL_KINDS[k].fmt}, with the 100-point time faster than the 0-point time.`);
+      avgT[k]={dist:Math.round(d*100)/100, best:b, zero:z}; });
     const en={}; c.querySelectorAll('[data-en]').forEach(b=>en[b.dataset.en]=b.checked);
     if(!Object.values(en).some(Boolean)) msgs.push('Turn on at least one event.');
     const tl={}; WEAPON_KEYS.forEach(k=>{ const raw=$('tl-'+k).value.trim(); if(!raw){ tl[k]=null; return; } const v=parseTime(raw); if(!(v>0)) msgs.push(`${eventShort(k)} time limit must be m:ss, or blank for none.`); tl[k]=v; });
     if(msgs.length){ $('setMsg').innerHTML=`<div class="note warn"><ul class="plain">${msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`; $('setMsg').scrollIntoView({block:'center'}); return; }
-    Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, cftBest:best, cftZero:zero, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
+    Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, cftBest:best, cftZero:zero, avgTimes:avgT, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
     rebuildRegistry(); STATE.grid=null; save(); toast('Settings saved. Rankings updated.'); render();
   };
   $('saveSet2').onclick=()=>$('saveSet').click();
@@ -4126,7 +4177,7 @@ function exportHealthCsv(){
 function meSoldier(){ return soldierById(STATE.session.soldierId); }
 function renderSoldierApp(app){
   const s=meSoldier(); if(!s){ STATE.session=null; render(); return; }
-  const tabs=[['myhealth','My health'],['mylog','Log my scan'],...(s.tryout!==false?[['myresults','My tryout results']]:[]),['mypractice','Practice']];
+  const tabs=[['myhealth','My health'],['mylog','Log my scan'],...(s.tryout!==false?[['myresults','My tryout results']]:[]),['mytimes','My times'],['mypractice','Practice']];
   if(!tabs.some(t=>t[0]===STATE.tab)) STATE.tab='myhealth';
   app.innerHTML=`<header class="app-header"><div class="app-title">Rusty Anvil <span class="app-sub">ROTC UCM Skills Trainer</span></div>
     <nav class="tabs" aria-label="Sections">${tabs.map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${l}</button>`).join('')}</nav>
@@ -4139,6 +4190,7 @@ function renderSoldierApp(app){
   if(STATE.tab==='myhealth'){ c.innerHTML=healthProfileHtml(s,false); wireHealthProfile(s,false); }
   else if(STATE.tab==='mylog') renderMyLog(c,s);
   else if(STATE.tab==='myresults') renderMyResults(c,s);
+  else if(STATE.tab==='mytimes') renderMyTimes(c,s);
   else { c.innerHTML='<div id="drillRoot"></div>'; Drill.mount($('drillRoot'), {store:{load:()=>({log:s.practice}), save:d=>{ s.practice=d.log; save(); }}, who:s.name}); }
 }
 function renderMyLog(c,s){
@@ -4158,10 +4210,301 @@ function renderMyResults(c,s){
     ${isOn('cft')?`<div class="panel"><h3 style="margin-top:0">Combat Field Test</h3><div class="kv"><span>Time</span><span class="mono">${s.cft!=null?fmtTime(s.cft)+' \u2192 '+fmt1(sc.cftPts)+' pts':'\u2013'}</span></div></div>`:''}
     ${customTests().filter(t=>isOn(ctKey(t))).map(t=>{ const x=sc.ct[t.id]; return `<div class="panel"><h3 style="margin-top:0">${esc(t.name)}</h3>${t.events.map(e=>{ const v=s[ctField(t,e)], ty=CT_TYPES[e.type]||{}; return `<div class="kv"><span>${esc(e.name)}</span><span class="mono">${v!=null?(ty.time?fmtTime(v):v+(e.unit?' '+esc(e.unit):''))+' \u2192 '+(x.pts[e.id]??'\u2013')+' pts':'\u2013'}</span></div>`; }).join('')}
       <div class="kv"><b>Total</b><b class="mono">${x.total??'\u2013'}${x.fail?' <span class="badge b-bad">below a minimum</span>':x.pass?' <span class="badge b-good">passes</span>':''}</b></div></div>`; }).join('')}
+    ${timeEventsOn().length?`<div class="panel"><h3 style="margin-top:0">Average ruck and run times</h3>${timeEventsOn().map(e=>{ const x=sc.avg[e.kind]; return `<div class="kv"><span>${e.name} (${x.dist} mi)</span><span class="mono">${x.n?`${fmtLong(x.avg)} over ${x.n} \u2192 ${fmt1(x.pts)} pts`:'none logged yet'}</span></div>`; }).join('')}</div>`:''}
     ${SKILLS_ON().length?`<div class="panel"><h3 style="margin-top:0">Go / No-Go events</h3>${SKILLS_ON().map(k=>`<div class="kv"><span>${esc(k.name)}${k.k==='grenade'&&s.grenade!=null?` <span class="soft">(${s.grenade} of ${S.grenadeTotal})</span>`:''}${k.k==='throw'&&s.circle==='yes'?' <span class="soft">(in the circle)</span>':''}</span>${gn(skillResult(s,k.k))}</div>`).join('')}</div>`:''}
     <div class="panel"><div class="kv"><span>Gos</span><b class="mono">${sc.gos} of ${SKILLS_ON().length}</b></div>${physOn()?`<div class="kv"><span>Physical score</span><b class="mono">${sc.phys==null?'\u2013':fmt1(sc.phys)} / 500</b></div>`:''}<div class="kv"><b>Total score</b><b class="mono">${fmt1(sc.total)}</b></div>
       ${sc.missing.length?`<p class="sub" style="margin:8px 0 0">Not recorded yet: ${sc.missing.join(', ')}</p>`:''}</div>
   </div>`;
+}
+
+/* ============================== rope bridge, ruck, and run times ============================== */
+// Every logged time lives in DATA.timeLogs: {id, kind:'rope'|'ruck'|'run', date, sec, dist?, team? | sid?, note?}
+// Team times carry a team name and show on the admin Dashboard. Individual times carry a soldier id (sid) and show on that soldier's Individual page.
+const TL_KINDS = {
+  rope:{label:'Rope bridge', ex:'3:42', fmt:'m:ss'},
+  ruck:{label:'Ruck', ex:'2:48:30', fmt:'h:mm:ss'},
+  run:{label:'Run', ex:'14:05', fmt:'m:ss'},
+};
+function timeLogs(){ if(!Array.isArray(DATA.timeLogs)) DATA.timeLogs=[]; return DATA.timeLogs; }
+function parseLong(s){
+  s=String(s==null?'':s).trim(); if(!s) return null;
+  // Digits only works too (phone number pads have no colon): 352 = 3:52, 24830 = 2:48:30.
+  if(/^\d{3,6}$/.test(s)){ const p=s.padStart(6,'0'); s=(+p.slice(0,2)?(+p.slice(0,2))+':':'')+(+p.slice(0,2)?p.slice(2,4):String(+p.slice(2,4)))+':'+p.slice(4); }
+  let m=s.match(/^(\d{1,2}):([0-5]\d):([0-5]\d)$/); if(m) return (+m[1])*3600+(+m[2])*60+(+m[3]);
+  return parseTime(s);
+}
+function fmtLong(sec){ if(sec==null||isNaN(sec)) return ''; sec=Math.round(sec); if(sec<3600) return fmtTime(sec); const h=Math.floor(sec/3600), r=sec%3600; return h+':'+String(Math.floor(r/60)).padStart(2,'0')+':'+String(r%60).padStart(2,'0'); }
+const tlDist = d => { const n=+d; return isFinite(n)&&n>0 ? String(Math.round(n*100)/100) : ''; };
+const tlPace = e => e.dist>0 ? fmtTime(e.sec/e.dist)+'/mi' : '';
+const tlDate = d => { if(!d) return ''; const [y,m,dd]=d.split('-'), dt=new Date(+y,+m-1,+dd); return dt.toLocaleDateString([], dt.getFullYear()===new Date().getFullYear() ? {month:'short', day:'numeric'} : {month:'short', day:'numeric', year:'numeric'}); };
+const tlNewest = (a,b) => a.date<b.date?1:a.date>b.date?-1:0;
+// who: 'team' for team times, or a soldier id for that soldier's own times.
+function tlOf(kind, who){ return timeLogs().filter(e=>e.kind===kind && (who==='team' ? !e.sid : e.sid===who)); }
+function tlDistances(list){
+  const n={}; list.forEach(e=>{ const k=tlDist(e.dist); if(k) n[k]=(n[k]||0)+1; });
+  return Object.keys(n).sort((a,b)=>n[b]-n[a] || +a-+b);
+}
+const tlKey = (kind, who) => (who==='team'?'team':'ind')+':'+kind;
+function tlPickDist(kind, who, list){
+  const k=tlKey(kind,who), ds=tlDistances(list);
+  if(!ds.includes(STATE.tl.dist[k])) STATE.tl.dist[k]=ds[0]||null;
+  return {ds, d:STATE.tl.dist[k]};
+}
+
+function tlTrendSvg(entries, caption){
+  // Best time per day, oldest to newest. Lower is faster.
+  const byDay={}; entries.forEach(e=>{ if(!byDay[e.date] || e.sec<byDay[e.date]) byDay[e.date]=e.sec; });
+  const pts=Object.keys(byDay).sort().map(d=>({d, v:byDay[d]}));
+  if(pts.length<2) return '';
+  const W=400, H=170, m={t:18,r:62,b:26,l:58}, iw=W-m.l-m.r, ih=H-m.t-m.b;
+  let lo=Math.min(...pts.map(p=>p.v)), hi=Math.max(...pts.map(p=>p.v)); const pad=Math.max((hi-lo)*0.15, 5); lo=Math.max(0,lo-pad); hi=hi+pad;
+  const X=i=>m.l+i*iw/(pts.length-1), Y=v=>m.t+ih-(v-lo)/(hi-lo)*ih;
+  const T='<'+'title>', TE='<'+'/title>', last=pts[pts.length-1];
+  return `<figure class="mini" style="margin-top:14px"><figcaption>${esc(caption)} (lower is faster)</figcaption>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(caption)}: ${pts.map(p=>tlDate(p.d)+' '+fmtLong(p.v)).join(', ')}" style="width:100%;height:auto;display:block">
+      ${[lo,(lo+hi)/2,hi].map(v=>`<line x1="${m.l}" x2="${W-m.r}" y1="${Y(v)}" y2="${Y(v)}" stroke="var(--line)"/><text x="${m.l-6}" y="${Y(v)+4}" font-size="12" text-anchor="end" fill="var(--inkSoft)">${fmtLong(v)}</text>`).join('')}
+      <polyline points="${pts.map((p,i)=>X(i)+','+Y(p.v)).join(' ')}" fill="none" stroke="var(--navy)" stroke-width="2"/>
+      ${pts.map((p,i)=>`<g><circle cx="${X(i)}" cy="${Y(p.v)}" r="10" fill="transparent">${T}${esc(tlDate(p.d))}: ${fmtLong(p.v)}${TE}</circle><circle cx="${X(i)}" cy="${Y(p.v)}" r="4" fill="var(--navy)" stroke="var(--panel)" stroke-width="2"/></g>`).join('')}
+      <text x="${X(pts.length-1)+8}" y="${Y(last.v)+4}" font-size="13" fill="var(--ink)" font-weight="600">${fmtLong(last.v)}</text>
+      <text x="${m.l}" y="${H-6}" font-size="12" fill="var(--inkSoft)">${esc(tlDate(pts[0].d))}</text><text x="${W-m.r}" y="${H-6}" font-size="12" text-anchor="end" fill="var(--inkSoft)">${esc(tlDate(last.d))}</text>
+    </svg></figure>`;
+}
+
+/* ---------- the log form (shared by team and individual) ---------- */
+function tlFormHtml(kind, who){
+  const K=TL_KINDS[kind], mine=timeLogs().filter(e=>e.kind===kind && (who==='team'?!e.sid:!!e.sid)).sort(tlNewest)[0]||{};
+  const lastTeam=(timeLogs().filter(e=>!e.sid).sort(tlNewest)[0]||{}).team||'';
+  return `<div class="tl-form"><div class="grid">
+    <label class="field"><span>Date</span><input class="input" type="date" id="tl_date" value="${todayISO()}"></label>
+    ${who==='team'?`<label class="field"><span>Team or squad</span><input class="input" id="tl_team" value="${esc(lastTeam)}" placeholder="e.g. Team 1"></label>`:''}
+    ${kind==='rope'?'':`<label class="field"><span>Distance (miles)</span><input class="input" inputmode="decimal" id="tl_dist" value="${esc(mine.dist || (kind==='ruck'?12:2))}"></label>`}
+    <label class="field"><span>Time (${K.fmt})</span><input class="input" id="tl_time" inputmode="numeric" placeholder="${K.ex}"></label>
+    <label class="field"><span>Note (optional)</span><input class="input" id="tl_note" placeholder="${kind==='rope'?'e.g. wet rope':'e.g. hills, hot day'}"></label>
+  </div>
+  <div class="row" style="margin-top:12px"><button class="btn primary" id="tl_save">Save time</button><button class="btn" id="tl_cancel">Done</button><span id="tl_msg" class="sub" style="margin:0"></span></div></div>`;
+}
+function tlSave(kind, who){
+  const v=id=>{ const el=$(id); return el?el.value.trim():''; }, msg=$('tl_msg');
+  document.querySelectorAll('.tl-form .input.bad').forEach(el=>el.classList.remove('bad'));
+  const bad=(id,t)=>{ const el=$(id); if(el){ el.classList.add('bad'); el.focus(); } msg.innerHTML=`<span style="color:var(--alert)">${t}</span>`; };
+  const e={id:uid(), kind, date:v('tl_date')||todayISO()};
+  const note=v('tl_note'); if(note) e.note=note;
+  if(who==='team') e.team=v('tl_team')||'Team'; else e.sid=who;
+  if(kind!=='rope'){ const d=+v('tl_dist'); if(!(d>0&&d<100)) return bad('tl_dist','Enter the distance in miles, like 12 or 2.'); e.dist=Math.round(d*100)/100; }
+  const sec=parseLong(v('tl_time'));
+  if(sec==null||isNaN(sec)||sec<=0) return bad('tl_time',`Enter the time as ${TL_KINDS[kind].fmt}, like ${TL_KINDS[kind].ex}. Digits only works too.`);
+  e.sec=sec;
+  timeLogs().push(e); save();
+  STATE.tl.flash=`Saved ${who==='team'?e.team+' ':''}${TL_KINDS[kind].label.toLowerCase()}: ${fmtLong(sec)}${e.dist?` for ${tlDist(e.dist)} mi`:''}.`;
+  if(e.dist) STATE.tl.dist[tlKey(kind,who)]=tlDist(e.dist);
+  render();
+  const t=$('tl_time'); if(t) t.focus();
+}
+
+/* ---------- pieces used by both screens ---------- */
+function tlDistSeg(kind, who, ds, d){
+  return ds.length>1 ? `<div class="seg" style="margin:4px 0 10px" role="group" aria-label="Distance">${ds.map(x=>`<button data-tldist="${tlKey(kind,who)}|${x}" aria-pressed="${x===d}">${x} mi</button>`).join('')}</div>` : '';
+}
+function tlAllTable(kind, who, list, ro){
+  if(!list.length) return '';
+  const rows=[...list].sort(tlNewest), k=tlKey(kind,who), conf=STATE.tl.del, team=who==='team', dist=kind!=='rope';
+  return `<details class="tbl" ${STATE.tl.showAll===k?'open':''} data-tlall="${k}"><summary>All ${team?'team ':''}${TL_KINDS[kind].label.toLowerCase()} times (${rows.length})</summary>
+    <div class="scroll"><table><thead><tr><th>Date</th>${team?'<th>Team</th>':''}${dist?'<th class="num">Miles</th>':''}<th class="num">Time</th>${dist?'<th class="num">Pace</th>':''}<th>Note</th>${ro?'':'<th></th>'}</tr></thead>
+    <tbody>${rows.map(e=>`<tr><td>${esc(tlDate(e.date))}</td>${team?`<td>${esc(e.team)}</td>`:''}${dist?`<td class="num">${tlDist(e.dist)}</td>`:''}<td class="num">${fmtLong(e.sec)}</td>${dist?`<td class="num">${tlPace(e)}</td>`:''}<td>${esc(e.note||'')}</td>
+      ${ro?'':`<td style="white-space:nowrap">${conf===e.id?`<button class="btn danger sm" data-tldelyes="${e.id}">Delete</button> <button class="btn sm" data-tldelno="1">Keep</button>`:`<button class="btn sm" data-tldel="${e.id}" aria-label="Delete this time">Delete</button>`}</td>`}</tr>`).join('')}</tbody></table></div></details>`;
+}
+function tlLogButton(kind, who){
+  const k=tlKey(kind,who);
+  if(STATE.tl.open===k) return '';
+  return `<button class="btn primary sm" data-tlopen="${k}">Log a${who==='team'?' team':''} time</button>`;
+}
+function tlFormBlock(kind, who){
+  if(STATE.tl.open!==tlKey(kind,who)) return '';
+  return tlFormHtml(kind, who) + (STATE.tl.flash?`<div class="note ok" style="margin:-2px 0 12px">${esc(STATE.tl.flash)}</div>`:'');
+}
+function tlWire(c){
+  c.querySelectorAll('[data-tlopen]').forEach(b=>b.onclick=()=>{ STATE.tl.open=b.dataset.tlopen; STATE.tl.del=null; render(); const t=$('tl_time'); if(t) t.focus(); });
+  c.querySelectorAll('[data-tldist]').forEach(b=>b.onclick=()=>{ const i=b.dataset.tldist.lastIndexOf('|'); STATE.tl.dist[b.dataset.tldist.slice(0,i)]=b.dataset.tldist.slice(i+1); render(); });
+  c.querySelectorAll('details[data-tlall]').forEach(d=>d.ontoggle=()=>{ if(d.open) STATE.tl.showAll=d.dataset.tlall; else if(STATE.tl.showAll===d.dataset.tlall) STATE.tl.showAll=null; });
+  c.querySelectorAll('[data-tldel]').forEach(b=>b.onclick=()=>{ STATE.tl.del=b.dataset.tldel; render(); });
+  c.querySelectorAll('[data-tldelno]').forEach(b=>b.onclick=()=>{ STATE.tl.del=null; render(); });
+  c.querySelectorAll('[data-tldelyes]').forEach(b=>b.onclick=()=>{ DATA.timeLogs=timeLogs().filter(e=>e.id!==b.dataset.tldelyes); STATE.tl.del=null; save(); toast('Time deleted.'); render(); });
+  const sv=c.querySelector('#tl_save');
+  if(sv){
+    const [scope, kind]=STATE.tl.open.split(':'), who=scope==='team'?'team':STATE.tl.sid;
+    sv.onclick=()=>tlSave(kind, who);
+    $('tl_cancel').onclick=()=>{ STATE.tl.open=null; render(); };
+    c.querySelectorAll('.tl-form .input').forEach(el=>el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); tlSave(kind, who); } }));
+  }
+  STATE.tl.flash='';
+}
+function tlInit(){ STATE.tl = STATE.tl || {open:null, dist:{}, del:null, flash:'', showAll:null, indKind:'run', sid:null}; }
+
+/* ---------- Dashboard: team times ---------- */
+function tlTeamPanel(kind){
+  const K=TL_KINDS[kind], all=tlOf(kind,'team');
+  let seg='', list=all, cap='Best time each day';
+  if(kind!=='rope'){ const p=tlPickDist(kind,'team',all); seg=tlDistSeg(kind,'team',p.ds,p.d); list=all.filter(e=>tlDist(e.dist)===p.d); if(p.d) cap=`Best ${p.d} mi time each day`; }
+  const top=[...list].sort((a,b)=>a.sec-b.sec).slice(0,5);
+  return `<div class="panel tl-panel" data-kind="${kind}">
+    <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+      <div><h2>Team ${K.label.toLowerCase()}</h2><p class="sub" style="margin:0">Fastest team times${kind==='rope'?'':' at this distance'}.</p></div>
+      ${tlLogButton(kind,'team')}
+    </div>
+    ${tlFormBlock(kind,'team')}
+    ${seg}
+    ${top.length?`<ol class="top5">${top.map((e,i)=>`<li><span class="t5n">${i+1}</span><span class="t5who">${esc(e.team)}<small>${esc(tlDate(e.date))}${e.dist?` \u00B7 ${tlDist(e.dist)} mi \u00B7 ${tlPace(e)}`:''}${e.note?' \u00B7 '+esc(e.note):''}</small></span><b>${fmtLong(e.sec)}</b></li>`).join('')}</ol>`
+      :`<p class="sub" style="margin:6px 0 0">No team ${K.label.toLowerCase()} times yet.</p>`}
+    ${tlTrendSvg(list, cap)}
+    ${tlAllTable(kind,'team',all)}
+  </div>`;
+}
+function renderDash(c){
+  tlInit();
+  const top=ranked('overall').slice(0,5), n=tryoutSoldiers().length;
+  const best=kind=>{ const all=tlOf(kind,'team'); if(!all.length) return null; const d=kind==='rope'?null:tlDistances(all)[0]; const b=all.filter(e=>!d||tlDist(e.dist)===d).sort((a,b)=>a.sec-b.sec)[0]; return {t:fmtLong(b.sec), s:esc(b.team)+(d?`, ${d} mi`:'')}; };
+  const tile=(kind,lbl)=>{ const b=best(kind); return `<div><b>${b?b.t:'\u2013'}</b><span>${b?`${lbl} (${b.s})`:lbl}</span></div>`; };
+  const empty = !DATA.soldiers.length ? `<div class="panel" style="text-align:center;padding:26px 16px"><p class="sub" style="margin:0 auto 12px">No one is on the roster yet. Add your team in Team entry, or import a .json file.</p><div class="row" style="justify-content:center"><button class="btn primary" id="goTeam">Go to Team entry</button><button class="btn" id="sample">Load example team</button></div></div>` : '';
+  c.innerHTML=`<div class="stack">
+    ${empty}
+    <div class="tiles">
+      <div><b>${n}</b><span>soldiers in tryout</span></div>
+      ${tile('rope','best rope bridge')}${tile('ruck','best team ruck')}${tile('run','best team run')}
+    </div>
+    <div class="two">
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><h2>Top 5 overall</h2><p class="sub" style="margin:0">From tryout rankings.</p></div><button class="btn sm" id="dashRank">Full rankings</button></div>
+        ${top.length?`<ol class="top5">${top.map((r,i)=>`<li><span class="t5n">${i+1}</span><span class="t5who"><button class="linkish" data-open="${r.s.id}">${esc(r.s.name)}</button><small>${SKILLS_ON().length?`${r.sc.gos} Go${r.sc.gos===1?'':'s'}`:''}${isCut(r.sc)?' \u00B7 <span style="color:var(--alert)">PT fail</span>':''}</small></span><b>${fmt1(r.sc.total)}</b></li>`).join('')}</ol>`
+          :`<p class="sub" style="margin:6px 0 0">No one is on the tryout roster yet.</p>`}
+      </div>
+      ${tlTeamPanel('rope')}
+    </div>
+    <div class="two">${tlTeamPanel('ruck')}${tlTeamPanel('run')}</div>
+    <div class="row"><button class="btn" id="dashWk">Log a weekend run or ruck (individual times)</button><span class="sub" style="margin:0;font-size:12.5px">Individual times show on each soldier's page in Individual, not here.</span></div>
+  </div>`;
+  $('dashRank').onclick=()=>{ STATE.tab='rank'; render(); };
+  $('dashWk').onclick=()=>{ STATE.weekend=true; STATE.tab='one'; render(); window.scrollTo(0,0); };
+  const gt=$('goTeam'); if(gt) gt.onclick=()=>{ STATE.tab='team'; render(); };
+  const sm=$('sample'); if(sm) sm.onclick=loadSample;
+  c.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{ STATE.selectedId=b.dataset.open; STATE.newMode=false; STATE.tab='one'; render(); });
+  tlWire(c);
+}
+
+/* ---------- Individual page: one soldier's ruck and run times ---------- */
+function indivTimesHtml(s, ro){
+  tlInit();
+  if(STATE.tl.sid!==s.id){ if(STATE.tl.open && STATE.tl.open.startsWith('ind:')) STATE.tl.open=null; STATE.tl.sid=s.id; STATE.tl.del=null; }
+  const kind=STATE.tl.indKind, K=TL_KINDS[kind], all=tlOf(kind,s.id), p=tlPickDist(kind,s.id,all);
+  const list=all.filter(e=>tlDist(e.dist)===p.d), best=[...list].sort((a,b)=>a.sec-b.sec)[0], latest=[...list].sort(tlNewest)[0];
+  const counts={ruck:tlOf('ruck',s.id).length, run:tlOf('run',s.id).length};
+  return `<div class="panel tl-panel" id="indTimes">
+    <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:10px">
+      <div><h2>${ro?'My ruck and run times':'Ruck and run times'}</h2><p class="sub" style="margin:0">${ro?'Your times from weekend runs and rucks. Leadership logs these.':esc(s.name)+"'s own times, like weekend runs."}</p></div>
+      ${ro?'':tlLogButton(kind,s.id)}
+    </div>
+    <div class="seg" style="margin-bottom:10px" role="group" aria-label="Event">${['run','ruck'].map(k=>`<button data-tlind="${k}" aria-pressed="${k===kind}">${TL_KINDS[k].label}s${counts[k]?` (${counts[k]})`:''}</button>`).join('')}</div>
+    ${ro?'':tlFormBlock(kind,s.id)}
+    ${avgLine(s,kind)}
+    ${tlDistSeg(kind,s.id,p.ds,p.d)}
+    ${best?`<div class="tiles tiles3">
+        <div><b>${fmtLong(best.sec)}</b><span>best ${p.d} mi (${esc(tlDate(best.date))})</span></div>
+        <div><b>${fmtLong(latest.sec)}</b><span>latest ${p.d} mi (${esc(tlDate(latest.date))})</span></div>
+        <div><b>${tlPace(best).replace('/mi','')}</b><span>best pace per mile</span></div>
+      </div>`:`<p class="sub" style="margin:6px 0 0">No ${K.label.toLowerCase()} times for ${esc(s.name)} yet.</p>`}
+    ${p.d?tlTrendSvg(list, `${K.label}, ${p.d} mi`):''}
+    ${tlAllTable(kind,s.id,all,ro)}
+  </div>`;
+}
+function wireIndivTimes(s){
+  const c=$('indTimes'); if(!c) return;
+  c.querySelectorAll('[data-tlind]').forEach(b=>b.onclick=()=>{ STATE.tl.indKind=b.dataset.tlind; if(STATE.tl.open&&STATE.tl.open.startsWith('ind:')) STATE.tl.open=null; render(); });
+  tlWire(c);
+}
+
+/* ---------- average times as a ranking event ---------- */
+// Each soldier's average time at one set distance, scored like the CFT: a time worth 100 points, a time worth 0, straight line between.
+// On a 500 scale it blends into the physical score by its weight, the same as any PT test.
+const TIME_EVENTS=[{k:'avgrun', kind:'run', short:'Run avg', name:'Average run time'},{k:'avgruck', kind:'ruck', short:'Ruck avg', name:'Average ruck time'}];
+const AVG_DEFAULTS={run:{dist:2, best:720, zero:1080}, ruck:{dist:12, best:9000, zero:12600}};
+function avgCfg(kind){ return Object.assign({}, AVG_DEFAULTS[kind], ((DATA.settings.avgTimes||{})[kind])||{}); }
+function avgTime(s, kind){
+  const c=avgCfg(kind), d=tlDist(c.dist), L=tlOf(kind,s.id).filter(e=>tlDist(e.dist)===d);
+  if(!L.length) return {n:0, avg:null, pts:null, dist:d};
+  const avg=L.reduce((a,e)=>a+e.sec,0)/L.length;
+  const pts= avg<=c.best ? 100 : avg>=c.zero ? 0 : (c.zero-avg)/(c.zero-c.best)*100;
+  return {n:L.length, avg, pts, dist:d};
+}
+function timeEventsOn(){ return TIME_EVENTS.filter(e=>isOn(e.k)); }
+function avgLine(s, kind){
+  const te=TIME_EVENTS.find(e=>e.kind===kind); if(!isOn(te.k)) return '';
+  const a=avgTime(s,kind), unit=kind==='run'?'run':'ruck';
+  return `<div class="note info" style="margin:0 0 10px">${a.n
+    ? `Average ${a.dist} mi ${unit}: <b class="mono">${fmtLong(a.avg)}</b> over ${a.n} ${unit}${a.n===1?'':'s'} = <b class="mono">${fmt1(a.pts)}</b> points toward the rankings.`
+    : `The average ${a.dist} mi ${unit} time counts toward the rankings. No ${a.dist} mi ${unit}s logged yet, so it's 0 points for now.`}</div>`;
+}
+
+/* ---------- weekend quick entry: one run or ruck, everyone's times at once ---------- */
+function renderWeekend(c){
+  tlInit();
+  const W = STATE.wk = STATE.wk || {kind:'run', date:todayISO(), dist:null, note:'', vals:{}, bad:{}, flash:''};
+  if(W.dist==null) W.dist=String(avgCfg(W.kind).dist);
+  const people=sortedByName(), d=tlDist(W.dist);
+  const existing=sid=>timeLogs().find(e=>e.kind===W.kind && e.sid===sid && e.date===W.date && tlDist(e.dist)===d);
+  c.innerHTML=`<div class="stack">
+    <div class="panel">
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div><h2>Log a weekend ${W.kind}</h2><p class="sub" style="margin:0">Type everyone's time from one ${W.kind}. Leave a box blank for anyone who didn't go. Each time lands on that soldier's Individual page.</p></div>
+        <button class="btn sm" id="wkBack">Back to Individual</button>
+      </div>
+      <div class="seg" style="margin:14px 0 12px" role="group" aria-label="Event">${['run','ruck'].map(k=>`<button data-wkkind="${k}" aria-pressed="${k===W.kind}">${TL_KINDS[k].label}</button>`).join('')}</div>
+      <div class="grid">
+        <label class="field"><span>Date</span><input class="input" type="date" id="wk_date" value="${esc(W.date)}"></label>
+        <label class="field"><span>Distance (miles)</span><input class="input" inputmode="decimal" id="wk_dist" value="${esc(W.dist)}"></label>
+        <label class="field" style="grid-column:span 2"><span>Note for everyone (optional)</span><input class="input" id="wk_note" value="${esc(W.note)}" placeholder="e.g. hills, hot day"></label>
+      </div>
+      <p class="sub" style="margin:10px 0 0;font-size:13px">Digits only works: 1405 = 14:05${W.kind==='ruck'?', 24830 = 2:48:30':''}. Enter jumps to the next person. A new time for someone already logged on this date replaces theirs.</p>
+      ${W.flash?`<div class="note ok" style="margin-top:12px">${esc(W.flash)}</div>`:''}
+    </div>
+    <div class="panel" style="padding:8px 14px">
+      ${people.length?`<table class="wk-table"><thead><tr><th>Soldier</th><th>Time (${TL_KINDS[W.kind].fmt})</th></tr></thead><tbody>
+        ${people.map(s=>{ const ex=existing(s.id); return `<tr><td><span class="wk-name">${esc(s.name)}</span>${ex?`<small class="soft">already logged ${fmtLong(ex.sec)}</small>`:''}</td>
+          <td><input class="input wk-in ${W.bad[s.id]?'bad':''}" data-wk="${s.id}" inputmode="numeric" autocomplete="off" value="${esc(W.vals[s.id]||'')}" placeholder="${ex?fmtLong(ex.sec):''}" aria-label="${esc(s.name)} time"></td></tr>`; }).join('')}
+      </tbody></table>`:`<p class="sub" style="padding:10px 0">No one is on the roster yet.</p>`}
+    </div>
+    <div class="panel wk-bar">
+      <div class="row"><button class="btn primary" id="wkSave">Save times</button><span id="wkMsg" class="sub" style="margin:0;font-size:13px"></span></div>
+    </div>
+  </div>`;
+  const keep=()=>{ W.date=$('wk_date').value||todayISO(); W.dist=$('wk_dist').value.trim(); W.note=$('wk_note').value.trim(); c.querySelectorAll('[data-wk]').forEach(i=>W.vals[i.dataset.wk]=i.value.trim()); };
+  $('wkBack').onclick=()=>{ STATE.weekend=false; render(); };
+  c.querySelectorAll('[data-wkkind]').forEach(b=>b.onclick=()=>{ keep(); if(W.kind!==b.dataset.wkkind){ W.kind=b.dataset.wkkind; W.dist=String(avgCfg(W.kind).dist); W.vals={}; W.bad={}; } W.flash=''; render(); });
+  ['wk_date','wk_dist'].forEach(id=>$(id).onchange=()=>{ keep(); W.flash=''; render(); });
+  const ins=[...c.querySelectorAll('[data-wk]')];
+  ins.forEach((el,i)=>el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); if(ins[i+1]) ins[i+1].focus(); else $('wkSave').focus(); } }));
+  $('wkSave').onclick=()=>{
+    keep(); W.bad={};
+    const dist=+W.dist;
+    if(!(dist>0&&dist<100)){ $('wk_dist').classList.add('bad'); $('wkMsg').innerHTML='<span style="color:var(--alert)">Enter the distance in miles, like 2 or 12.</span>'; return; }
+    const rows=[]; people.forEach(s=>{ const raw=W.vals[s.id]; if(!raw) return; const sec=parseLong(raw); if(sec==null||isNaN(sec)||sec<=0) W.bad[s.id]=true; else rows.push({s,sec}); });
+    if(Object.keys(W.bad).length){ render(); $('wkMsg').innerHTML=`<span style="color:var(--alert)">Fix the ${Object.keys(W.bad).length} time${Object.keys(W.bad).length===1?'':'s'} outlined in red (${TL_KINDS[W.kind].fmt}, like ${TL_KINDS[W.kind].ex}). Nothing was saved yet.</span>`; const f=c.querySelector('.wk-in.bad'); if(f) f.focus(); return; }
+    if(!rows.length){ $('wkMsg').innerHTML='<span style="color:var(--alert)">Type at least one time first.</span>'; return; }
+    const D=Math.round(dist*100)/100, dd=tlDist(D);
+    let replaced=0;
+    rows.forEach(({s,sec})=>{
+      const old=timeLogs().filter(e=>e.kind===W.kind && e.sid===s.id && e.date===W.date && tlDist(e.dist)===dd); replaced+=old.length ? 1 : 0;
+      DATA.timeLogs=timeLogs().filter(e=>!old.includes(e));
+      const e={id:uid(), kind:W.kind, date:W.date, sid:s.id, dist:D, sec}; if(W.note) e.note=W.note; timeLogs().push(e);
+    });
+    save();
+    W.flash=`Saved ${rows.length} ${W.kind} time${rows.length===1?'':'s'} for ${tlDate(W.date)}, ${dd} mi${replaced?` (${replaced} replaced an earlier entry)`:''}.`;
+    W.vals={}; render(); window.scrollTo(0,0);
+  };
+}
+
+/* ---------- a soldier's own times (read only) ---------- */
+function renderMyTimes(c, s){
+  c.innerHTML=`<div class="stack">${indivTimesHtml(s, true)}</div>`;
+  wireIndivTimes(s);
 }
 
 load();
