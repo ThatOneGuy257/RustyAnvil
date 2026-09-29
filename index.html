@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" href="favicon-64.png">
 <link rel="apple-touch-icon" href="icon-180.png">
@@ -42,7 +42,9 @@ button,input,select,textarea{font:inherit;color:inherit}
 .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
 .soft{color:var(--inkSoft)}
 .app-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px 20px;padding-block:14px;padding-inline:max(16px,calc((100% - 1160px)/2));border-bottom:1px solid var(--line);background:var(--panel)}
-.app-title{font-family:var(--serif);font-weight:600;font-size:20px}
+.app-title{font-family:var(--serif);font-weight:600;font-size:20px;display:flex;align-items:center;gap:10px}
+.app-logo{width:32px;height:32px;image-rendering:pixelated;border-radius:8px;flex:none}
+.gate-logo{display:block;width:96px;height:96px;image-rendering:pixelated;border-radius:22px;margin:0 0 14px}
 .tabs{display:flex;flex-wrap:wrap;gap:4px;background:var(--panelAlt);padding:4px;border-radius:6px}
 .tab{border:0;background:transparent;padding:7px 11px;font-size:13.5px;color:var(--inkSoft);border-radius:4px;cursor:pointer}
 .tab[aria-current="page"]{background:var(--panel);color:var(--ink);font-weight:600;box-shadow:0 1px 0 var(--line) inset}
@@ -264,6 +266,56 @@ ol.top5 b{font-family:var(--mono);font-size:17px}
 .wk-table small{font-size:12px}
 .wk-table .input{max-width:160px}
 .wk-bar{position:sticky;bottom:10px;z-index:5;box-shadow:0 6px 20px rgba(0,0,0,.45);padding:10px 14px}
+/* phone tab bar, More menu, sheets */
+body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.bbar{display:none}
+.sheet-wrap{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:60;display:flex;align-items:flex-end;justify-content:center}
+.sheet-wrap[hidden]{display:none}
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:14px 14px 0 0;width:100%;max-width:520px;padding:10px 10px calc(12px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:2px;max-height:82vh;overflow:auto}
+.sheet hr{border:0;border-top:1px solid var(--line);margin:6px 4px;width:auto}
+.sheet-item{display:flex;align-items:center;gap:14px;padding:13px 12px;border:0;background:none;color:var(--ink);font:inherit;font-size:16px;border-radius:8px;text-align:left;cursor:pointer}
+.sheet-item:hover{background:var(--panelAlt)}
+.sheet-item[aria-current="page"]{background:var(--panelAlt);color:var(--navy);font-weight:600}
+.sheet-close{justify-content:center;color:var(--inkSoft);margin-top:4px}
+.news-wrap{align-items:center;padding:16px}
+.news{border-radius:14px;padding:22px 20px}
+.news h2{font-family:var(--serif);margin:0 0 4px}
+.news-list{margin:10px 0 18px;padding-left:20px}.news-list li{margin:7px 0}
+.big-btn{padding:14px 16px;font-size:16px}
+.share-box{text-align:center}
+.share-box details{text-align:left}
+.qr{width:min(240px,70vw);margin:10px auto;background:#fff;padding:10px;border-radius:10px}
+.qr svg{display:block;width:100%;height:auto}
+.share-url{word-break:break-all;font-size:13px;margin:0 0 12px}
+.ref-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.chip-btn{border:1px solid var(--line);background:var(--field);color:var(--inkSoft);border-radius:20px;padding:6px 12px;font-size:13px;cursor:pointer}
+.chip-btn:hover{color:var(--ink)}
+.ref-card summary{cursor:pointer;list-style:none;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.ref-card summary::-webkit-details-marker{display:none}
+.ref-card summary::after{content:'+';font-size:24px;line-height:1;color:var(--inkSoft)}
+.ref-card[open] summary::after{content:'\2013'}
+.ref-card summary h2{margin:0}
+.ref-body{margin-top:12px}
+.ref-gren{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:12px}
+.rg{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--panelAlt)}
+.rg img{width:72px;height:72px;object-fit:contain;background:#fff;border-radius:6px;flex:none}
+.rg p{margin:4px 0 0;font-size:13.5px;color:var(--inkSoft)}
+/* iPhone zooms into any text box under 16px; keep them at 16px on touch screens */
+@media (pointer:coarse){input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea{font-size:16px!important}}
+@media (max-width:760px){
+  .app-header .tabs,.who-btns{display:none}
+  .app-header{padding-block:10px}
+  .bbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;background:var(--panel);border-top:1px solid var(--line);padding:4px max(4px,env(safe-area-inset-right,0px)) calc(4px + env(safe-area-inset-bottom,0px)) max(4px,env(safe-area-inset-left,0px))}
+  .bb{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;border:0;background:none;color:var(--inkSoft);font:inherit;font-size:11px;padding:6px 2px;border-radius:8px;cursor:pointer;min-width:0}
+  .bb span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+  .bb[aria-current="page"]{color:var(--navy);font-weight:600}
+  .main{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(80px + env(safe-area-inset-bottom,0px))}
+  .wk-bar{bottom:calc(74px + env(safe-area-inset-bottom,0px))}
+  .ref-chips{flex-wrap:nowrap;overflow-x:auto;margin-inline:-14px;padding:0 14px 4px;scrollbar-width:none}
+  .ref-chips::-webkit-scrollbar{display:none}
+  .chip-btn{flex:none}
+}
 .tl-form{border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--panelAlt);margin-bottom:12px}
 figure.mini{margin:0}
 figure.mini figcaption{font-size:13px;color:var(--inkSoft);margin-bottom:4px}
@@ -290,7 +342,7 @@ tr.editing td{background:var(--panelAlt)}
 .prog-tiles small{font-size:12px;color:var(--inkSoft);font-family:var(--mono)}
 .prog-charts{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px 18px}
 .sect-h{margin:10px 0 0;font-size:18px}
-.app-sub{font-family:var(--sans);font-size:12.5px;font-weight:400;color:var(--inkSoft);margin-left:6px;letter-spacing:.02em}
+.app-sub{font-family:var(--sans);font-size:12.5px;font-weight:400;color:var(--inkSoft);letter-spacing:.02em;align-self:flex-end;margin-bottom:3px}
 @media (max-width:560px){.app-sub{display:none}}
 .drill{
   --bg:#111214; --panel:#191B1E; --ink:#E6E7E9; --muted:#9EA2A8; --line:#30343A;
@@ -654,7 +706,7 @@ function exportProgram(){
     +tag('div','id="app"')+end('div')+tag('div','id="toast" class="toast" hidden')+end('div')
     +tag('scr'+'ipt')+'window.__EMBED__='+payload+';'+end('scr'+'ipt')
     +tag('scr'+'ipt','id="appScript"')+code+end('scr'+'ipt')+end('bo'+'dy')+end('html');
-  offerFile(`Rusty_Anvil_${stamp()}.html`, html, 'text/html');
+  markBackup(); offerFile(`Rusty_Anvil_${stamp()}.html`, html, 'text/html');
 }
 
 /* ============================== helpers ============================== */
@@ -852,7 +904,7 @@ async function offerFile(filename, data, mime){
   setTimeout(()=>URL.revokeObjectURL(url), 4000); toast(`Saved ${filename}.`);
 }
 function stamp(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function exportJSON(){ offerFile(`Rusty_Anvil_data_${stamp()}.json`, JSON.stringify(Object.assign({}, DATA, {exportedAt:new Date().toISOString()}), null, 2), 'application/json'); }
+function exportJSON(){ markBackup(); offerFile(`Rusty_Anvil_data_${stamp()}.json`, JSON.stringify(Object.assign({}, DATA, {exportedAt:new Date().toISOString()}), null, 2), 'application/json'); }
 function exportXlsx(){
   const S=DATA.settings, cut=cutIndex(ranked('overall')), aftOn=isOn('aft'), cftOn=isOn('cft'), sk=SKILLS_ON();
   const gn2=v=>v==='go'?'Go':v==='nogo'?'No-Go':'';
@@ -1979,16 +2031,78 @@ const CONTACT=[
 ];
 function calls(fixed){return {cs:fixed?'Ripley 1-6':unitCS(),hq:fixed?'Reaper 6':stationCS()};}
 
-function genSpot(fixed){
-  const o=pick(OBSERVED),[tz,tzn]=pick(TZS),[mSee,mAns]=pick(METHODS),{cs,hq}=calls(fixed),grid=mgrs();
+/* ---------- range estimate (mil relation) through binoculars ---------- */
+// Range in meters = (target height in inches \u00D7 25.4) \u00F7 height in mils. The vertical bar has a dot every 1 mil.
+function milView(H, N, seed){
+  let a=(seed>>>0)||1; const r=()=>{ a=(a+0x6D2B79F5)>>>0; let t=a; t=Math.imul(t^(t>>>15),t|1); t^=t+Math.imul(t^(t>>>7),t|61); return ((t^(t>>>14))>>>0)/4294967296; };
+  const LAND=[['#8FB3CC','#D9E5E8','#8C9A78','#7D8B57','#66743F'],['#8E989C','#C9CECE','#9DA592','#A4A06C','#8D8A57'],['#8FB3CC','#E4E0D2','#CDBB95','#C8AF7F','#B39868'],['#6F7FA0','#F3C38C','#6F7F62','#687649','#525F35']][Math.floor(r()*4)];
+  const ppm=14, base=236, barX=318, h=N*ppm, fx=barX+22+r()*16, INK='#23251C', INK2='#3E4133';
+  const horizon=base-Math.max(h*0.62, 60);
+  const hills=`M72 ${horizon} `+Array.from({length:9},(_,i)=>`L${72+i*62} ${horizon-6-r()*22}`).join(' ')+` L568 ${horizon} Z`;
+  const bush=(x,y,s)=>`<ellipse cx="${x}" cy="${y-s*0.45}" rx="${s}" ry="${s*0.55}" fill="${LAND[4]}"/><ellipse cx="${x-s*0.4}" cy="${y-s*0.6}" rx="${s*0.55}" ry="${s*0.4}" fill="${LAND[3]}"/>`;
+  let scen=''; for(let i=0;i<6;i++){ const x=90+r()*460; if(Math.abs(x-fx)<40) continue; scen+=bush(x, horizon+8+r()*(base-horizon+30), 5+r()*9); }
+  // Enemy soldier, drawn to scale: feet on the reticle line, top of head exactly N mils up.
+  const u=h/100, X=v=>fx+v*u, Y=v=>base-v*u;
+  const man=`<g fill="${INK}" stroke="${INK}" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M${X(-4.5)} ${Y(0)} L${X(-3)} ${Y(44)} L${X(3)} ${Y(44)} L${X(5)} ${Y(0)} L${X(2)} ${Y(0)} L${X(0.5)} ${Y(38)} L${X(-1.5)} ${Y(0)} Z" stroke-width="${u*0.8}"/>
+    <path d="M${X(-6.5)} ${Y(45)} L${X(-6)} ${Y(79)} Q${X(0)} ${Y(83)} ${X(6)} ${Y(79)} L${X(6.5)} ${Y(45)} Z" fill="${INK2}" stroke-width="${u*0.6}"/>
+    <path d="M${X(-6)} ${Y(77)} L${X(-8)} ${Y(56)} L${X(3)} ${Y(60)}" fill="none" stroke-width="${u*2.6}"/>
+    <path d="M${X(6)} ${Y(77)} L${X(8)} ${Y(62)} L${X(4)} ${Y(59)}" fill="none" stroke-width="${u*2.6}"/>
+    <line x1="${X(-11)}" y1="${Y(53)}" x2="${X(14)}" y2="${Y(66)}" stroke-width="${u*1.8}"/>
+    <rect x="${X(-2)}" y="${Y(87)}" width="${u*4}" height="${u*6}" stroke-width="0"/>
+    <circle cx="${X(0)}" cy="${Y(93)}" r="${u*7}" stroke-width="0"/>
+    <path d="M${X(-7.8)} ${Y(94.5)} Q${X(0)} ${Y(103.5)} ${X(7.8)} ${Y(94.5)} Z" fill="${INK2}" stroke-width="${u*0.6}"/>
+  </g><ellipse cx="${fx}" cy="${base+1}" rx="${u*12}" ry="${u*2}" fill="#000" opacity=".22"/>`;
+  // Reticle: horizontal line with 10-mil ticks, vertical bar with a dot every mil (every 5th dot a little bigger).
+  const top=base-15*ppm;
+  let dots=''; for(let m=0;m<=15;m++){ const y=base-m*ppm; dots+=`<circle cx="${barX}" cy="${y}" r="${m%5===0?2.6:1.8}" fill="#101109"/>`; }
+  const ticks=[-20,-10,10,20].map(m=>`<line x1="${barX+m*ppm*0.5}" y1="${base-5}" x2="${barX+m*ppm*0.5}" y2="${base+5}" stroke="#101109" stroke-width="1.2"/>`).join('');
+  const rim='M320 36.6 A146 146 0 1 0 320 263.4 A146 146 0 1 0 320 36.6Z', id='mv'+Math.floor(r()*1e6);
+  return `<figure style="margin:14px 0 4px;max-width:560px">
+    <svg viewBox="72 4 496 292" role="img" aria-label="Binocular view: an enemy soldier stands beside the vertical mil scale. Each dot is 1 mil. Count the dots from his feet to the top of his head." style="width:100%;height:auto;display:block;border-radius:10px">
+      <defs><clipPath id="${id}c"><circle cx="228" cy="150" r="146"/><circle cx="412" cy="150" r="146"/></clipPath>
+        <linearGradient id="${id}s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${LAND[0]}"/><stop offset="1" stop-color="${LAND[1]}"/></linearGradient>
+        <filter id="${id}b"><feGaussianBlur stdDeviation="14"/></filter></defs>
+      <rect x="0" y="0" width="640" height="300" fill="#0B0C0A"/>
+      <g clip-path="url(#${id}c)">
+        <rect x="72" y="0" width="496" height="${horizon}" fill="url(#${id}s)"/>
+        <path d="${hills}" fill="${LAND[2]}"/><rect x="72" y="${horizon}" width="496" height="${300-horizon}" fill="${LAND[3]}"/>
+        <rect x="72" y="${base+14}" width="496" height="${300-base}" fill="${LAND[4]}" opacity=".55"/>${scen}${man}
+        <line x1="0" y1="${base}" x2="640" y2="${base}" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="3"/>
+        <line x1="0" y1="${base}" x2="640" y2="${base}" stroke="#101109" stroke-width="1.2"/>${ticks}
+        <line x1="${barX}" y1="${top}" x2="${barX}" y2="${base}" stroke="#FFFFFF" stroke-opacity=".3" stroke-width="3"/>
+        <line x1="${barX}" y1="${top}" x2="${barX}" y2="${base}" stroke="#101109" stroke-width="1"/>${dots}
+        <path d="${rim}" fill="none" stroke="#000" stroke-opacity=".6" stroke-width="40" filter="url(#${id}b)"/>
+      </g>
+      <path d="${rim}" fill="none" stroke="#2A2C26" stroke-width="3"/>
+    </svg>
+    <figcaption style="font-size:13px;opacity:.75;margin-top:6px">Each dot on the vertical bar is 1 mil. The bottom dot sits on the horizontal line (0 mils).</figcaption></figure>`;
+}
+function rangeTask(){
+  const H=pick([66,68,69,70,71,72,73,74]), N=ri(3,12), exact=H*25.4/N, dist=Math.round(exact);
+  return {H, N, exact, dist, view:milView(H,N,ri(1,1e9)),
+    ask:`Range estimate: look through your binoculars below. The nearest enemy soldier is standing next to your mil scale. Assume he is ${H} inches tall. How far away is he, in meters?`,
+    work:`(${H} in \u00D7 25.4) \u00F7 ${N} mils = ${exact.toFixed(1)} m, about ${dist} meters`};
+}
+function rangeCheckHtml(){
+  return `<div class="rg-check" style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 2px">
+    <label style="display:flex;gap:8px;align-items:center">Your range <input id="rgIn" inputmode="numeric" autocomplete="off" style="width:7em;padding:8px 10px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit"> m</label>
+    <button class="btn" id="rgChk">Check range</button><span id="rgRes" aria-live="polite"></span></div>`;
+}
+// Right if within 2% (rounding 25.4 to 25 still counts; misreading the mils by one does not).
+const rangeOk = (typed, exact) => { const n=parseFloat(String(typed||'').replace(/[^0-9.]/g,'')); return isFinite(n) && Math.abs(n-exact) <= Math.max(2, exact*0.02); };
+
+function genSpot(fixed, opts){
+  const wantRange = !opts || opts.range!==false;
+  const o=pick(OBSERVED),[tz,tzn]=pick(TZS),{cs,hq}=calls(fixed),grid=mgrs();
+  const [mSee,mAns] = wantRange ? METHODS[0] : pick(METHODS);
   const seen=randTime(), sent=new Date(seen.getTime()+ri(4,25)*60000);
-  const bonus=Math.random()<0.35;
-  let H,N,dist; if(bonus){H=pick([60,66,68,70,72]);N=ri(4,12);dist=Math.round(25.4*H/N);}
+  const R = wantRange ? rangeTask() : null;
   const text=[`At ${spoken(seen,tzn)}, you are observing with ${mSee} from a hidden observation post when you spot ${o.see}.`,
     `They are at grid ${grid}. You have not been seen and have not made contact.`,
-    `You send your report at ${hhmm(sent)} ${tzn}.`,
+    sent.getUTCDate()===seen.getUTCDate() ? `You send your report at ${hhmm(sent)} ${tzn}.` : `You send your report after midnight, at ${spoken(sent,tzn)}.`,
     `Your call sign is ${cs}, and your higher is ${hq}.`,'Send a SPOT report.',
-    bonus?`Bonus: in your binoculars the nearest enemy is ${N} mils tall. If he is ${H} inches tall, how far away is he?`:''].filter(Boolean).join(' ');
+    R?R.ask:''].filter(Boolean).join(' ');
   const lines=[
     [1,'Date time group of report',dtg(sent,tz),'DD HHMM (time zone) MONYY, when you send the report.'],
     [2,'Call sign and method of observation',`${cs} \u2013 ${mAns}`,''],
@@ -2004,9 +2118,11 @@ function genSpot(fixed){
   ];
   const script=[`${hq}, this is ${cs}, SPOT report to follow, over.`,...lines.map(l=>`Line ${l[0]}, ${l[2]}`),'Over.'];
   let html=renderLines('Answer: SPOT report',lines,'Full call',script);
-  if(bonus) html+=`<div class="script"><h3>Bonus: mil relation</h3><p>(25.4 \u00D7 ${H} in) \u00F7 ${N} mils = ${dist} meters</p></div>`;
+  if(R) html+=`<div class="script"><h3>Range estimate (mil relation)</h3><p>The soldier is ${R.N} mils tall on the vertical bar.</p><p>(Height in inches \u00D7 25.4) \u00F7 height in mils = range in meters</p><p><b>${esc(R.work)}</b></p></div>`;
   const ck=['dtg','free','free','free','grid','free','dtg','free','free','free','free'];
-  return {text,html,script,key:lines.map((l,i)=>({n:l[0],label:l[1],ans:l[2],why:l[3],check:ck[i]}))};
+  const key=lines.map((l,i)=>({n:l[0],label:l[1],ans:l[2],why:l[3],check:ck[i]}));
+  if(R) key.push({n:'R', label:'Range to the nearest enemy (meters)', ans:`${R.dist} m`, why:`${R.N} mils tall. ${esc(R.work)}. Within 2% counts.`, check:'range', exact:R.exact});
+  return {text,html,script,key,view:R?R.view:'',range:R};
 }
 
 function genSalute(fixed){
@@ -2256,9 +2372,11 @@ function genWeapons(){ wResetProgress(); return {text:'', quiz:'<div></div>', wi
     <button data-mode="progress" aria-pressed="false">My progress</button>
   </div>
   <label class="opts"><input type="checkbox" id="rand"> <span id="randLbl">Randomize call signs and frequency</span></label>
+  <label class="opts" id="rangeOpt" hidden><input type="checkbox" id="rangeChk" checked> <span>Include a range estimate (mil relation)</span></label>
 
   <section class="card" aria-live="polite">
     <p class="scenario" id="scenario"></p>
+    <div id="scnView"></div>
     <div class="actions">
       <button class="btn primary" id="new">New scenario</button>
       <button class="btn" id="show" aria-expanded="false">Show answer</button>
@@ -2283,8 +2401,12 @@ let mode='medevac', cur=null;
 const $=id=>document.getElementById(id);
 function generate(){
   const fixed=!$('rand').checked;
-  cur={medevac:genMedevac,cff:genCFF,spot:genSpot,salute:genSalute,tccc:genTccc,fracture:genMedPractice('fracture'),burn:genMedPractice('burn'),grenade:genGrenade,weapons:genWeapons}[mode](fixed);
+  cur={medevac:genMedevac,cff:genCFF,spot:f=>genSpot(f,{range:$('rangeChk').checked}),salute:genSalute,tccc:genTccc,fracture:genMedPractice('fracture'),burn:genMedPractice('burn'),grenade:genGrenade,weapons:genWeapons}[mode](fixed);
   if(cur.quiz){ $('scenario').innerHTML=cur.quiz; (cur.wire||wireGrenadeQuiz)(); } else $('scenario').textContent=cur.text;
+  $('scnView').innerHTML = cur.range ? cur.view + rangeCheckHtml() : '';
+  if(cur.range){ const go=()=>{ const ok=rangeOk($('rgIn').value, cur.range.exact), res=$('rgRes');
+      res.innerHTML = !$('rgIn').value.trim() ? '<span class="flag">Type your range in meters first.</span>' : ok ? `<b style="color:var(--good,#62C0A6)">Correct: about ${cur.range.dist} m.</b>` : `<b class="flag">Not quite.</b> Count the dots again, then use (height in inches \u00D7 25.4) \u00F7 mils.`; };
+    $('rgChk').onclick=go; $('rgIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } }); }
   root.querySelector('.opts').hidden = mode==='weapons';
   $('new').hidden = mode==='weapons';
   $('show').hidden = mode==='weapons';
@@ -2311,9 +2433,10 @@ function setMode(m){
   randPref[mode==='grenade'?'grenade':'calls']=$('rand').checked;
   $('rand').checked=randPref[m==='grenade'?'grenade':'calls'];
   $('randLbl').textContent = m==='grenade' ? 'Randomize grenade order' : 'Randomize call signs and frequency';
+  $('rangeOpt').hidden = m!=='spot';
   mode=m;modeBtns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));$('mission').hidden=m!=='cff';showMission(false);
   const prog=m==='progress'; $('progressCard').hidden=!prog; root.querySelector('section.card:not(#missionCard):not(#progressCard)').hidden=prog; root.querySelector('.opts').hidden=prog||m==='weapons';
-  if(prog){ showProgress(); return; }
+  if(prog){ $('rangeOpt').hidden=true; showProgress(); return; }
   generate();}
 function showProgress(){ const c=$('progressCard'); c.innerHTML=progressHtml(); const r=$('pgReset');
   if(r) r.onclick=()=>{ $('pgMsg').innerHTML='<p class="flag" style="margin:10px 0 6px">Clear all of your practice history on this device? This can\'t be undone.</p><div class="actions"><button class="btn primary" id="pgYes">Clear it</button><button class="btn" id="pgNo">Keep it</button></div>';
@@ -2326,6 +2449,7 @@ $('mission').onclick=()=>showMission(true);
 $('backScn').onclick=()=>showMission(false);
 modeBtns.forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 $('rand').onchange=generate;
+$('rangeChk').onchange=generate;
 $('new').onclick=generate;
 $('show').onclick=()=>{const a=$('answer');a.hidden=!a.hidden;$('show').textContent=a.hidden?'Show answer':'Hide answer';$('show').setAttribute('aria-expanded',String(!a.hidden));
   $('selfCheck').hidden = a.hidden || !['medevac','cff','spot','salute','tccc','fracture','burn'].includes(mode) || cur.checked; };
@@ -2339,40 +2463,25 @@ generate();
   }
   // Read-only progress for the admin's view of a soldier.
   const progressView = log => '<div class="drill embed">'+progressHtml(log).replace(/^<h2>My progress<\/h2>/,'')+'</div>';
-  return {mount, WEAPONS, genMedevac, genSpot, genSalute, PTASKS, progressView};
+  return {mount, WEAPONS, GRENADES, wStudyHtml, genMedevac, genSpot, genSalute, PTASKS, progressView};
 })();
 
 
 /* ============================== render: shell ============================== */
-function render(){
+function render(){ renderScreen(); rememberSession(); showWhatsNew(); }
+function renderScreen(){
   const app=$('app');
   if(!STATE.session){ app.innerHTML = renderGate(); wireGate(); return; }
   if(STATE.session.role==='practice'){
-    app.innerHTML = `<header class="app-header"><div class="app-title">Rusty Anvil <span class="app-sub">ROTC UCM Skills Trainer</span></div>
-      <div class="who"><span>Practice \u00B7 not part of the tryout scores</span><button class="btn sm" id="logout">Switch user</button></div></header>
-      <div id="drillRoot"></div>`;
-    $('logout').onclick=()=>{ STATE.session=null; STATE.gate={step:'choose',error:''}; render(); };
-    Drill.mount($('drillRoot'));
+    const c=shell(app,'practice','Practice \u00B7 not part of the tryout scores');
+    if(c){ c.innerHTML='<div id="drillRoot"></div>'; Drill.mount($('drillRoot')); }
     return;
   }
   if(STATE.session.role==='soldier'){ renderSoldierApp(app); return; }
   const admin=isAdmin();
   if(!admin && !STATE.graderEvents){ renderPick(app); return; }
-  const tabs = admin
-    ? [['dash','Dashboard'],['rank','Rankings'],['team','Team entry'],['one','Individual'],['health','Health'],['tests','Tests & rules'],['data','Export / import'],['settings','Settings']]
-    : [['team','Team entry'],['one','Individual'],['tests','Tests & rules'],['data','Export / import']];
-  if(!tabs.some(t=>t[0]===STATE.tab)) STATE.tab = tabs[0][0];
-  app.innerHTML = `
-  <header class="app-header">
-    <div class="app-title">Rusty Anvil <span class="app-sub">ROTC UCM Skills Trainer</span></div>
-    <nav class="tabs" aria-label="Sections">${tabs.map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${l}</button>`).join('')}</nav>
-    <div class="who"><span>${admin?'Admin':'Grader'} \u00B7 ${tryoutSoldiers().length} in tryout</span>${admin?'':`<button class="btn sm" id="chgEv" title="Grading: ${esc(activeKeys().map(eventShort).join(', '))}">Change events</button>`}<button class="btn sm" id="logout">Switch user</button></div>
-  </header>
-  <main class="main" id="content"></main>`;
-  app.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ STATE.tab=b.dataset.tab; STATE.weekend=false; render(); });
-  $('logout').onclick=()=>{ STATE.session=null; STATE.graderEvents=null; STATE.gate={step:'choose',error:''}; render(); };
-  const ce=$('chgEv'); if(ce) ce.onclick=()=>{ STATE.graderEvents=null; render(); };
-  const c=$('content');
+  const c=shell(app, admin?'admin':'grader', `${admin?'Admin':'Grader'} \u00B7 ${tryoutSoldiers().length} in tryout`);
+  if(!c) return;
   ({dash:renderDash, rank:renderRank, team:renderTeam, one:renderOne, health:renderHealth, tests:renderTests, data:renderData, settings:renderSettings})[STATE.tab](c);
 }
 
@@ -2384,8 +2493,8 @@ function renderPick(app){
   let last=null; try{ last=JSON.parse(localStorage.getItem(PICK_KEY)||'null'); }catch(e){}
   const pre = k => Array.isArray(last) ? last.includes(k) : false;
   const group = (title, list) => `<h3>${title}</h3><div class="pick">${list.map(e=>`<label class="pick-item"><input type="checkbox" value="${e.k}" ${pre(e.k)?'checked':''}><span>${esc(e.name)}${offNote(e.k)}</span></label>`).join('')}</div>`;
-  app.innerHTML = `<header class="app-header"><div class="app-title">Rusty Anvil <span class="app-sub">ROTC UCM Skills Trainer</span></div>
-    <div class="who"><span>Grader</span><button class="btn sm" id="logout">Switch user</button></div></header>
+  app.innerHTML = `<header class="app-header"><div class="app-title">${logoImg()}<span>Rusty Anvil</span><span class="app-sub">ROTC UCM Skills Trainer</span></div>
+    <div class="who"><span>Grader</span><button class="btn sm" id="logout">Sign out</button></div></header>
     <main class="main"><div class="panel" style="max-width:640px;margin:0 auto">
       <h2>What are you grading?</h2>
       <p class="sub">Check the events you're running. You'll only see the entry boxes and test screens for those. You can change this any time.</p>
@@ -2394,7 +2503,7 @@ function renderPick(app){
       <div class="row" style="margin-top:16px"><button class="btn sm" id="pkAll">Check all</button><button class="btn primary" id="pkGo">Start grading</button></div>
       <div id="pkMsg" style="margin-top:10px"></div>
     </div></main>`;
-  $('logout').onclick=()=>{ STATE.session=null; STATE.graderEvents=null; STATE.gate={step:'choose',error:''}; render(); };
+  $('logout').onclick=signOut;
   $('pkAll').onclick=()=>app.querySelectorAll('.pick input').forEach(i=>i.checked=true);
   $('pkGo').onclick=()=>{
     const ks=[...app.querySelectorAll('.pick input:checked')].map(i=>i.value);
@@ -2410,18 +2519,29 @@ function renderPick(app){
 function renderGate(){
   const g=STATE.gate, S=DATA.settings; let body='';
   if(g.step==='choose'){
-    body=`<div class="stack" style="gap:10px;margin-top:14px">
-        <button class="btn primary" id="gAdmin">Admin</button>
+    body=`<div class="stack" style="gap:10px;margin-top:18px">
+        <button class="btn primary big-btn" id="gLogin">Log in</button>
+        <button class="btn big-btn" id="gPractice">Practice without logging in</button>
+      </div>
+      <div class="row" style="justify-content:center;margin-top:16px"><button class="linkish soft" id="gShare" style="font-weight:500;font-size:14px">Share Rusty Anvil</button></div>`;
+  } else if(g.step==='login'){
+    body=`<p class="sub" style="margin-top:6px">Log in as</p>
+      <div class="stack" style="gap:10px">
+        <button class="btn primary" id="gSoldier">Soldier</button>
         <button class="btn" id="gTester">Grader</button>
-        <button class="btn" id="gSoldier">Soldier</button>
-        <button class="btn" id="gPractice">Practice</button>
+        <button class="btn" id="gAdmin">Admin</button>
+        ${keepBoxHtml()}
+        <div class="row" style="margin-top:4px"><button class="btn" id="gHome">Back</button></div>
       </div>`;
+  } else if(g.step==='share'){
+    body=shareHtml(true)+`<div class="row" style="margin-top:12px"><button class="btn" id="gHome">Back</button></div>`;
   } else if(g.step==='adminCreate'){
     body=`<p class="sub">No admin PIN is set for Rusty Anvil yet. Create one. It travels with the .json file, so graders who import your roster can't open the admin view.</p>
       <div class="stack" style="gap:10px">
         <label class="field"><span>New PIN (4+ digits)</span><input class="input" type="password" inputmode="numeric" id="p1"></label>
         <label class="field"><span>Confirm PIN</span><input class="input" type="password" inputmode="numeric" id="p2"></label>
         ${g.error?`<div class="flag">${esc(g.error)}</div>`:''}
+        ${keepBoxHtml()}
         <div class="row"><button class="btn primary" id="gCreate">Set PIN and continue</button><button class="btn" id="gBack">Back</button></div>
       </div>`;
   } else if(g.step==='adminLogin' || g.step==='testerLogin'){
@@ -2429,6 +2549,7 @@ function renderGate(){
       <div class="stack" style="gap:10px" id="gForm">
         <label class="field"><span>PIN</span><input class="input" type="password" inputmode="numeric" id="pin" autofocus></label>
         ${g.error?`<div class="flag">${esc(g.error)}</div>`:''}
+        ${keepBoxHtml()}
         <div class="row"><button class="btn primary" type="button" id="gSubmit">Continue</button><button class="btn" type="button" id="gBack">Back</button></div>
       </div>`;
   }
@@ -2444,6 +2565,7 @@ function renderGate(){
         <label class="field"><span>${setting?'New PIN (4+ digits)':'PIN'}</span><input class="input" type="password" inputmode="numeric" id="gsP1"></label>
         ${setting?'<label class="field"><span>Confirm PIN</span><input class="input" type="password" inputmode="numeric" id="gsP2"></label>':''}
         ${g.error?`<div class="flag">${esc(g.error)}</div>`:''}
+        ${keepBoxHtml()}
         <div class="row"><button class="btn primary" id="gsGo">${setting?'Set PIN and continue':'Continue'}</button><button class="btn" id="gsBack">Back</button></div>
         ${setting?'':'<p class="sub" style="margin:0;font-size:13px">Forgot it? Leadership can reset your PIN.</p>'}
       </div>`;
@@ -2456,19 +2578,25 @@ function renderGate(){
         <label class="field"><span>PIN (4+ digits)</span><input class="input" type="password" inputmode="numeric" id="gsP1"></label>
         <label class="field"><span>Confirm PIN</span><input class="input" type="password" inputmode="numeric" id="gsP2"></label>
         ${g.error?`<div class="flag">${esc(g.error)}</div>`:''}
+        ${keepBoxHtml()}
         <div class="row"><button class="btn primary" id="gsCreate">Make my profile</button><button class="btn" id="gsBack">Back</button></div>
       </div>`;
   }
   const pk = DATA.fromPackage ? `<p class="soft" style="font-size:12.5px;margin:14px 0 0">Shared copy made ${new Date(DATA.fromPackage).toLocaleString([], {month:'short',day:'numeric',year:'numeric',hour:'numeric',minute:'2-digit'})}. ${DATA.soldiers.length} people on the roster.</p>` : '';
-  return `<div class="gate"><div class="panel"><h2 style="font-size:26px;margin-bottom:2px">Rusty Anvil</h2><p class="soft" style="margin:0 0 10px;font-size:13.5px">ROTC UCM Skills Trainer</p>${body}${g.step==='choose'?pk:''}</div></div>`;
+  return `<div class="gate"><div class="panel">${logoImg('gate-logo')}<h2 style="font-size:26px;margin-bottom:2px">Rusty Anvil</h2><p class="soft" style="margin:0 0 10px;font-size:13.5px">ROTC UCM Skills Trainer</p>${body}${g.step==='choose'?pk:''}</div></div>`;
 }
 function wireGate(){
   const S=DATA.settings, g=STATE.gate;
   const on=(id,fn)=>{ const el=$(id); if(el) el.onclick=fn; };
   on('gAdmin',()=>{ STATE.gate={step:S.adminPinHash?'adminLogin':'adminCreate',error:''}; render(); });
   on('gTester',()=>{ if(S.testerPinHash){ STATE.gate={step:'testerLogin',error:''}; render(); } else enter('tester'); });
-  on('gBack',()=>{ STATE.gate={step:'choose',error:''}; render(); });
-  on('gPractice',()=>{ STATE.session={role:'practice'}; render(); });
+  on('gBack',()=>{ STATE.gate={step:'login',error:''}; render(); });
+  on('gLogin',()=>{ STATE.gate={step:'login',error:''}; render(); });
+  on('gHome',()=>{ STATE.gate={step:'choose',error:''}; render(); });
+  on('gShare',()=>{ STATE.gate={step:'share',error:''}; render(); });
+  wireKeepBoxes();
+  if(g.step==='share') wireShare(document.querySelector('.gate'));
+  on('gPractice',()=>{ STATE.session={role:'practice'}; STATE.tab='practice'; render(); });
   on('gSoldier',()=>{ STATE.gate={step:'soldierPick',error:''}; render(); });
   on('gsBack',()=>{ STATE.gate={step:'soldierPick',error:''}; render(); });
   on('gsNew',()=>{ STATE.gate={step:'soldierNew',error:''}; render(); });
@@ -2958,7 +3086,7 @@ function testSetup(el){
         <li><b>Spoken:</b> the soldier reads the scenario, then sends the report out loud as if on the radio. The grader marks each line against the answer key, kept out of the soldier's sight.</li>
         <li><b>Typed:</b> the soldier reads the scenario and types each line, then presses Submit. The tool checks grids, date-time groups, and the lettered and numbered lines. The grader checks the lines written in the soldier's own words.</li>
       </ul>
-      <p>Go means every line is correct${k==='medevac'?' (all 9 lines)':k==='spot'?' (all 11 lines)':' (S, A, L, U, T, E)'}. One wrong line is a No-Go.</p>
+      <p>Go means every line is correct${k==='medevac'?' (all 9 lines)':k==='spot'?' (all 11 lines, plus the range estimate when it\'s on)':' (S, A, L, U, T, E)'}. One wrong line is a No-Go.</p>
     </div>`).join('')}
   </div>`;
 }
@@ -2980,7 +3108,7 @@ function eventStandard(k){
     m240b:`Clear, disassemble, assemble, and functions check: every step in order, ${limitText('m240b')}`,
     m4:`Clear, disassemble, assemble, and functions check: every step in order, ${limitText('m4')}`,
     medevac:'All 9 lines correct, spoken or typed',
-    spot:'All 11 lines correct, spoken or typed',
+    spot:'All 11 lines correct (plus the range estimate when it\'s on), spoken or typed',
     salute:'All 6 lines (S-A-L-U-T-E) correct, spoken or typed',
   })[k]||'';
 }
@@ -3395,7 +3523,7 @@ function testWeapon(el, k){
 }
 
 /* ============================== 9-line, SPOT, SALUTE: spoken or typed ============================== */
-const REPORT_GEN = { medevac:f=>Drill.genMedevac(f), spot:f=>Drill.genSpot(f), salute:f=>Drill.genSalute(f) };
+const REPORT_GEN = { medevac:f=>Drill.genMedevac(f), spot:f=>Drill.genSpot(f,{range:STATE.spotRange!==false}), salute:f=>Drill.genSalute(f) };
 const normRpt = v => String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 function countMap(v){ const m={}; String(v||'').toUpperCase().replace(/(\d+)\s*([A-Z])\b/g,(_,n,l)=>{ m[l]=(m[l]||0)+ +n; return ''; }); return JSON.stringify(Object.keys(m).sort().map(k=>k+m[k])); }
 function letterSet(v){ return [...new Set(String(v||'').toUpperCase().split(/[^A-Z]+/).filter(t=>t.length===1))].sort().join(''); }
@@ -3407,6 +3535,7 @@ function autoCheck(line, typed){
     case 'count': return countMap(typed)===countMap(line.ans) && countMap(line.ans)!=='[]';
     case 'letters': return letterSet(typed)===letterSet(line.ans) && letterSet(line.ans)!=='';
     case 'freqcs': return line.parts.every(p=>normRpt(typed).includes(normRpt(p)));
+    case 'range': { const n=parseFloat(String(typed).replace(/[^0-9.]/g,'')); return isFinite(n) && Math.abs(n-line.exact)<=Math.max(2, line.exact*0.02); }
     default: return null;
   }
 }
@@ -3443,9 +3572,9 @@ function testReport(el, k){
       <p class="sub">Go means every line is correct. Choose how the soldier sends it before you start.</p>
       <div class="row" style="justify-content:space-between;margin-bottom:12px">
         <div class="seg" role="group" aria-label="How the report is sent"><button data-rm="spoken" aria-pressed="${mode==='spoken'}">Spoken (grader checks)</button><button data-rm="typed" aria-pressed="${mode==='typed'}">Typed (tool checks)</button></div>
-        <div class="row"><label class="row soft" style="gap:6px;font-size:13.5px"><input type="checkbox" id="rpRand" ${STATE.randomCalls?'checked':''}> Random call signs</label><button class="btn sm" id="rpNew">New scenario</button></div>
+        <div class="row">${k==='spot'?`<label class="row soft" style="gap:6px;font-size:13.5px"><input type="checkbox" id="rpRange" ${STATE.spotRange!==false?'checked':''}> Range estimate</label>`:''}<label class="row soft" style="gap:6px;font-size:13.5px"><input type="checkbox" id="rpRand" ${STATE.randomCalls?'checked':''}> Random call signs</label><button class="btn sm" id="rpNew">New scenario</button></div>
       </div>
-      <p class="scenario">${esc(R.sc.text)}</p>
+      <p class="scenario">${esc(R.sc.text)}</p>${R.sc.view||''}
     </div>
     <div class="panel"><h2>${mode==='spoken'?'Answer key':R.submitted?'Grading':'Soldier\'s report'}</h2>${body}
       <div class="row" style="margin-top:12px">${!key.some((_,i)=>R.marks[i]) ? '' : anyBad ? `<span class="flag">${key.filter((_,i)=>R.marks[i]==='bad').length} line(s) wrong: No-Go</span>` : allMarked ? '<span class="badge b-good">All lines correct</span>' : `<span class="soft">${okN} of ${key.length} lines marked correct.</span>`}</div>
@@ -3461,6 +3590,7 @@ function testReport(el, k){
   const ed=$('rpEdit'); if(ed) ed.onclick=()=>{ R.submitted=false; R.marks={}; render(); };
   $('rpNew').onclick=()=>{ STATE.rp[k]=newReport(k); render(); };
   $('rpRand').onchange=e=>{ STATE.randomCalls=e.target.checked; STATE.rp[k]=newReport(k); render(); };
+  const rr=$('rpRange'); if(rr) rr.onchange=e=>{ STATE.spotRange=e.target.checked; STATE.rp[k]=newReport(k); render(); };
   wireRecorder(k, wireGoButtons(el.querySelector('.recorder')));
   if(verdict){ const b=el.querySelector(`.recorder [data-go="${verdict}"]`); if(b) b.click(); }
 }
@@ -3485,6 +3615,7 @@ function renderData(c){
     <div class="two">
       <div class="panel"><h2>Send or back up</h2>
         <p class="sub">The .json file holds the whole roster and every result. Save it to Google Drive or send it to the admin. ${admin?'':'Only the admin can see scores inside Rusty Anvil, but anyone who opens the .json in a text editor can read it.'}</p>
+        ${admin?`<p class="sub" style="margin:-6px 0 12px;font-size:13px">Last backup from this device: <b>${backupAgo()}</b>.</p>`:''}
         <div class="row"><button class="btn brass" id="expJson">Download .json</button>${admin?`<button class="btn" id="expXl">Export to Excel (.xlsx)</button>`:''}</div>
         ${admin?`<p class="sub" style="margin:10px 0 0;font-size:13px">The Excel file has overall rankings, the three other ranking views, and your scoring settings. Upload it to Drive and open it with Google Sheets.</p>`:''}
       </div>
@@ -4175,18 +4306,11 @@ function exportHealthCsv(){
 
 /* ---------- soldier session ---------- */
 function meSoldier(){ return soldierById(STATE.session.soldierId); }
+function soldierExport(){ const s=meSoldier(); if(!s) return;
+  offerFile(`${s.name.replace(/[^a-z0-9]+/gi,'_')}_my_data_${stamp()}.json`, JSON.stringify({app:'team-tryout-scorebook', version:1, kind:'soldier', exportedAt:new Date().toISOString(), soldiers:[s]}, null, 2), 'application/json'); }
 function renderSoldierApp(app){
-  const s=meSoldier(); if(!s){ STATE.session=null; render(); return; }
-  const tabs=[['myhealth','My health'],['mylog','Log my scan'],...(s.tryout!==false?[['myresults','My tryout results']]:[]),['mytimes','My times'],['mypractice','Practice']];
-  if(!tabs.some(t=>t[0]===STATE.tab)) STATE.tab='myhealth';
-  app.innerHTML=`<header class="app-header"><div class="app-title">Rusty Anvil <span class="app-sub">ROTC UCM Skills Trainer</span></div>
-    <nav class="tabs" aria-label="Sections">${tabs.map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${l}</button>`).join('')}</nav>
-    <div class="who"><span>${esc(s.name)}</span><button class="btn sm" id="myExport" title="Download your data to send to leadership">Export my data</button><button class="btn sm" id="logout">Sign out</button></div></header>
-    <main class="main" id="content"></main>`;
-  app.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{ STATE.tab=b.dataset.tab; render(); });
-  $('logout').onclick=()=>{ STATE.session=null; STATE.gate={step:'choose',error:''}; render(); };
-  $('myExport').onclick=()=>offerFile(`${s.name.replace(/[^a-z0-9]+/gi,'_')}_my_data_${stamp()}.json`, JSON.stringify({app:'team-tryout-scorebook', version:1, kind:'soldier', exportedAt:new Date().toISOString(), soldiers:[s]}, null, 2), 'application/json');
-  const c=$('content');
+  const s=meSoldier(); if(!s){ STATE.session=null; forgetSession(); render(); return; }
+  const c=shell(app, 'soldier', s.name); if(!c) return;
   if(STATE.tab==='myhealth'){ c.innerHTML=healthProfileHtml(s,false); wireHealthProfile(s,false); }
   else if(STATE.tab==='mylog') renderMyLog(c,s);
   else if(STATE.tab==='myresults') renderMyResults(c,s);
@@ -4366,6 +4490,7 @@ function renderDash(c){
   const tile=(kind,lbl)=>{ const b=best(kind); return `<div><b>${b?b.t:'\u2013'}</b><span>${b?`${lbl} (${b.s})`:lbl}</span></div>`; };
   const empty = !DATA.soldiers.length ? `<div class="panel" style="text-align:center;padding:26px 16px"><p class="sub" style="margin:0 auto 12px">No one is on the roster yet. Add your team in Team entry, or import a .json file.</p><div class="row" style="justify-content:center"><button class="btn primary" id="goTeam">Go to Team entry</button><button class="btn" id="sample">Load example team</button></div></div>` : '';
   c.innerHTML=`<div class="stack">
+    ${backupBannerHtml()}
     ${empty}
     <div class="tiles">
       <div><b>${n}</b><span>soldiers in tryout</span></div>
@@ -4383,6 +4508,7 @@ function renderDash(c){
     <div class="row"><button class="btn" id="dashWk">Log a weekend run or ruck (individual times)</button><span class="sub" style="margin:0;font-size:12.5px">Individual times show on each soldier's page in Individual, not here.</span></div>
   </div>`;
   $('dashRank').onclick=()=>{ STATE.tab='rank'; render(); };
+  wireBackupBanner();
   $('dashWk').onclick=()=>{ STATE.weekend=true; STATE.tab='one'; render(); window.scrollTo(0,0); };
   const gt=$('goTeam'); if(gt) gt.onclick=()=>{ STATE.tab='team'; render(); };
   const sm=$('sample'); if(sm) sm.onclick=loadSample;
@@ -4507,7 +4633,270 @@ function renderMyTimes(c, s){
   wireIndivTimes(s);
 }
 
+/* ============================== app frame: header, phone tab bar, More menu ============================== */
+// Desktop: tabs across the top. Phones: up to 5 buttons along the bottom, the rest under More.
+const SHARE_URL = 'https://thatoneguy257.github.io/RustyAnvil/';
+const LOGO_SRC = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAIAAABMXPacAAAIC0lEQVR42u1dvU5jRxS+zNoWEJkrJVpFrBShNE7nR4AqqeI06VKuhPIAW+0TpOIJ6NNt5aRJE+EyJc0qNMiKFnaFdiWDFjv2YlKcZDI7f57/mYvPEYUxZu7M953fuWeuNzY6mxVKPmmFGuhRt14HvO5uJmEHJIh+3pVueLqg9YE+kh0QRD/vwgmin3f5Li5ozaEP64sIop/XDgiCmFcIqn9jCED0Y8BCEP0G1wEo/tpJUP0zqj9aQPFB+FG3ZtU/+F4gCslleiiOLghpyEwAStiUBAkIkws5s2JdCWNKKuYmaAGYBaG4xgliNQr6n+DKii6oOS4I1R/rgDWLASgJYkALwbKVk8EO++vB8JrTfat0sYUe3wH3s8kCXvTqtuewyr4gKQEc+YULp5sBcX823oMXw/4FvZBbnWTtgugkCpde3WaxsyJD1DMRevq+pxG4xIDn7/qFo//Tp6esonBk2KoaC3qnW1dVNf9P2Z+N9472xukIaIr6P3/Xf/Hly7PJgmLHwUTVVroiTs1V6AeRloNpv6hfNiUMHO2NAU1AfHD6xHaEDhMLReg91T9YDBD9YCG2Qic2OH0CAdMW9NhiTYDKPAsUininW4PygkHY4qvyOaD+h6Np6iDsKQ76Ze52KdYmhsgN6+DiPdG3JqBXt6lXjWfCLAQOQ3EcmJNqBb2/99cRoCqDIe0d9i9UeTG7Eil2tinEvMi7QKHQt7aAw9G0qqYngx0a3KifZXM+DQ0xMrlcnPn7H8cYwFWVx/tbvboNliGmelJ/YuglnGMMDC4GAKo3PleXxl66DxFsM87WLCgZrHlqbCISB/ObSadbSwenfPijH1BIcKuEH8105zcTTZAIwgEHcXCmNc7HdkvOrivCfHSWAxUNiUueomJvijoAODje32K3BFQc5Mp2NOWxqoaQqr+t63ckwOEuDZ3u8f5Yk7lGDctcHfPxe22rXZMgmU+eSvhwNJVaQxrdH/YvRKzZ9CGXJN2KoE4J1FBTUVO/FMQyaOUYXH+dY++KIBy1C3FlfA4bogOiHwOWPG0pbKoataCllVc83W8kASwomtzO3w7OJouzySII+mRzu8r+xKy7OBWN6ItodujJgYmpra8F6DEyv4ElrZJiFE0PkwApZA43b7nbor26XbjuOxIArjC4/PjHhqi2tkbQOPV3tICoHLBGUE4XTKQluxCwuLpMvHjDOMx6rV7dbkoLk+MBjeAasZzdghGE8h6NCACOLgiMIJ5VUqF7FSXcGYZVB28a93pkWQIOnAvjpjRyEx91SJCP+kgoDqLqmftjK8M6IjoOlwu5Cc2g/DmAiUXyP44WEJwDdoTfv16xQz7sXwz7FyZWEoqDqGJ3QoYVui/UfrzLZjKe6Iv9RWJdxqaYmpsKQFKvbrsdlWEntri61APivEsW4IbM4uoSOCCb27YcGOq+qv1LbwdweuJssjje36KezUFLogY8dwvgaKd2YLhIznEB+tItIED/5u+7H/78QqXmK+2ADTArp8fpvpU/CEaAJwcr1ynqvgZ9/d6cAwea6Tmgn5MA8docDexSpVovbiRwbsdhZ9TZFNicxweEpARoZiCSwaEvOhZNt6+5cOFaDBu7m6Sqqu9G96J+OKCfOQhzc2WnIl0MNPOCane6daf70Tjfn/9/mkWlyCbEqOyG/u/PX/1FcQcOOINIc1Q9fFsKzJulgVsJi34lO6aib0VRtWFzFYD+cJ00DGjmHEn9q3h9QaoFnAx2KHAOW2zQY2J4Ntp2/CxPZyjxaSkq4EDxD0dTKKygJK4aLqkJWHmfRI8+rWmDPAdiHQkwFzbSAvoceQfDaxWd8L+N6H1vwPOCNL2Fh6MpNF1nPL3s2StF4g0tFUjAHTJ61S1GeB/2R9nMVTwnwwrNQdEFrdb9g+G1/gYv/BVSowY1pJTrgo72xoCmeVsnxGTY+qccqPxSOepfmXyTXtjs+JdvPoEXl7MlW1uJ4fTpr6/dLn0y2FEFZ84Bfvvb++wxIDUBVqtqxHPrIgbhhi4pXgYhXiLFd0nmema3v/o34mnjpEz19/16us1t2Akvn4OH/+TcSByEGpY0zpbNu2A0t4PQAuImP3Sjv3xHRPIacjz1b4pbK+4rTKK2IBQYVDKfkrQa3Fz9uU+GKuiCJP6+MSDGJEyQ4jDVTCOSm4q06pb/bFJuGHBdgtJmyOXslnKwsqczu923YqiGw5r1i+R6xNkPw59UvV/lb2ms3oxLs5HA9lpzSs31S4kNSNJ831/304T6WHXAnWtLCDgQ+Km05yM0+Pr3MydLtGJZgI8diBqtV2cpWD7qnzLNjUtAqHhgVRw0axs1OgGeHDjYkDMBWeq7Qgloen2bPwijIAFIAEqaSjidssiqXLezsUiAI9wmH3OgJOP+doosyCQRirGFac5ERgJajVBz/8GL9VStBwm96nIF0tB68NBLL10OE0kr4RJuqQP0UiayRAKynk5gObulTORVC5IGerrIvKvl6GdpwEo4g4DPAQ4e8mYcp3cpnzxKr0WVXerxMzrG1BagQX9xdWnCjS1/IvRFFWIkmaUHUTRA35ADk49lb7kkyRR/Obu1Xe381fn81Xko+lVv5uUgnQvi1rmc3VJwWeeT/tnUa2EBol/+8PZNKL9kYigf3r6hV0QCqrubSeuzz/UeQMSUNY6VhqL5QFHHBRJtR6uk/XhXhdT9fPbvFA1meD+f6T8Go+VdbIkE+CObZag1IgCDMAoSgASgIAFIAEoc+QdKwh+EO8X4IQAAAABJRU5ErkJggg==';
+const logoImg = (cls='app-logo') => `<img class="${cls}" src="${LOGO_SRC}" alt="" width="128" height="128">`;
+const ICON_PATHS = {
+  dash:'<path d="M4 4h7v7H4zM13 4h7v4h-7zM13 10h7v10h-7zM4 13h7v7H4z"/>',
+  rank:'<path d="M8 4h8v4a4 4 0 0 1-8 0zM8 6H5a3 3 0 0 0 3 4M16 6h3a3 3 0 0 1-3 4M12 12v4M8 20h8M9 20v-2h6v2"/>',
+  one:'<circle cx="12" cy="8" r="4"/><path d="M4 20c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  tests:'<path d="M9 3.5h6v3H9zM7 5H5v15h14V5h-2M9 13l2 2 4-4"/>',
+  team:'<circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c1-3.5 3.5-5 6-5s5 1.5 6 5M15 14.5c2.5 0 4.5 1.5 5.5 4"/>',
+  health:'<path d="M12 20s-7-4.5-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.5-7 10-7 10z"/>',
+  ref:'<path d="M5 4h9a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h9"/>',
+  data:'<path d="M8 4v12M4 12l4 4 4-4M16 20V8M12 12l4-4 4 4"/>',
+  settings:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+  more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
+  share:'<path d="M12 4v11M8 8l4-4 4 4M5 13v6h14v-6"/>',
+  signout:'<path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/>',
+  practice:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6"/>',
+  mytimes:'<circle cx="12" cy="13" r="7"/><path d="M12 13V9.5M10 3h4M12 3v3"/>',
+  mylog:'<path d="M5 5h14v14H5zM12 9v6M9 12h6"/>',
+  myresults:'<path d="M4 6h2M9 6h11M4 12h2M9 12h11M4 18h2M9 18h11"/>',
+  export:'<path d="M12 4v11M8 11l4 4 4-4M5 19h14"/>',
+  events:'<path d="M4 7l2 2 3-3M11 8h9M4 15l2 2 3-3M11 16h9"/>',
+  news:'<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>',
+};
+const icon = k => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[k]||ICON_PATHS.more}</svg>`;
+
+// Which screens each kind of user gets. tabs = every screen in desktop order; bar = the phone bottom bar; the rest go under More.
+function navFor(role){
+  const shareA={id:'share', label:'Share Rusty Anvil', icon:'share'}, outA={id:'signout', label:'Sign out', icon:'signout'};
+  const news = whatsNewReady() ? [{id:'news', label:'What\'s new', icon:'news'}] : [];
+  if(role==='admin') return {
+    tabs:[['dash','Dashboard'],['rank','Rankings'],['team','Team entry'],['one','Individual'],['health','Health'],['tests','Tests & rules'],['ref','Reference'],['data','Export / import'],['settings','Settings']],
+    bar:['dash','rank','one','tests'], actions:[shareA, ...news, outA]};
+  if(role==='soldier') return {
+    tabs:[['myhealth','My health'],['mylog','Log my scan'],...(meSoldier() && meSoldier().tryout!==false?[['myresults','My tryout results']]:[]),['mytimes','My times'],['mypractice','Practice'],['ref','Reference']],
+    bar:['myhealth','mytimes','mypractice','ref'], actions:[{id:'myexport', label:'Export my data', icon:'export'}, shareA, ...news, outA]};
+  if(role==='practice') return {
+    tabs:[['practice','Practice'],['ref','Reference']], bar:['practice','ref'], barActions:[shareA, {id:'signout', label:'Exit', icon:'signout'}], actions:[...news]};
+  return { // grader
+    tabs:[['team','Team entry'],['one','Individual'],['tests','Tests & rules'],['ref','Reference'],['data','Export / import']],
+    bar:['team','one','tests','ref'], actions:[{id:'events', label:'Change events', icon:'events'}, shareA, ...news, outA]};
+}
+const TAB_ICON = {dash:'dash',rank:'rank',team:'team',one:'one',health:'health',tests:'tests',ref:'ref',data:'data',settings:'settings',myhealth:'health',mylog:'mylog',myresults:'myresults',mytimes:'mytimes',mypractice:'practice',practice:'practice'};
+
+// Draws the frame and returns the content element, or null when the frame handled the screen itself (Reference, Share).
+function shell(app, role, who){
+  const N=navFor(role), keys=N.tabs.map(t=>t[0]);
+  if(!keys.includes(STATE.tab) && STATE.tab!=='share') STATE.tab=keys[0];
+  const label=k=>(N.tabs.find(t=>t[0]===k)||[k,k])[1];
+  const moreTabs=N.tabs.filter(t=>!N.bar.includes(t[0]));
+  const hasMore = moreTabs.length || N.actions.length;
+  const inMore = moreTabs.some(t=>t[0]===STATE.tab) || STATE.tab==='share' && role!=='practice';
+  const barBtn=(k,lbl,ic,cur,attr)=>`<button class="bb" ${attr} ${cur?'aria-current="page"':''}>${icon(ic)}<span>${esc(lbl)}</span></button>`;
+  const deskBtns = N.actions.concat(N.barActions||[]).filter(a=>a.id!=='news').map(a=>`<button class="btn sm" data-act="${a.id}" ${a.id==='signout'?'id="logout"':a.id==='events'?'id="chgEv"':a.id==='myexport'?'id="myExport"':''}>${esc(a.label)}</button>`).join('');
+  app.innerHTML = `
+  <header class="app-header">
+    <div class="app-title">${logoImg()}<span>Rusty Anvil</span><span class="app-sub">ROTC UCM Skills Trainer</span></div>
+    <nav class="tabs" aria-label="Sections">${N.tabs.map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${esc(l)}</button>`).join('')}</nav>
+    <div class="who"><span>${esc(who)}</span><span class="who-btns">${deskBtns}</span></div>
+  </header>
+  <main class="main" id="content"></main>
+  <nav class="bbar" aria-label="Sections">
+    ${N.bar.map(k=>barBtn(k,label(k),TAB_ICON[k],STATE.tab===k,`data-nav="${k}"`)).join('')}
+    ${(N.barActions||[]).map(a=>barBtn(a.id,a.label,a.icon,STATE.tab===a.id,`data-navact="${a.id}"`)).join('')}
+    ${hasMore && role!=='practice' ? barBtn('more','More','more',inMore,'id="bbMore" aria-haspopup="true"') : ''}
+  </nav>
+  <div class="sheet-wrap" id="moreSheet" hidden><div class="sheet" role="dialog" aria-label="More">
+    ${moreTabs.map(([k,l])=>`<button class="sheet-item" data-nav="${k}" ${STATE.tab===k?'aria-current="page"':''}>${icon(TAB_ICON[k])}<span>${esc(l)}</span></button>`).join('')}
+    ${moreTabs.length&&N.actions.length?'<hr>':''}
+    ${N.actions.map(a=>`<button class="sheet-item" data-navact="${a.id}">${icon(a.icon)}<span>${esc(a.label)}</span></button>`).join('')}
+    <button class="sheet-item sheet-close" id="sheetClose">Close</button>
+  </div></div>`;
+  const sheet=$('moreSheet');
+  const go=k=>{ STATE.tab=k; STATE.weekend=false; sheet.hidden=true; render(); window.scrollTo(0,0); };
+  app.querySelectorAll('[data-tab],[data-nav]').forEach(b=>b.onclick=()=>go(b.dataset.tab||b.dataset.nav));
+  app.querySelectorAll('[data-act],[data-navact]').forEach(b=>b.onclick=()=>{ sheet.hidden=true; shellAction(b.dataset.act||b.dataset.navact, role); });
+  const mb=$('bbMore'); if(mb) mb.onclick=()=>{ sheet.hidden=false; const f=sheet.querySelector('.sheet-item'); if(f) f.focus(); };
+  $('sheetClose').onclick=()=>{ sheet.hidden=true; };
+  sheet.onclick=e=>{ if(e.target===sheet) sheet.hidden=true; };
+  sheet.onkeydown=e=>{ if(e.key==='Escape') sheet.hidden=true; };
+  const c=$('content');
+  if(STATE.tab==='ref'){ renderReference(c); return null; }
+  if(STATE.tab==='share'){ c.innerHTML=shareHtml(); wireShare(c); return null; }
+  return c;
+}
+function shellAction(id, role){
+  if(id==='signout') return signOut();
+  if(id==='share'){ STATE.tab='share'; render(); window.scrollTo(0,0); return; }
+  if(id==='news') return showWhatsNew(true);
+  if(id==='events'){ STATE.graderEvents=null; render(); return; }
+  if(id==='myexport') return soldierExport();
+}
+function signOut(){
+  STATE.session=null; STATE.graderEvents=null; STATE.weekend=false; STATE.gate={step:'choose',error:''};
+  forgetSession(); render(); window.scrollTo(0,0);
+}
+
+/* ---------- stay signed in ---------- */
+const SESSION_KEY='rustyAnvil_session', KEEP_KEY='rustyAnvil_keepSignedIn';
+function keepPref(){ try{ return localStorage.getItem(KEEP_KEY)==='1'; }catch(e){ return false; } }
+function setKeepPref(on){ try{ localStorage.setItem(KEEP_KEY, on?'1':'0'); }catch(e){} }
+function keepBoxHtml(){ return `<label class="row keep" style="gap:8px;font-size:14px;margin-top:4px"><input type="checkbox" class="gKeep" ${keepPref()?'checked':''}> Keep me signed in on this phone</label>`; }
+function wireKeepBoxes(){ document.querySelectorAll('.gKeep').forEach(b=>b.onchange=()=>setKeepPref(b.checked)); }
+// Called on every render: while signed in with "keep me signed in" on, remember who and where.
+function rememberSession(){
+  const s=STATE.session;
+  if(!s || s.role==='practice' || !keepPref()) return;
+  try{ localStorage.setItem(SESSION_KEY, JSON.stringify({role:s.role, soldierId:s.soldierId||null, tab:STATE.tab==='share'?null:STATE.tab, graderEvents:STATE.graderEvents||null})); }catch(e){}
+}
+function forgetSession(){ try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
+function restoreSession(){
+  if(!keepPref()) return;
+  let v=null; try{ v=JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); }catch(e){}
+  if(!v || !v.role) return;
+  if(v.role==='admin' && !DATA.settings.adminPinHash) return forgetSession();
+  if(v.role==='soldier' && !soldierById(v.soldierId)) return forgetSession();
+  STATE.session = v.role==='soldier' ? {role:'soldier', soldierId:v.soldierId} : {role:v.role};
+  if(v.tab) STATE.tab=v.tab;
+  if(Array.isArray(v.graderEvents)) STATE.graderEvents=v.graderEvents;
+}
+
+/* ---------- share ---------- */
+function shareHtml(inGate){
+  return `<div class="${inGate?'':'panel '}share-box">
+    ${inGate?'':'<h2>Share Rusty Anvil</h2>'}
+    <p class="sub">Have them scan this with their phone camera, then add it to their home screen.</p>
+    <div class="qr"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 41 41" shape-rendering="crispEdges" role="img" aria-label="QR code for https://thatoneguy257.github.io/RustyAnvil/"><rect width="41" height="41" fill="#fff"/><path d="M4 4h1v1h-1zM5 4h1v1h-1zM6 4h1v1h-1zM7 4h1v1h-1zM8 4h1v1h-1zM9 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM16 4h1v1h-1zM17 4h1v1h-1zM18 4h1v1h-1zM19 4h1v1h-1zM20 4h1v1h-1zM22 4h1v1h-1zM24 4h1v1h-1zM27 4h1v1h-1zM30 4h1v1h-1zM31 4h1v1h-1zM32 4h1v1h-1zM33 4h1v1h-1zM34 4h1v1h-1zM35 4h1v1h-1zM36 4h1v1h-1zM4 5h1v1h-1zM10 5h1v1h-1zM13 5h1v1h-1zM14 5h1v1h-1zM15 5h1v1h-1zM16 5h1v1h-1zM17 5h1v1h-1zM18 5h1v1h-1zM22 5h1v1h-1zM23 5h1v1h-1zM30 5h1v1h-1zM36 5h1v1h-1zM4 6h1v1h-1zM6 6h1v1h-1zM7 6h1v1h-1zM8 6h1v1h-1zM10 6h1v1h-1zM18 6h1v1h-1zM21 6h1v1h-1zM22 6h1v1h-1zM23 6h1v1h-1zM24 6h1v1h-1zM25 6h1v1h-1zM28 6h1v1h-1zM30 6h1v1h-1zM32 6h1v1h-1zM33 6h1v1h-1zM34 6h1v1h-1zM36 6h1v1h-1zM4 7h1v1h-1zM6 7h1v1h-1zM7 7h1v1h-1zM8 7h1v1h-1zM10 7h1v1h-1zM12 7h1v1h-1zM14 7h1v1h-1zM20 7h1v1h-1zM21 7h1v1h-1zM25 7h1v1h-1zM26 7h1v1h-1zM30 7h1v1h-1zM32 7h1v1h-1zM33 7h1v1h-1zM34 7h1v1h-1zM36 7h1v1h-1zM4 8h1v1h-1zM6 8h1v1h-1zM7 8h1v1h-1zM8 8h1v1h-1zM10 8h1v1h-1zM12 8h1v1h-1zM14 8h1v1h-1zM15 8h1v1h-1zM20 8h1v1h-1zM21 8h1v1h-1zM23 8h1v1h-1zM25 8h1v1h-1zM26 8h1v1h-1zM30 8h1v1h-1zM32 8h1v1h-1zM33 8h1v1h-1zM34 8h1v1h-1zM36 8h1v1h-1zM4 9h1v1h-1zM10 9h1v1h-1zM12 9h1v1h-1zM13 9h1v1h-1zM14 9h1v1h-1zM17 9h1v1h-1zM18 9h1v1h-1zM19 9h1v1h-1zM21 9h1v1h-1zM24 9h1v1h-1zM25 9h1v1h-1zM26 9h1v1h-1zM27 9h1v1h-1zM28 9h1v1h-1zM30 9h1v1h-1zM36 9h1v1h-1zM4 10h1v1h-1zM5 10h1v1h-1zM6 10h1v1h-1zM7 10h1v1h-1zM8 10h1v1h-1zM9 10h1v1h-1zM10 10h1v1h-1zM12 10h1v1h-1zM14 10h1v1h-1zM16 10h1v1h-1zM18 10h1v1h-1zM20 10h1v1h-1zM22 10h1v1h-1zM24 10h1v1h-1zM26 10h1v1h-1zM28 10h1v1h-1zM30 10h1v1h-1zM31 10h1v1h-1zM32 10h1v1h-1zM33 10h1v1h-1zM34 10h1v1h-1zM35 10h1v1h-1zM36 10h1v1h-1zM12 11h1v1h-1zM14 11h1v1h-1zM16 11h1v1h-1zM18 11h1v1h-1zM21 11h1v1h-1zM23 11h1v1h-1zM24 11h1v1h-1zM25 11h1v1h-1zM26 11h1v1h-1zM28 11h1v1h-1zM4 12h1v1h-1zM8 12h1v1h-1zM10 12h1v1h-1zM11 12h1v1h-1zM12 12h1v1h-1zM13 12h1v1h-1zM14 12h1v1h-1zM15 12h1v1h-1zM19 12h1v1h-1zM21 12h1v1h-1zM25 12h1v1h-1zM26 12h1v1h-1zM27 12h1v1h-1zM28 12h1v1h-1zM29 12h1v1h-1zM30 12h1v1h-1zM31 12h1v1h-1zM32 12h1v1h-1zM33 12h1v1h-1zM36 12h1v1h-1zM4 13h1v1h-1zM5 13h1v1h-1zM7 13h1v1h-1zM9 13h1v1h-1zM15 13h1v1h-1zM16 13h1v1h-1zM18 13h1v1h-1zM19 13h1v1h-1zM21 13h1v1h-1zM22 13h1v1h-1zM24 13h1v1h-1zM25 13h1v1h-1zM27 13h1v1h-1zM29 13h1v1h-1zM33 13h1v1h-1zM34 13h1v1h-1zM4 14h1v1h-1zM6 14h1v1h-1zM7 14h1v1h-1zM9 14h1v1h-1zM10 14h1v1h-1zM11 14h1v1h-1zM12 14h1v1h-1zM13 14h1v1h-1zM14 14h1v1h-1zM16 14h1v1h-1zM17 14h1v1h-1zM18 14h1v1h-1zM19 14h1v1h-1zM20 14h1v1h-1zM22 14h1v1h-1zM24 14h1v1h-1zM27 14h1v1h-1zM29 14h1v1h-1zM30 14h1v1h-1zM33 14h1v1h-1zM35 14h1v1h-1zM6 15h1v1h-1zM9 15h1v1h-1zM12 15h1v1h-1zM13 15h1v1h-1zM14 15h1v1h-1zM15 15h1v1h-1zM16 15h1v1h-1zM17 15h1v1h-1zM20 15h1v1h-1zM24 15h1v1h-1zM26 15h1v1h-1zM27 15h1v1h-1zM28 15h1v1h-1zM30 15h1v1h-1zM36 15h1v1h-1zM4 16h1v1h-1zM8 16h1v1h-1zM9 16h1v1h-1zM10 16h1v1h-1zM11 16h1v1h-1zM12 16h1v1h-1zM13 16h1v1h-1zM17 16h1v1h-1zM20 16h1v1h-1zM23 16h1v1h-1zM26 16h1v1h-1zM28 16h1v1h-1zM30 16h1v1h-1zM32 16h1v1h-1zM33 16h1v1h-1zM35 16h1v1h-1zM36 16h1v1h-1zM7 17h1v1h-1zM8 17h1v1h-1zM9 17h1v1h-1zM11 17h1v1h-1zM13 17h1v1h-1zM15 17h1v1h-1zM17 17h1v1h-1zM18 17h1v1h-1zM22 17h1v1h-1zM23 17h1v1h-1zM24 17h1v1h-1zM28 17h1v1h-1zM31 17h1v1h-1zM33 17h1v1h-1zM34 17h1v1h-1zM6 18h1v1h-1zM9 18h1v1h-1zM10 18h1v1h-1zM12 18h1v1h-1zM13 18h1v1h-1zM14 18h1v1h-1zM15 18h1v1h-1zM16 18h1v1h-1zM17 18h1v1h-1zM19 18h1v1h-1zM22 18h1v1h-1zM24 18h1v1h-1zM25 18h1v1h-1zM27 18h1v1h-1zM28 18h1v1h-1zM29 18h1v1h-1zM30 18h1v1h-1zM32 18h1v1h-1zM35 18h1v1h-1zM4 19h1v1h-1zM6 19h1v1h-1zM7 19h1v1h-1zM8 19h1v1h-1zM11 19h1v1h-1zM12 19h1v1h-1zM14 19h1v1h-1zM15 19h1v1h-1zM18 19h1v1h-1zM19 19h1v1h-1zM20 19h1v1h-1zM21 19h1v1h-1zM22 19h1v1h-1zM25 19h1v1h-1zM28 19h1v1h-1zM29 19h1v1h-1zM30 19h1v1h-1zM31 19h1v1h-1zM32 19h1v1h-1zM7 20h1v1h-1zM9 20h1v1h-1zM10 20h1v1h-1zM11 20h1v1h-1zM13 20h1v1h-1zM15 20h1v1h-1zM16 20h1v1h-1zM17 20h1v1h-1zM21 20h1v1h-1zM23 20h1v1h-1zM25 20h1v1h-1zM26 20h1v1h-1zM27 20h1v1h-1zM30 20h1v1h-1zM32 20h1v1h-1zM33 20h1v1h-1zM35 20h1v1h-1zM4 21h1v1h-1zM5 21h1v1h-1zM7 21h1v1h-1zM8 21h1v1h-1zM14 21h1v1h-1zM18 21h1v1h-1zM19 21h1v1h-1zM20 21h1v1h-1zM22 21h1v1h-1zM24 21h1v1h-1zM27 21h1v1h-1zM33 21h1v1h-1zM34 21h1v1h-1zM36 21h1v1h-1zM5 22h1v1h-1zM6 22h1v1h-1zM7 22h1v1h-1zM8 22h1v1h-1zM9 22h1v1h-1zM10 22h1v1h-1zM11 22h1v1h-1zM12 22h1v1h-1zM14 22h1v1h-1zM17 22h1v1h-1zM19 22h1v1h-1zM21 22h1v1h-1zM25 22h1v1h-1zM26 22h1v1h-1zM27 22h1v1h-1zM28 22h1v1h-1zM29 22h1v1h-1zM31 22h1v1h-1zM33 22h1v1h-1zM35 22h1v1h-1zM4 23h1v1h-1zM19 23h1v1h-1zM21 23h1v1h-1zM22 23h1v1h-1zM23 23h1v1h-1zM25 23h1v1h-1zM27 23h1v1h-1zM30 23h1v1h-1zM31 23h1v1h-1zM35 23h1v1h-1zM36 23h1v1h-1zM4 24h1v1h-1zM6 24h1v1h-1zM8 24h1v1h-1zM9 24h1v1h-1zM10 24h1v1h-1zM12 24h1v1h-1zM15 24h1v1h-1zM16 24h1v1h-1zM22 24h1v1h-1zM23 24h1v1h-1zM24 24h1v1h-1zM28 24h1v1h-1zM30 24h1v1h-1zM33 24h1v1h-1zM4 25h1v1h-1zM7 25h1v1h-1zM8 25h1v1h-1zM9 25h1v1h-1zM12 25h1v1h-1zM13 25h1v1h-1zM14 25h1v1h-1zM16 25h1v1h-1zM17 25h1v1h-1zM18 25h1v1h-1zM20 25h1v1h-1zM21 25h1v1h-1zM23 25h1v1h-1zM26 25h1v1h-1zM27 25h1v1h-1zM28 25h1v1h-1zM29 25h1v1h-1zM31 25h1v1h-1zM34 25h1v1h-1zM35 25h1v1h-1zM6 26h1v1h-1zM8 26h1v1h-1zM10 26h1v1h-1zM13 26h1v1h-1zM14 26h1v1h-1zM17 26h1v1h-1zM18 26h1v1h-1zM20 26h1v1h-1zM21 26h1v1h-1zM23 26h1v1h-1zM27 26h1v1h-1zM29 26h1v1h-1zM32 26h1v1h-1zM34 26h1v1h-1zM35 26h1v1h-1zM6 27h1v1h-1zM7 27h1v1h-1zM8 27h1v1h-1zM9 27h1v1h-1zM11 27h1v1h-1zM12 27h1v1h-1zM14 27h1v1h-1zM16 27h1v1h-1zM18 27h1v1h-1zM21 27h1v1h-1zM22 27h1v1h-1zM23 27h1v1h-1zM24 27h1v1h-1zM25 27h1v1h-1zM27 27h1v1h-1zM28 27h1v1h-1zM31 27h1v1h-1zM35 27h1v1h-1zM36 27h1v1h-1zM4 28h1v1h-1zM5 28h1v1h-1zM6 28h1v1h-1zM10 28h1v1h-1zM13 28h1v1h-1zM14 28h1v1h-1zM16 28h1v1h-1zM17 28h1v1h-1zM18 28h1v1h-1zM19 28h1v1h-1zM20 28h1v1h-1zM21 28h1v1h-1zM25 28h1v1h-1zM26 28h1v1h-1zM27 28h1v1h-1zM28 28h1v1h-1zM29 28h1v1h-1zM30 28h1v1h-1zM31 28h1v1h-1zM32 28h1v1h-1zM33 28h1v1h-1zM35 28h1v1h-1zM12 29h1v1h-1zM14 29h1v1h-1zM17 29h1v1h-1zM18 29h1v1h-1zM19 29h1v1h-1zM20 29h1v1h-1zM21 29h1v1h-1zM24 29h1v1h-1zM25 29h1v1h-1zM26 29h1v1h-1zM28 29h1v1h-1zM32 29h1v1h-1zM34 29h1v1h-1zM35 29h1v1h-1zM4 30h1v1h-1zM5 30h1v1h-1zM6 30h1v1h-1zM7 30h1v1h-1zM8 30h1v1h-1zM9 30h1v1h-1zM10 30h1v1h-1zM12 30h1v1h-1zM14 30h1v1h-1zM16 30h1v1h-1zM18 30h1v1h-1zM19 30h1v1h-1zM20 30h1v1h-1zM22 30h1v1h-1zM24 30h1v1h-1zM28 30h1v1h-1zM30 30h1v1h-1zM32 30h1v1h-1zM33 30h1v1h-1zM4 31h1v1h-1zM10 31h1v1h-1zM13 31h1v1h-1zM15 31h1v1h-1zM16 31h1v1h-1zM17 31h1v1h-1zM19 31h1v1h-1zM20 31h1v1h-1zM26 31h1v1h-1zM28 31h1v1h-1zM32 31h1v1h-1zM35 31h1v1h-1zM36 31h1v1h-1zM4 32h1v1h-1zM6 32h1v1h-1zM7 32h1v1h-1zM8 32h1v1h-1zM10 32h1v1h-1zM12 32h1v1h-1zM16 32h1v1h-1zM17 32h1v1h-1zM19 32h1v1h-1zM20 32h1v1h-1zM26 32h1v1h-1zM28 32h1v1h-1zM29 32h1v1h-1zM30 32h1v1h-1zM31 32h1v1h-1zM32 32h1v1h-1zM33 32h1v1h-1zM4 33h1v1h-1zM6 33h1v1h-1zM7 33h1v1h-1zM8 33h1v1h-1zM10 33h1v1h-1zM14 33h1v1h-1zM22 33h1v1h-1zM23 33h1v1h-1zM24 33h1v1h-1zM28 33h1v1h-1zM30 33h1v1h-1zM31 33h1v1h-1zM32 33h1v1h-1zM33 33h1v1h-1zM34 33h1v1h-1zM35 33h1v1h-1zM4 34h1v1h-1zM6 34h1v1h-1zM7 34h1v1h-1zM8 34h1v1h-1zM10 34h1v1h-1zM14 34h1v1h-1zM18 34h1v1h-1zM19 34h1v1h-1zM21 34h1v1h-1zM22 34h1v1h-1zM24 34h1v1h-1zM25 34h1v1h-1zM27 34h1v1h-1zM28 34h1v1h-1zM30 34h1v1h-1zM31 34h1v1h-1zM32 34h1v1h-1zM33 34h1v1h-1zM4 35h1v1h-1zM10 35h1v1h-1zM16 35h1v1h-1zM17 35h1v1h-1zM19 35h1v1h-1zM20 35h1v1h-1zM21 35h1v1h-1zM25 35h1v1h-1zM27 35h1v1h-1zM28 35h1v1h-1zM30 35h1v1h-1zM4 36h1v1h-1zM5 36h1v1h-1zM6 36h1v1h-1zM7 36h1v1h-1zM8 36h1v1h-1zM9 36h1v1h-1zM10 36h1v1h-1zM12 36h1v1h-1zM13 36h1v1h-1zM15 36h1v1h-1zM17 36h1v1h-1zM18 36h1v1h-1zM21 36h1v1h-1zM23 36h1v1h-1zM25 36h1v1h-1zM26 36h1v1h-1zM27 36h1v1h-1zM28 36h1v1h-1zM30 36h1v1h-1zM33 36h1v1h-1zM36 36h1v1h-1z" fill="#000"/></svg></div>
+    <p class="mono share-url">${esc(SHARE_URL)}</p>
+    <div class="row" style="justify-content:center">${navigator.share?'<button class="btn primary" id="shShare">Send the link</button>':''}<button class="btn" id="shCopy">Copy link</button></div>
+    <div id="shMsg" class="sub" style="text-align:center;margin:8px 0 0"></div>
+    <details class="tbl" style="margin-top:12px"><summary>How to put it on your phone</summary>
+      <ul class="plain" style="margin:8px 0 0"><li><b>iPhone:</b> open the link in Safari, tap Share, then Add to Home Screen. Leave "Open as Web App" on.</li>
+      <li><b>Android:</b> open the link in Chrome and tap Install app (or \u22EE then Add to Home screen).</li>
+      <li>Open it once with signal. After that it works offline.</li></ul></details>
+  </div>`;
+}
+function wireShare(c){
+  const sh=c.querySelector('#shShare'); if(sh) sh.onclick=()=>navigator.share({title:'Rusty Anvil', text:'Rusty Anvil: ROTC UCM Skills Trainer', url:SHARE_URL}).catch(()=>{});
+  c.querySelector('#shCopy').onclick=async()=>{ const m=c.querySelector('#shMsg');
+    try{ await navigator.clipboard.writeText(SHARE_URL); m.textContent='Link copied.'; }
+    catch(e){ const r=document.createRange(); r.selectNodeContents(c.querySelector('.share-url')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); m.textContent='Link selected. Copy it from here.'; } };
+}
+
+/* ---------- what's new (shown once per update) ---------- */
+// Fill in WHATS_NEW.items to show it. Leave items empty and nothing appears.
+const WHATS_NEW = {id:'2026-09-29', title:'What\'s new in Rusty Anvil', items:[]};
+const NEWS_KEY='rustyAnvil_newsSeen';
+function whatsNewReady(){ return Array.isArray(WHATS_NEW.items) && WHATS_NEW.items.length>0; }
+function showWhatsNew(force){
+  if(!whatsNewReady() || document.getElementById('newsSheet')) return;
+  let seen=null; try{ seen=localStorage.getItem(NEWS_KEY); }catch(e){}
+  if(!force && seen===WHATS_NEW.id) return;
+  const w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='newsSheet';
+  w.innerHTML=`<div class="sheet news" role="dialog" aria-modal="true" aria-labelledby="newsH"><h2 id="newsH">${esc(WHATS_NEW.title)}</h2>
+    <ul class="news-list">${WHATS_NEW.items.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+    <button class="btn primary" id="newsOk" style="width:100%">Got it</button></div>`;
+  document.body.appendChild(w);
+  const done=()=>{ try{ localStorage.setItem(NEWS_KEY, WHATS_NEW.id); }catch(e){} w.remove(); };
+  w.querySelector('#newsOk').onclick=done; w.onclick=e=>{ if(e.target===w) done(); };
+  w.querySelector('#newsOk').focus();
+}
+
+/* ---------- backup reminder (admin) ---------- */
+const BACKUP_DAYS=7;
+function markBackup(){ DATA.lastBackupAt=new Date().toISOString(); DATA.backupSnooze=null; save(); }
+function backupDue(){
+  if(!DATA.soldiers.length) return false;
+  if(!DATA.backupSince){ DATA.backupSince=new Date().toISOString(); save(); }
+  const since=new Date(DATA.lastBackupAt||DATA.backupSince).getTime(), now=Date.now();
+  if(DATA.backupSnooze && now<new Date(DATA.backupSnooze).getTime()) return false;
+  return now-since > BACKUP_DAYS*864e5;
+}
+function backupAgo(){ if(!DATA.lastBackupAt) return 'never'; const d=Math.floor((Date.now()-new Date(DATA.lastBackupAt).getTime())/864e5); return d<=0?'today':d===1?'yesterday':`${d} days ago`; }
+function backupBannerHtml(){
+  if(!backupDue()) return '';
+  return `<div class="note warn backup-note"><b>Time for a backup.</b> Everything in Rusty Anvil lives only on this device. Last backup: ${backupAgo()}. Download a .json and save it somewhere safe, like Google Drive or email it to yourself.
+    <div class="row" style="margin-top:10px"><button class="btn primary sm" id="bkNow">Download backup</button><button class="btn sm" id="bkLater">Remind me in 3 days</button></div></div>`;
+}
+function wireBackupBanner(){
+  const n=$('bkNow'); if(n) n.onclick=()=>{ exportJSON(); render(); };
+  const l=$('bkLater'); if(l) l.onclick=()=>{ DATA.backupSnooze=new Date(Date.now()+3*864e5).toISOString(); save(); render(); };
+}
+
+/* ============================== Reference: quick cards, searchable ============================== */
+// Built from the same content the Practice and grading screens use, so they always match.
+function refCards(){
+  const kv=(rows)=>`<ol class="lines">${rows.map(r=>`<li><span class="num">${esc(r[0])}</span><div><div class="lbl">${esc(r[1])}</div>${r[2]?`<div class="why">${r[2]}</div>`:''}</div></li>`).join('')}</ol>`;
+  const codes=(o)=>Object.entries(o).map(([k,v])=>`<b>${k}</b> = ${esc(v)}`).join(' \u00B7 ');
+  const guide=(G)=>`<ol class="tguide">${G.map(g=>`<li><span class="tg-k">${esc(g.k)}</span><div><b>${esc(g.t)}</b><ul>${g.b.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div></li>`).join('')}</ol>`;
+  return [
+    {id:'medevac', title:'9-line MEDEVAC', tags:'medevac medical evacuation nine line 9 line casualty precedence litter ambulatory', html:
+      kv([[1,'Location of the pickup site','Your grid, read exactly.'],
+          [2,'Radio frequency, call sign, and suffix','Your frequency, then your call sign.'],
+          [3,'Number of patients by precedence',codes(PREC)+'. Urgent: within 1 hour to save life, limb, or eyesight. Priority: within 4 hours. Routine: within 24 hours.'],
+          [4,'Special equipment',codes(EQUIP)],
+          [5,'Number of patients by type','<b>L</b> = litter (can\'t walk) \u00B7 <b>A</b> = ambulatory (can walk)'],
+          [6,'Security of the pickup site',codes(SEC)+' (wartime)'],
+          [7,'Method of marking the pickup site',codes(MARK)+'. At night, smoke and panels don\'t work.'],
+          [8,'Patient nationality and status',codes(STAT)],
+          [9,'NBC contamination (wartime) / terrain','<b>N</b> = nuclear \u00B7 <b>B</b> = biological \u00B7 <b>C</b> = chemical. With no contamination, describe the terrain at the pickup site.']])
+      +`<div class="script"><h3>How it sounds</h3><p>"[Their call sign], this is [your call sign], request MEDEVAC, over." Then "Line 1: \u2026" through "Line 9: \u2026", and "Over."</p><p>In testing, lines 1\u20135 must be sent within 10:00 of "Go."</p></div>`},
+    {id:'spot', title:'SPOT report', tags:'spot report 11 line dtg size activity location uniform equipment assessment recommendation authentication', html:
+      kv([[1,'Date time group of the report','DD HHMM (time zone) MONYY: when you send it.'],
+          [2,'Call sign and method of observation','Your call sign, and binoculars, naked eye, thermal, etc.'],
+          [3,'Size','How many enemy and vehicles.'],
+          [4,'Activity','What they\'re doing and which way they\'re moving.'],
+          [5,'Location','Enemy grid.'],
+          [6,'Uniform','What they\'re wearing.'],
+          [7,'Time of observation','DTG of when you saw them, not when you sent the report.'],
+          [8,'Equipment','Weapons and vehicles.'],
+          [9,'Assessment of activity','Your judgment of what the enemy is trying to do.'],
+          [10,'Action recommendation','What you recommend: call for fire, continue to observe, etc.'],
+          [11,'Authentication','Your initials.']])},
+    {id:'salute', title:'SALUTE report', tags:'salute size activity location unit uniform time equipment contact', html:
+      kv([['S','Size','How many enemy.'],['A','Activity','What they did or are doing, and which way they went.'],['L','Location','Enemy grid.'],
+          ['U','Unit / uniform','What they\'re wearing, any unit markings.'],['T','Time','DTG of when you saw them or took contact.'],['E','Equipment','Weapons and vehicles.']])},
+    {id:'cff', title:'Call for fire', tags:'call for fire cff grid mission adjust fire snap fuze danger close mto shot splash correction bracket ot factor end of mission', html:
+      kv([['1st','Observer identification and warning order','"[FDC], this is [you], Adjust Fire, Over."'],
+          ['2nd','Target location','"Grid [grid], Altitude [alt]m, Direction [dir] Mils, Over."'],
+          ['3rd','Target description, method of engagement, method of fire and control','SNAP: <b>S</b>ize, <b>N</b>omenclature, <b>A</b>ctivity, <b>P</b>rotection. Add "Danger Close" if friendlies are within 600m of the target, and "At my command" if you want to control when the guns fire. HE is the default ammunition.']])
+      +`<div class="script"><h3>Fuzes</h3>${Object.entries(FUZE).map(([k,v])=>`<p><b>${esc(k)}:</b> ${esc(v)}</p>`).join('')}</div>
+      <div class="script"><h3>After the call</h3><p>Read back the MTO (message to observer). The FDC sends "Shot" and "Splash"; you answer "Shot, Out" and "Splash, Out."</p>
+      <p><b>Deviation:</b> meters = mils off the target \u00D7 OT factor. OT factor = your distance to the target in thousands of meters, rounded (1,400m = 1, 2,500m = 2). Round to the nearest 10m; skip deviation corrections under 30m.</p>
+      <p><b>Range:</b> bracket with Add or Drop 400, then 200, then 100, then 50 and Fire for effect.</p>
+      <p><b>Correction:</b> "Adjust fire, [Left/Right] [meters], [Add/Drop] [meters], Over." Last one: "\u2026, Fire for effect, Over."</p>
+      <p><b>End of mission:</b> "End of mission, [what was destroyed], estimated [number] enemy casualties, Over."</p></div>`},
+    {id:'range', title:'Range estimate (mil relation)', tags:'range estimate mil relation mils binoculars distance worm height formula spot', html:
+      `<div class="script"><h3>Formula</h3><p style="font-size:17px"><b>Range (meters) = (target height in inches \u00D7 25.4) \u00F7 height in mils</b></p>
+      <p>Count the dots on the vertical bar in your binoculars from the target's feet to the top of its head. Each dot is 1 mil.</p>
+      <p><b>Example:</b> a 72-inch soldier is 6 mils tall. (72 \u00D7 25.4) \u00F7 6 = 1,828.8 \u00F7 6 = <b>304.8, about 305 meters</b>.</p>
+      <p>Close enough counts: within about 2% is correct in Rusty Anvil.</p></div>`},
+    {id:'tccc', title:'TCCC', tags:'tccc tactical combat casualty care tourniquet march airway respiration circulation hypothermia napila buddy drag', html: guide(TCCC_GUIDE)},
+    {id:'fracture', title:'Fractures (081-831-1034)', tags:'fracture broken bone splint sling swathe cravat first aid', html: guide(FX_GUIDE)},
+    {id:'burn', title:'Burns (081-831-1007)', tags:'burn burns thermal electrical chemical laser field dressing first aid', html: guide(BN_GUIDE)},
+    {id:'grenade', title:'Grenades', tags:'grenade grenades m67 mk3a2 m84 m18 an-m14 th3 m7a3 m7a2 smoke frag flash bang incendiary cs', html:
+      `<div class="ref-gren">${Drill.GRENADES.map(g=>{ const ph=GRENADE_PHOTOS.find(p=>p.name===g.name); return `<div class="rg">${ph?`<img src="${ph.src}" alt="${esc(g.name)}" loading="lazy">`:''}<div><b>${esc(g.name)}</b><p>${esc(g.d)}</p></div></div>`; }).join('')}</div>
+      <div class="script"><h3>Steps in grenade deployment</h3>${GRENADE_STEPS.map((s,i)=>`<p>${i+1}. ${esc(s)}</p>`).join('')}</div>`},
+    ...['m249','m240b','m4'].map(k=>({id:k, title:`${Drill.WEAPONS[k].name}: clear, disassemble, assemble, functions check`, tags:`${k} ${Drill.WEAPONS[k].name} weapon weapons rifle machine gun clear disassembly assembly functions check`, html:Drill.wStudyHtml(k).replace(/^<h2>[^<]*<\/h2>/,'')+`<p class="wp-note"><b>Standard:</b> 2:30 from "Go" through the functions check.</p>`})),
+  ];
+}
+const REF_TEXT={};
+function renderReference(c){
+  const cards=refCards(), q=normName(STATE.refQ||'');
+  cards.forEach(k=>{ if(!REF_TEXT[k.id]){ const d=document.createElement('div'); d.innerHTML=k.html; REF_TEXT[k.id]=normName(k.title+' '+k.tags+' '+d.textContent); } });
+  const words=q.split(' ').filter(Boolean), hit=k=>words.every(w=>REF_TEXT[k.id].includes(w));
+  const shown=cards.filter(hit), open=STATE.refOpen||{};
+  c.innerHTML=`<div class="stack ref">
+    <div class="panel ref-top"><h2>Reference</h2><p class="sub" style="margin-bottom:10px">Formats, steps, and standards. Tap a card to open it.</p>
+      <input class="input" id="refQ" type="search" placeholder="Search the reference" value="${esc(STATE.refQ||'')}" aria-label="Search the reference" autocomplete="off">
+      <div class="ref-chips">${cards.map(k=>`<button class="chip-btn" data-refgo="${k.id}">${esc(k.title.replace(/:.*| \(.*/,''))}</button>`).join('')}</div></div>
+    ${shown.length?shown.map(k=>`<details class="panel ref-card" id="ref-${k.id}" ${words.length||open[k.id]?'open':''}><summary><h2>${esc(k.title)}</h2></summary><div class="drill embed ref-body">${k.html}</div></details>`).join('')
+      :`<div class="panel"><p class="sub" style="margin:0">Nothing matches "${esc(STATE.refQ)}". Try a shorter word.</p></div>`}
+  </div>`;
+  const inp=$('refQ');
+  inp.oninput=()=>{ STATE.refQ=inp.value; const pos=inp.selectionStart; renderReference(c); const n=$('refQ'); n.focus(); try{ n.setSelectionRange(pos,pos); }catch(e){} };
+  c.querySelectorAll('details.ref-card').forEach(d=>d.ontoggle=()=>{ STATE.refOpen=STATE.refOpen||{}; STATE.refOpen[d.id.slice(4)]=d.open; });
+  c.querySelectorAll('[data-refgo]').forEach(b=>b.onclick=()=>{ STATE.refQ=''; STATE.refOpen=STATE.refOpen||{}; STATE.refOpen[b.dataset.refgo]=true; renderReference(c);
+    const d=$('ref-'+b.dataset.refgo); if(d) d.scrollIntoView({block:'start', behavior:'smooth'}); });
+}
+
 load();
 rebuildRegistry();
+restoreSession();
 render();
 </script>
