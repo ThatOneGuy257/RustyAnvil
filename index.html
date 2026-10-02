@@ -317,6 +317,8 @@ body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inse
   .ref-chips::-webkit-scrollbar{display:none}
   .chip-btn{flex:none}
 }
+.sync-stat{font-size:12px;color:var(--good);margin-left:8px}.sync-stat.warn{color:var(--brass)}
+.ua-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
 .tl-form{border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--panelAlt);margin-bottom:12px}
 figure.mini{margin:0}
 figure.mini figcaption{font-size:13px;color:var(--inkSoft);margin-bottom:4px}
@@ -672,7 +674,9 @@ const STATE = {
   rec:{cff:'', grenade:'', tccc:'', throw:''}, tcTimer:{startedAt:null, elapsed:0}, gthrow:{seq:[]}, randomCalls:false, aftLookup:{sex:'M', age:'17-21'},
 };
 function clone(o){ return JSON.parse(JSON.stringify(o)); }
-function save(){ DATA.savedAt = new Date().toISOString(); try{ localStorage.setItem(STORE_KEY, JSON.stringify(DATA)); }catch(e){} }
+function rawSave(){ DATA.savedAt = new Date().toISOString(); try{ localStorage.setItem(STORE_KEY, JSON.stringify(DATA)); }catch(e){} }
+// Every change goes through here. When signed in to the sheet, it's also queued for the sheet.
+function save(){ rawSave(); if(typeof syncCapture==='function') syncCapture(); }
 // A packaged copy (see exportProgram) carries its data inside the file. The first time it's opened, that data is loaded;
 // after that, changes made in the copy are kept until a newer package is opened.
 let PACKAGE_LOADED=false;
@@ -2519,7 +2523,8 @@ function renderPick(app){
 /* ============================== gate ============================== */
 function renderGate(){
   const g=STATE.gate, S=DATA.settings; let body='';
-  if(g.step==='choose'){
+  if(SYNC.on && g.step!=='share') body=syncGateBody(g);
+  else if(g.step==='choose'){
     body=`<div class="stack" style="gap:10px;margin-top:18px">
         <button class="btn primary big-btn" id="gLogin">Log in</button>
         <button class="btn big-btn" id="gPractice">Practice without logging in</button>
@@ -2587,6 +2592,7 @@ function renderGate(){
   return `<div class="gate"><div class="panel"><div class="gate-head">${logoImg('gate-logo')}<h2 style="font-size:26px;margin-bottom:2px">Rusty Anvil</h2><p class="soft" style="margin:0 0 10px;font-size:13.5px">ROTC UCM Skills Trainer</p></div>${body}${g.step==='choose'?pk:''}</div></div>`;
 }
 function wireGate(){
+  if(SYNC.on) return syncWireGate();
   const S=DATA.settings, g=STATE.gate;
   const on=(id,fn)=>{ const el=$(id); if(el) el.onclick=fn; };
   on('gAdmin',()=>{ STATE.gate={step:S.adminPinHash?'adminLogin':'adminCreate',error:''}; render(); });
@@ -2697,7 +2703,7 @@ function renderRank(c){
             <td class="num"><b>${fmt1(sc.total)}</b></td>
             <td>${isCut(sc)?`<span class="badge b-bad">${esc(sc.cutBy.join(', '))} fail: cut</span> `:''}${sc.missing.length?`<span class="badge b-none" title="Missing: ${sc.missing.join(', ')}">${sc.missing.length} missing</span>`:''}</td>
           </tr>`; }).join('')}</tbody></table></div>`
-      : `<div class="stack" style="padding:30px 10px;align-items:center;text-align:center"><p class="sub">No one is on the roster yet. Add your team in Team entry, or import a .json file.</p><div class="row"><button class="btn primary" id="goTeam">Go to Team entry</button><button class="btn" id="sample">Load example team</button></div></div>`}
+      : `<div class="stack" style="padding:30px 10px;align-items:center;text-align:center"><p class="sub">No one is on the roster yet. Add your team in Team entry, or import a .json file.</p><div class="row"><button class="btn primary" id="goTeam">Go to Team entry</button>${SYNC.on?'':'<button class="btn" id="sample">Load example team</button>'}</div></div>`}
     </div>
     <p class="sub" style="font-size:12.5px">${aftOn?'Event columns show AFT points (hover for the raw result). AFT is the official 0\u2013500 total. ':''}${physOn()?`Physical uses ${aftOn?'your event weights':''}${aftOn&&cftOn?' and ':''}${cftOn?'CFT':''}. `:''}Total adds ${S.goPoints} points per Go${isOn('throw')?` and ${S.circleBonus} for a grenade in the circle`:''}.${aftOn&&S.aftFailCut?' Anyone who fails the AFT general standard is cut automatically.':''} Counted events: ${enabledKeys().map(eventShort).join(', ')||'none'}.</p>
   </div>`;
@@ -3842,7 +3848,7 @@ function renderSettings(c){
       <div class="row" style="margin-top:14px"><button class="btn primary" id="saveSet">Save settings</button><button class="btn sm" id="resetSet">Restore defaults</button></div>
       <div id="setMsg" style="margin-top:10px"></div>
     </div>
-    <div class="panel"><h2>PINs</h2>
+    ${syncActive()?syncAccessHtml():`<div class="panel"><h2>PINs</h2>
       <p class="sub">Both PINs are saved in the .json, so they carry over to any device that imports your roster fresh. They keep casual users out of the admin view; they don't encrypt the data.</p>
       <div class="grid">
         <label class="field"><span>New admin PIN</span><input class="input" type="password" inputmode="numeric" id="pinA"></label>
@@ -3850,7 +3856,7 @@ function renderSettings(c){
       </div>
       ${S.testerPinHash?`<label class="row" style="gap:8px;margin-top:10px"><input type="checkbox" id="pinTOff"> Remove the grader PIN</label>`:''}
       <div class="row" style="margin-top:12px"><button class="btn sm" id="savePins">Update PINs</button></div>
-    </div>
+    </div>`}
   </div>`;
   $('saveSet').onclick=()=>{
     const msgs=[], n=id=>+$(id).value;
@@ -3884,7 +3890,8 @@ function renderSettings(c){
     $('ctDelYes').onclick=()=>{ S.customTests=S.customTests.filter(x=>x.id!==t.id); delete S.enabled[ctKey(t)]; delete S.physWeights[ctKey(t)]; rebuildRegistry(); STATE.grid=null; save(); toast(`Deleted ${t.name}.`); render(); };
     $('ctDelNo').onclick=()=>{ $('ctMsg').innerHTML=''; }; });
   $('resetSet').onclick=()=>{ const keep={adminPinHash:S.adminPinHash, testerPinHash:S.testerPinHash, grenadeList:S.grenadeList, enabled:S.enabled, timeLimits:S.timeLimits, customTests:S.customTests}; DATA.settings=Object.assign(clone(DEFAULT_SETTINGS),keep); save(); toast('Settings restored to defaults.'); render(); };
-  $('savePins').onclick=()=>{
+  if(syncActive()) syncWireAccess();
+  if($('savePins')) $('savePins').onclick=()=>{
     const a=$('pinA').value, t=$('pinT').value;
     if(a && a.length<4){ toast('Admin PIN must be at least 4 digits.'); return; }
     if(t && t.length<4){ toast('Grader PIN must be at least 4 digits.'); return; }
@@ -4489,7 +4496,7 @@ function renderDash(c){
   const top=ranked('overall').slice(0,5), n=tryoutSoldiers().length;
   const best=kind=>{ const all=tlOf(kind,'team'); if(!all.length) return null; const d=kind==='rope'?null:tlDistances(all)[0]; const b=all.filter(e=>!d||tlDist(e.dist)===d).sort((a,b)=>a.sec-b.sec)[0]; return {t:fmtLong(b.sec), s:esc(b.team)+(d?`, ${d} mi`:'')}; };
   const tile=(kind,lbl)=>{ const b=best(kind); return `<div><b>${b?b.t:'\u2013'}</b><span>${b?`${lbl} (${b.s})`:lbl}</span></div>`; };
-  const empty = !DATA.soldiers.length ? `<div class="panel" style="text-align:center;padding:26px 16px"><p class="sub" style="margin:0 auto 12px">No one is on the roster yet. Add your team in Team entry, or import a .json file.</p><div class="row" style="justify-content:center"><button class="btn primary" id="goTeam">Go to Team entry</button><button class="btn" id="sample">Load example team</button></div></div>` : '';
+  const empty = !DATA.soldiers.length ? `<div class="panel" style="text-align:center;padding:26px 16px"><p class="sub" style="margin:0 auto 12px">No one is on the roster yet. Add your team in Team entry, or import a .json file.</p><div class="row" style="justify-content:center"><button class="btn primary" id="goTeam">Go to Team entry</button>${SYNC.on?'':'<button class="btn" id="sample">Load example team</button>'}</div></div>` : '';
   c.innerHTML=`<div class="stack">
     ${backupBannerHtml()}
     ${empty}
@@ -4694,7 +4701,7 @@ function shell(app, role, who){
   <header class="app-header">
     <div class="app-title">${logoImg()}<span>Rusty Anvil</span><span class="app-sub">ROTC UCM Skills Trainer</span></div>
     <nav class="tabs" aria-label="Sections">${N.tabs.map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${esc(l)}</button>`).join('')}</nav>
-    <div class="who"><span>${esc(who)}</span><span class="who-btns">${deskBtns}</span></div>
+    <div class="who"><span>${esc(who)}${syncActive()?'<span id="syncStat" class="sync-stat"></span>':''}</span><span class="who-btns">${deskBtns}</span></div>
   </header>
   <main class="main" id="content"></main>
   <nav class="bbar" aria-label="Sections">
@@ -4716,6 +4723,7 @@ function shell(app, role, who){
   $('sheetClose').onclick=()=>{ sheet.hidden=true; };
   sheet.onclick=e=>{ if(e.target===sheet) sheet.hidden=true; };
   sheet.onkeydown=e=>{ if(e.key==='Escape') sheet.hidden=true; };
+  if(syncActive()) syncStatus();
   const c=$('content');
   if(STATE.tab==='ref'){ renderReference(c); return null; }
   if(STATE.tab==='share'){ c.innerHTML=shareHtml(); wireShare(c); return null; }
@@ -4729,6 +4737,7 @@ function shellAction(id, role){
   if(id==='myexport') return soldierExport();
 }
 function signOut(){
+  if(SYNC.on && STATE.session && STATE.session.role!=='practice' && SYNC.cfg.token && !syncSignOut()) return;
   STATE.session=null; STATE.graderEvents=null; STATE.weekend=false; STATE.gate={step:'choose',error:''};
   forgetSession(); render(); window.scrollTo(0,0);
 }
@@ -4747,6 +4756,7 @@ function rememberSession(){
 }
 function forgetSession(){ try{ localStorage.removeItem(SESSION_KEY); }catch(e){} }
 function restoreSession(){
+  if(SYNC.on){ syncRestore(); return; }
   if(!keepPref()) return;
   let v=null; try{ v=JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); }catch(e){}
   if(!v || !v.role) return;
@@ -4802,6 +4812,7 @@ function showWhatsNew(force){
 const BACKUP_DAYS=7;
 function markBackup(){ DATA.lastBackupAt=new Date().toISOString(); DATA.backupSnooze=null; save(); }
 function backupDue(){
+  if(SYNC.on) return false;
   if(!DATA.soldiers.length) return false;
   if(!DATA.backupSince){ DATA.backupSince=new Date().toISOString(); save(); }
   const since=new Date(DATA.lastBackupAt||DATA.backupSince).getTime(), now=Date.now();
@@ -4894,6 +4905,410 @@ function renderReference(c){
   c.querySelectorAll('details.ref-card').forEach(d=>d.ontoggle=()=>{ STATE.refOpen=STATE.refOpen||{}; STATE.refOpen[d.id.slice(4)]=d.open; });
   c.querySelectorAll('[data-refgo]').forEach(b=>b.onclick=()=>{ STATE.refQ=''; STATE.refOpen=STATE.refOpen||{}; STATE.refOpen[b.dataset.refgo]=true; renderReference(c);
     const d=$('ref-'+b.dataset.refgo); if(d) d.scrollIntoView({block:'start', behavior:'smooth'}); });
+}
+
+/* ============================== Google Sheet sync ============================== */
+// The installed app (GitHub) keeps its data in the Rusty Anvil Google Sheet, through the sheet's script.
+// Claude's preview, the offline .html file, and shared copies keep working on this device only.
+const SYNC_URL = 'https://script.google.com/macros/s/AKfycbwO2x-1977xEJ4MVE0dYSf4QQUVD0YoPLLG62jtN3RkopZeK2EZ59h7vh0w071FwLW5pQ/exec';
+const SYNC_KEY='rustyAnvil_sync', QUEUE_KEY='rustyAnvil_queue', BASE_KEY='rustyAnvil_base', PRESYNC_KEY='rustyAnvil_beforeSync';
+const SYNC = {
+  on: !!window.__SYNC_TEST__ || /github\.io$/i.test(location.hostname) || /[?&]sync=1\b/.test(location.search),
+  url: window.__SYNC_URL__ || SYNC_URL,
+  cfg:{}, queue:[], base:null, users:[], rolePins:{}, names:null, ready:null, signup:true,
+  busy:false, pulling:false, online:true, lastOk:0, error:'', timer:null, pendingRender:false,
+};
+const ROLE_FROM_SERVER = {admin:'admin', grader:'grader', soldier:'soldier'};
+function syncLoadLocal(){
+  try{ SYNC.cfg=JSON.parse(localStorage.getItem(SYNC_KEY)||'{}')||{}; }catch(e){ SYNC.cfg={}; }
+  try{ SYNC.queue=JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]')||[]; }catch(e){ SYNC.queue=[]; }
+  try{ SYNC.base=JSON.parse(localStorage.getItem(BASE_KEY)||'null'); }catch(e){ SYNC.base=null; }
+  if(Array.isArray(SYNC.cfg.users)) SYNC.users=SYNC.cfg.users;
+}
+function syncPersist(){ try{ localStorage.setItem(SYNC_KEY, JSON.stringify(SYNC.cfg)); localStorage.setItem(QUEUE_KEY, JSON.stringify(SYNC.queue)); localStorage.setItem(BASE_KEY, JSON.stringify(SYNC.base)); }catch(e){} }
+function syncActive(){ return SYNC.on && !!SYNC.cfg.token && !!STATE.session && STATE.session.role!=='practice'; }
+
+/* ---------- talking to the script ---------- */
+async function syncApi(action, body){
+  const ctl = typeof AbortController!=='undefined' ? new AbortController() : null;
+  const t = ctl ? setTimeout(()=>ctl.abort(), 25000) : null;
+  try{
+    // text/plain keeps the browser from sending a pre-check request the script can't answer
+    const r = await fetch(SYNC.url, {method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body:JSON.stringify(Object.assign({action}, body||{})), redirect:'follow', signal:ctl?ctl.signal:undefined});
+    const j = await r.json();
+    SYNC.online=true;
+    return j;
+  }catch(e){ SYNC.online=false; throw new Error('offline'); }
+  finally{ if(t) clearTimeout(t); }
+}
+
+/* ---------- turning the app's data into rows, and back ---------- */
+const PRIVATE_SETTINGS = ['adminPinHash','testerPinHash'];
+function syncFlatten(D){
+  const F={soldiers:{}, scans:{}, practice:{}, times:{}, settings:{}};
+  (D.soldiers||[]).forEach(s=>{
+    const rec={}; Object.keys(s).forEach(k=>{ if(k!=='scans' && k!=='practice' && k!=='pinHash' && k.charAt(0)!=='_') rec[k]=s[k]; });
+    F.soldiers[s.id]=rec;
+    (s.scans||[]).forEach(x=>{ if(x && x.date) F.scans[s.id+'|'+x.date]=Object.assign({}, x, {sid:s.id}); });
+    (s.practice||[]).forEach(x=>{ if(x && x.t!=null) F.practice[s.id+'|'+x.t+'|'+x.task]=Object.assign({}, x, {sid:s.id}); });
+  });
+  (D.timeLogs||[]).forEach(e=>{ if(e && e.id) F.times[e.id]=Object.assign({}, e); });
+  Object.keys(D.settings||{}).forEach(k=>{ if(!PRIVATE_SETTINGS.includes(k)) F.settings[k]=D.settings[k]; });
+  return JSON.parse(JSON.stringify(F));
+}
+const same = (a,b) => JSON.stringify(a===undefined?null:a)===JSON.stringify(b===undefined?null:b);
+// What changed since the last time this phone and the sheet agreed, as requests the script understands.
+function syncDiff(A, B, role){
+  const ops=[];
+  ['soldiers','scans','practice','times'].forEach(tab=>{
+    if(role==='grader' && tab!=='soldiers') return;
+    if(role==='soldier' && tab!=='scans' && tab!=='practice') return;
+    const a=A[tab]||{}, b=B[tab]||{};
+    Object.keys(b).forEach(id=>{
+      if(!a[id]){ ops.push({op:'put', tab, id, patch:b[id]}); return; }
+      const patch={}; let n=0;
+      new Set([...Object.keys(a[id]), ...Object.keys(b[id])]).forEach(k=>{ if(!same(a[id][k], b[id][k])){ patch[k]=b[id][k]===undefined?null:b[id][k]; n++; } });
+      if(n) ops.push({op:'put', tab, id, patch});
+    });
+    if(role==='grader' || tab==='practice') return;
+    Object.keys(a).forEach(id=>{ if(!b[id]) ops.push({op:'del', tab, id}); });
+  });
+  if(role==='admin'){
+    const patch={}; let n=0;
+    new Set([...Object.keys(A.settings||{}), ...Object.keys(B.settings||{})]).forEach(k=>{ if(!same((A.settings||{})[k], (B.settings||{})[k])){ patch[k]=(B.settings||{})[k]; n++; } });
+    if(n) ops.push({op:'settings', patch});
+  }
+  return ops;
+}
+// Called after every save() while signed in: queue whatever changed and send it.
+function syncCapture(){
+  if(!syncActive() || !SYNC.base) return;
+  const cur=syncFlatten(DATA), ops=syncDiff(SYNC.base, cur, SYNC.cfg.user && SYNC.cfg.user.role);
+  if(!ops.length) return;
+  SYNC.queue.push(...ops); SYNC.base=cur; syncPersist(); syncStatus();
+  clearTimeout(SYNC.flushT); SYNC.flushT=setTimeout(()=>syncFlush(), 400);
+}
+
+/* ---------- applying what the sheet sends back ---------- */
+function stripMeta(r){ const o={}; Object.keys(r).forEach(k=>{ if(k.charAt(0)!=='_') o[k]=r[k]; }); return o; }
+function syncApply(res, full){
+  const d=res.data||{};
+  if(full){
+    try{ if(!localStorage.getItem(PRESYNC_KEY) && DATA.soldiers.length) localStorage.setItem(PRESYNC_KEY, JSON.stringify(DATA)); }catch(e){}
+    const keepPins={adminPinHash:DATA.settings.adminPinHash, testerPinHash:DATA.settings.testerPinHash};
+    DATA = {app:'team-tryout-scorebook', version:1, settings:Object.assign(clone(DEFAULT_SETTINGS), {settingsVersion:0}, keepPins), soldiers:[], timeLogs:[]};
+  }
+  const byId={}; DATA.soldiers.forEach(s=>byId[s.id]=s);
+  (d.soldiers||[]).forEach(r=>{
+    if(r._deleted){ DATA.soldiers=DATA.soldiers.filter(s=>s.id!==r.id); delete byId[r.id]; return; }
+    let s=byId[r.id];
+    if(!s){ s=fixSoldier({id:r.id}); FIELDS.forEach(f=>s[f.k]=null); DATA.soldiers.push(s); byId[r.id]=s; }
+    const rec=stripMeta(r);
+    // the sheet sends whole rows and leaves out empty cells, so anything missing was cleared
+    Object.keys(s).forEach(k=>{ if(k!=='scans' && k!=='practice' && k!=='pinHash' && k!=='id' && !(k in rec)) s[k]=null; });
+    Object.assign(s, rec); fixSoldier(s);
+  });
+  const owner = sid => byId[sid];
+  (d.scans||[]).forEach(r=>{ const s=owner(r.sid); if(!s) return; const rec=stripMeta(r); delete rec.sid;
+    s.scans=s.scans.filter(x=>x.date!==rec.date); if(!r._deleted) s.scans.push(rec); s.scans.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0); });
+  (d.practice||[]).forEach(r=>{ const s=owner(r.sid); if(!s) return; const rec=stripMeta(r); delete rec.sid;
+    s.practice=s.practice.filter(x=>!(x.t===rec.t && x.task===rec.task)); if(!r._deleted) s.practice.push(rec); s.practice.sort((a,b)=>a.t-b.t); });
+  if(!Array.isArray(DATA.timeLogs)) DATA.timeLogs=[];
+  (d.times||[]).forEach(r=>{ DATA.timeLogs=DATA.timeLogs.filter(e=>e.id!==r.id); if(!r._deleted) DATA.timeLogs.push(stripMeta(r)); });
+  const st=d.settings||{};
+  if(Object.keys(st).length){ Object.keys(st).forEach(k=>{ if(!PRIVATE_SETTINGS.includes(k)) DATA.settings[k]=st[k]; }); migrateSettings(DATA.settings); rebuildRegistry(); }
+  else if(full){ migrateSettings(DATA.settings); rebuildRegistry(); }
+  if(d.users){ const m={}; (full?[]:SYNC.users).forEach(u=>m[u.id]=u); d.users.forEach(u=>{ if(u._deleted) delete m[u.id]; else m[u.id]=u; }); SYNC.users=Object.values(m).sort((a,b)=>String(a.name).localeCompare(String(b.name))); SYNC.cfg.users=SYNC.users; }
+  if(d.rolePins) SYNC.rolePins=d.rolePins;
+  SYNC.cfg.rev=res.rev;
+  if(res.me) SYNC.cfg.user=Object.assign({}, SYNC.cfg.user, res.me);
+  SYNC.base=syncFlatten(DATA);
+  rawSave(); syncPersist();
+}
+
+/* ---------- send and receive ---------- */
+async function syncFlush(){
+  if(!syncActive() || SYNC.busy || !SYNC.queue.length) return;
+  SYNC.busy=true; syncStatus();
+  const batch=SYNC.queue.slice(0,200);
+  try{
+    const res=await syncApi('push', {token:SYNC.cfg.token, ops:batch});
+    if(res.auth===false) return syncSignedOutByServer(res.error);
+    if(!res.ok) throw new Error(res.error||'rejected');
+    SYNC.queue=SYNC.queue.slice(batch.length);
+    const bad=(res.results||[]).filter(r=>!r.ok);
+    SYNC.lastOk=Date.now(); SYNC.error='';
+    syncPersist();
+    if(bad.length){ toast(`The sheet didn't accept ${bad.length===1?'a change':bad.length+' changes'}: ${bad[0].error}`); SYNC.needFull=true; }
+  }catch(e){ SYNC.error = SYNC.online ? String(e.message||e) : ''; }
+  finally{ SYNC.busy=false; syncStatus(); }
+  if(SYNC.queue.length && SYNC.online) return syncFlush();
+  if(SYNC.online) syncPull(SYNC.needFull);
+}
+async function syncPull(full){
+  if(!syncActive() || SYNC.pulling) return;
+  if(SYNC.queue.length){ if(!SYNC.busy) syncFlush(); return; }
+  SYNC.pulling=true; full = full || !SYNC.base || !SYNC.cfg.rev;
+  try{
+    const res=await syncApi('pull', {token:SYNC.cfg.token, since: full?0:SYNC.cfg.rev});
+    if(res.auth===false) return syncSignedOutByServer(res.error);
+    if(!res.ok) throw new Error(res.error||'');
+    if(SYNC.queue.length) return;          // something changed here while we were waiting; send that first
+    const roleNow = res.me && res.me.role, roleWas = SYNC.cfg.user && SYNC.cfg.user.role;
+    const changed = full || Object.keys(res.data||{}).some(k=>Array.isArray(res.data[k]) ? res.data[k].length : Object.keys(res.data[k]||{}).length);
+    if(changed || res.rev!==SYNC.cfg.rev){ syncApply(res, full); SYNC.needFull=false; }
+    SYNC.lastOk=Date.now(); SYNC.error='';
+    if(roleNow && roleWas && roleNow!==roleWas){ toast('Your access changed. Please sign in again.'); return syncSignOut(true); }
+    if(changed) syncRerender();
+  }catch(e){ SYNC.error = SYNC.online ? String(e.message||e) : ''; }
+  finally{ SYNC.pulling=false; syncStatus(); }
+}
+// Redraw with fresh data, but never while someone is typing or in the middle of entering something.
+const SAFE_TABS=['dash','rank','health','data','myhealth','mytimes','myresults'];
+function syncRerender(){
+  const a=document.activeElement, typing = a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest('#app');
+  const busy = document.querySelector('.tl-form, #moreSheet:not([hidden]), #newsSheet') || STATE.weekend || STATE.pendingImport;
+  if(typing || busy || !SAFE_TABS.includes(STATE.tab)){ SYNC.pendingRender=true; return; }
+  SYNC.pendingRender=false; const y=window.scrollY; render(); window.scrollTo(0,y);
+}
+function syncStatus(){
+  const el=$('syncStat'); if(!el) return;
+  const n=SYNC.queue.length;
+  let t, cls='';
+  if(SYNC.busy || SYNC.pulling && !SYNC.lastOk) t='Syncing\u2026';
+  else if(n && !SYNC.online){ t=`${n} change${n===1?'':'s'} waiting for signal`; cls='warn'; }
+  else if(n) { t=`${n} change${n===1?'':'s'} sending`; }
+  else if(!SYNC.online){ t='Offline \u00B7 showing saved data'; cls='warn'; }
+  else if(SYNC.error){ t='Sync problem'; cls='warn'; el.title=SYNC.error; }
+  else t='Synced';
+  el.textContent=t; el.className='sync-stat '+cls;
+}
+function syncStart(){
+  if(SYNC.timer) clearInterval(SYNC.timer);
+  SYNC.timer=setInterval(()=>{ if(document.visibilityState==='visible' && syncActive()){ if(SYNC.queue.length) syncFlush(); else syncPull(false); } }, 20000);
+}
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible' && syncActive()) { if(SYNC.queue.length) syncFlush(); else syncPull(false); } });
+window.addEventListener('online', ()=>{ if(syncActive()) syncFlush(); });
+
+/* ---------- signing in and out ---------- */
+async function syncSignedIn(res, keep){
+  SYNC.cfg={token:res.token, user:res.user, rev:0, keep:!!keep}; SYNC.queue=[]; SYNC.base=null; SYNC.users=[];
+  setKeepPref(!!keep); syncPersist();
+  const u=res.user;
+  STATE.session = u.role==='soldier' ? {role:'soldier', soldierId:u.sid} : {role:ROLE_FROM_SERVER[u.role]};
+  STATE.gate={step:'choose', error:''};
+  await syncPull(true);
+  if(u.role==='admin') STATE.tab='dash';
+  else if(u.role==='grader'){ STATE.graderEvents=null; STATE.tab='team'; }
+  else { const s=soldierById(u.sid); STATE.tab = s && s.scans.length ? 'myhealth' : 'mylog'; }
+  syncStart(); render(); window.scrollTo(0,0);
+}
+function syncClearLocal(){
+  SYNC.cfg={}; SYNC.queue=[]; SYNC.base=null; SYNC.users=[];
+  DATA={app:'team-tryout-scorebook', version:1, settings:clone(DEFAULT_SETTINGS), soldiers:[], timeLogs:[]}; rebuildRegistry();
+  rawSave(); syncPersist();
+}
+function syncSignOut(force){
+  if(SYNC.queue.length && !force && navigator.onLine!==false && !SYNC._warned){
+    SYNC._warned=true; toast(`${SYNC.queue.length} change${SYNC.queue.length===1?' hasn\'t':'s haven\'t'} reached the sheet yet. Get signal and wait for "Synced", or tap Sign out again to discard.`); syncFlush(); return false;
+  }
+  SYNC._warned=false;
+  const tok=SYNC.cfg.token; if(tok) syncApi('logout',{token:tok}).catch(()=>{});
+  if(SYNC.timer){ clearInterval(SYNC.timer); SYNC.timer=null; }
+  syncClearLocal(); return true;
+}
+function syncSignedOutByServer(msg){
+  SYNC.busy=false; SYNC.pulling=false;
+  syncSignOut(true); STATE.session=null; STATE.graderEvents=null; STATE.gate={step:'choose', error:''};
+  forgetSession(); render(); toast(msg||'Please sign in again.');
+}
+function syncRestore(){
+  syncLoadLocal();
+  if(!SYNC.on || !SYNC.cfg.token || !SYNC.cfg.user) return false;
+  if(!keepPref()){ const t=SYNC.cfg.token; syncApi('logout',{token:t}).catch(()=>{}); syncClearLocal(); return false; }
+  const u=SYNC.cfg.user;
+  STATE.session = u.role==='soldier' ? {role:'soldier', soldierId:u.sid} : {role:ROLE_FROM_SERVER[u.role]};
+  let v=null; try{ v=JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); }catch(e){}
+  if(v && v.role===STATE.session.role){ if(v.tab) STATE.tab=v.tab; if(Array.isArray(v.graderEvents)) STATE.graderEvents=v.graderEvents; }
+  else STATE.tab = u.role==='admin'?'dash':u.role==='grader'?'team':'myhealth';
+  syncStart(); setTimeout(()=>{ if(SYNC.queue.length) syncFlush(); else syncPull(false); }, 50);
+  return true;
+}
+
+/* ---------- login screen (synced) ---------- */
+async function syncLoadNames(force){
+  if(SYNC.names && !force) return;
+  try{
+    const r=await syncApi(SYNC.ready===null?'ping':'names');
+    if(r.notReady || r.ready===false){ SYNC.ready=false; SYNC.names=[]; SYNC.signup=r.signup!==false; }
+    else if(r.users){ SYNC.ready=true; SYNC.names=r.users; SYNC.rolePinsPublic=r.rolePins||{}; }
+    else if(r.ready){ SYNC.ready=true; SYNC.signup=r.signup!==false; return syncLoadNames(true); }
+  }catch(e){ SYNC.names=null; STATE.gate.offline=true; }
+  if(!STATE.session) render();
+}
+const ROLE_WORD={soldier:'Soldier', grader:'Grader', admin:'Admin'};
+function syncGateBody(g){
+  const err = g.error?`<div class="flag">${esc(g.error)}</div>`:'';
+  const btn = (id,label,cls='primary') => `<button class="btn ${cls}" id="${id}" ${g.busy?'disabled':''}>${g.busy&&cls==='primary'?'Working\u2026':label}</button>`;
+  if(g.step==='choose'){
+    if(SYNC.names===null && !g.offline) syncLoadNames();
+    const setup = SYNC.ready===false;
+    return `<div class="stack" style="gap:10px;margin-top:18px">
+      ${setup?`<p class="sub" style="margin:0">Rusty Anvil's Google Sheet is ready but not connected yet. The admin finishes setup with the code from Apps Script.</p><button class="btn primary big-btn" id="sySetup">Set up Rusty Anvil</button>`
+        :`<button class="btn primary big-btn" id="gLogin">Log in</button>`}
+      <button class="btn big-btn" id="gPractice">Practice without logging in</button>
+      ${g.offline?'<p class="sub" style="margin:0;text-align:center">No connection to Rusty Anvil right now. Practice and Reference still work.</p>':''}
+    </div>
+    <div class="row" style="justify-content:center;margin-top:16px"><button class="linkish soft" id="gShare" style="font-weight:500;font-size:14px">Share Rusty Anvil</button></div>`;
+  }
+  if(g.step==='login') return `<p class="sub" style="margin-top:6px">Log in as</p>
+    <div class="stack" style="gap:10px">${['soldier','grader','admin'].map((r,i)=>`<button class="btn ${i?'':'primary'}" data-syrole="${r}">${ROLE_WORD[r]}</button>`).join('')}
+    <div class="row" style="margin-top:4px"><button class="btn" id="gHome">Back</button></div></div>`;
+  if(g.step==='pick'){
+    if(!SYNC.names){ syncLoadNames(true); return `<p class="sub">Loading names\u2026</p><div class="row"><button class="btn" id="syBack">Back</button></div>`; }
+    return `<p class="sub">${g.role==='soldier'?'Find your name.':`Pick your name (${ROLE_WORD[g.role].toLowerCase()}s).`}</p>
+      <input class="input" id="syQ" placeholder="Search your name" aria-label="Search your name" style="margin-bottom:10px" autocomplete="off">
+      <div class="list" id="syList" style="max-height:300px"></div>
+      <div class="row" style="margin-top:12px">${g.role==='soldier'&&SYNC.signup?'<button class="btn" id="syNew">I\'m not on this list</button>':''}<button class="btn" id="syBack">Back</button></div>`;
+  }
+  if(g.step==='pin'){
+    const u=(SYNC.names||[]).find(x=>x.id===g.uid)||{}, rp=SYNC.rolePinsPublic||{};
+    const needRole = (g.role==='admin'||g.role==='grader') && rp[g.role], first = !u.hasPin;
+    return `<p class="sub">${first?`${esc(u.name)} doesn't have a PIN yet. Choose one so only you can sign in as yourself.`:`Signing in as <b>${esc(u.name)}</b>.`}</p>
+      <div class="stack" style="gap:10px">
+        ${needRole?`<label class="field"><span>${ROLE_WORD[g.role]} PIN (shared)</span><input class="input" type="password" inputmode="numeric" id="syRole" autocomplete="off"></label>`:''}
+        <label class="field"><span>${first?'Choose your PIN (4 to 8 digits)':'Your PIN'}</span><input class="input" type="password" inputmode="numeric" id="syPin" autocomplete="off"></label>
+        ${first?'<label class="field"><span>Confirm your PIN</span><input class="input" type="password" inputmode="numeric" id="syPin2" autocomplete="off"></label>':''}
+        ${err}${keepBoxHtml()}
+        <div class="row">${btn('syGo','Continue')}<button class="btn" id="syBack">Back</button></div>
+        ${first?'':'<p class="sub" style="margin:0;font-size:13px">Forgot it? The admin can reset your PIN.</p>'}
+      </div>`;
+  }
+  if(g.step==='register') return `<p class="sub">Make your profile. Choose a PIN so only you can sign in as yourself.</p>
+    <div class="stack" style="gap:10px">
+      <label class="field"><span>Name</span><input class="input" id="syName" placeholder="Last, First" autocomplete="off"></label>
+      <div class="row" style="gap:10px"><label class="field" style="flex:1"><span>Age</span><input class="input" id="syAge" inputmode="numeric"></label>
+        <label class="field" style="flex:1"><span>Sex</span><select class="input" id="sySex"><option value="M">M</option><option value="F">F</option></select></label></div>
+      <label class="field"><span>PIN (4 to 8 digits)</span><input class="input" type="password" inputmode="numeric" id="syPin"></label>
+      <label class="field"><span>Confirm PIN</span><input class="input" type="password" inputmode="numeric" id="syPin2"></label>
+      ${err}${keepBoxHtml()}
+      <div class="row">${btn('syReg','Make my profile')}<button class="btn" id="syBack">Back</button></div></div>`;
+  if(g.step==='setup'){
+    const n=DATA.soldiers.filter(s=>!s.sample).length;
+    return `<p class="sub">First-time setup. You'll be the first admin. Use the 6-digit code shown when you ran <b>setup</b> in Apps Script.</p>
+    <div class="stack" style="gap:10px">
+      <label class="field"><span>Setup code</span><input class="input" id="syCode" inputmode="numeric" autocomplete="off"></label>
+      <label class="field"><span>Your name</span><input class="input" id="syName" placeholder="Last, First" autocomplete="off"></label>
+      <label class="field"><span>Your own PIN (4 to 8 digits)</span><input class="input" type="password" inputmode="numeric" id="syPin"></label>
+      <label class="field"><span>Shared admin PIN (6 to 8 digits)</span><input class="input" type="password" inputmode="numeric" id="syAdm"></label>
+      <label class="field"><span>Shared grader PIN (optional, 4 to 8 digits)</span><input class="input" type="password" inputmode="numeric" id="syGrd" placeholder="leave blank for none"></label>
+      ${n?`<label class="row" style="gap:8px;font-size:14px"><input type="checkbox" id="syBring" checked> Move the data on this device into the sheet (${n} ${n===1?'person':'people'}, their scans, times, and settings)</label>`:''}
+      ${err}${keepBoxHtml()}
+      <div class="row">${btn('syBoot','Connect')}<button class="btn" id="gHome">Back</button></div></div>`;
+  }
+  return '';
+}
+function syncWireGate(){
+  const g=STATE.gate, on=(id,fn)=>{ const el=$(id); if(el) el.onclick=fn; }, val=id=>{ const el=$(id); return el?el.value.trim():''; };
+  const go=step=>{ STATE.gate=Object.assign({}, g, {step, error:'', busy:false, vals:null}); render(); };
+  // After a failed try, put back what they typed (PINs are cleared on purpose).
+  const keepVals=()=>{ g.vals={}; document.querySelectorAll('.gate input:not([type=password]):not([type=checkbox]), .gate select').forEach(i=>{ if(i.id) g.vals[i.id]=i.value; }); };
+  if(g.vals) Object.keys(g.vals).forEach(id=>{ const el=$(id); if(el && el.type!=='password') el.value=g.vals[id]; });
+  wireKeepBoxes();
+  on('gLogin',()=>go('login')); on('sySetup',()=>go('setup'));
+  on('gHome',()=>{ STATE.gate={step:'choose', error:''}; render(); });
+  on('gShare',()=>{ STATE.gate={step:'share', error:''}; render(); });
+  on('gPractice',()=>{ STATE.session={role:'practice'}; STATE.tab='practice'; render(); });
+  if(g.step==='share') wireShare(document.querySelector('.gate'));
+  document.querySelectorAll('[data-syrole]').forEach(b=>b.onclick=()=>{ STATE.gate={step:'pick', role:b.dataset.syrole, error:''}; syncLoadNames(true); render(); });
+  on('syBack',()=>go(g.step==='pin'||g.step==='register'?'pick':'login'));
+  on('syNew',()=>go('register'));
+  if(g.step==='pick' && $('syList')){
+    const draw=q=>{ q=normName(q); const L=(SYNC.names||[]).filter(u=>u.role===g.role && normName(u.name).includes(q));
+      $('syList').innerHTML=L.map(u=>`<button data-uid="${u.id}"><span>${esc(u.name)}</span></button>`).join('') || `<p class="sub">${q?'No matches.':g.role==='soldier'?'No one yet. Use "I\'m not on this list".':`No ${g.role}s yet. The admin adds them in Settings.`}</p>`;
+      $('syList').querySelectorAll('[data-uid]').forEach(b=>b.onclick=()=>{ STATE.gate={step:'pin', role:g.role, uid:b.dataset.uid, error:''}; render(); }); };
+    draw(''); $('syQ').oninput=e=>draw(e.target.value);
+  }
+  const busy=async(fn)=>{ keepVals(); g.busy=true; g.error=''; render(); try{ await fn(); }catch(e){ g.error='No connection to Rusty Anvil. Check your signal and try again.'; } g.busy=false; if(!STATE.session) render(); };
+  const keep=()=>{ const k=document.querySelector('.gKeep'); return k?k.checked:false; };
+  if(g.step==='pin' && $('syPin')){
+    const u=(SYNC.names||[]).find(x=>x.id===g.uid)||{};
+    const submit=()=>{ const pin=val('syPin'), rolePin=val('syRole'), k=keep();
+      if(!u.hasPin){ if(!/^\d{4,8}$/.test(pin)){ g.error='Choose a PIN of 4 to 8 digits.'; keepVals(); render(); return; } if(pin!==val('syPin2')){ g.error='The PINs don\'t match.'; keepVals(); render(); return; } }
+      busy(async()=>{ const r=await syncApi('login',{userId:g.uid, pin, rolePin, keep:k}); if(!r.ok){ g.error=r.error; return; } await syncSignedIn(r,k); }); };
+    on('syGo',submit); ['syPin','syPin2','syRole'].forEach(id=>{ const el=$(id); if(el) el.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); submit(); } }; });
+    (($('syRole'))||$('syPin')).focus();
+  }
+  on('syReg',()=>{ const name=val('syName'), age=val('syAge'), pin=val('syPin'), k=keep();
+    if(!name){ g.error='Name is required.'; keepVals(); render(); return; }
+    if(age && (!/^\d+$/.test(age)||+age<16||+age>70)){ g.error='Age must be a number from 16 to 70.'; keepVals(); render(); return; }
+    if(!/^\d{4,8}$/.test(pin)){ g.error='PIN must be 4 to 8 digits.'; keepVals(); render(); return; }
+    if(pin!==val('syPin2')){ g.error='The PINs don\'t match.'; keepVals(); render(); return; }
+    busy(async()=>{ const r=await syncApi('register',{name, age, sex:$('sySex').value, pin, keep:k}); if(!r.ok){ g.error=r.error; return; } SYNC.names=null; await syncSignedIn(r,k); }); });
+  on('syBoot',()=>{ const code=val('syCode'), name=val('syName'), pin=val('syPin'), adminPin=val('syAdm'), graderPin=val('syGrd'), k=keep();
+    if(!/^\d{6}$/.test(code)){ g.error='The setup code is 6 digits.'; keepVals(); render(); return; }
+    if(!name){ g.error='Your name is required.'; keepVals(); render(); return; }
+    if(!/^\d{4,8}$/.test(pin)){ g.error='Your PIN must be 4 to 8 digits.'; keepVals(); render(); return; }
+    if(!/^\d{6,8}$/.test(adminPin)){ g.error='The admin PIN must be 6 to 8 digits.'; keepVals(); render(); return; }
+    if(graderPin && !/^\d{4,8}$/.test(graderPin)){ g.error='The grader PIN must be 4 to 8 digits.'; keepVals(); render(); return; }
+    const bring=$('syBring') && $('syBring').checked;
+    const data = bring ? {soldiers:DATA.soldiers.filter(s=>!s.sample), timeLogs:DATA.timeLogs||[], settings:DATA.settings} : null;
+    busy(async()=>{ const r=await syncApi('bootstrap',{code, name, pin, adminPin, graderPin:graderPin||null, data, keep:k}); if(!r.ok){ g.error=r.error; return; } SYNC.ready=true; SYNC.names=null; await syncSignedIn(r,k); }); });
+}
+
+/* ---------- Settings: who can sign in (admin, synced) ---------- */
+function syncAccessHtml(){
+  const me=SYNC.cfg.user||{}, U=SYNC.users||[], st=STATE.ua||{};
+  const staff=U.filter(u=>u.role!=='soldier'), sold=U.filter(u=>u.role==='soldier');
+  const row=u=>`<div class="ua-row"><div><b>${esc(u.name)}</b>${u.id===me.id?' <span class="soft">(you)</span>':''} <span class="badge ${u.role==='admin'?'b-brass':'b-none'}">${u.role}</span>${u.locked?' <span class="badge b-bad">paused: wrong PINs</span>':''}${!u.hasPin?' <span class="soft" style="font-size:12.5px">no PIN yet</span>':''}</div>
+    <div class="row" style="gap:6px">${st.pin===u.id?`<input class="input" style="width:120px" type="password" inputmode="numeric" id="uaPinIn" placeholder="new PIN"><button class="btn primary sm" data-uapinsave="${u.id}">Save</button><button class="btn sm" data-uacancel="1">Cancel</button>`
+      :`<button class="btn sm" data-uapin="${u.id}">${u.hasPin?'Reset PIN':'Set PIN'}</button>${u.locked?`<button class="btn sm" data-uaunlock="${u.id}">Unlock</button>`:''}${u.role!=='soldier'&&u.id!==me.id?(st.del===u.id?`<button class="btn danger sm" data-uadelyes="${u.id}">Remove</button><button class="btn sm" data-uacancel="1">Keep</button>`:`<button class="btn sm" data-uadel="${u.id}">Remove</button>`):''}`}</div></div>`;
+  const rp=SYNC.rolePins||{};
+  return `<div class="panel" id="uaPanel"><h2>Sign-in access</h2>
+    <p class="sub">Everything is stored in the Rusty Anvil Google Sheet. Admins and graders sign in with the shared PIN for their role plus their own PIN. Soldiers get a sign-in when they're added and choose their PIN the first time.</p>
+    <h3>Admins and graders</h3>${staff.map(row).join('')||'<p class="sub">No one yet.</p>'}
+    <div class="grid" style="margin-top:10px">
+      <label class="field"><span>Name</span><input class="input" id="uaName" placeholder="Rank Last, First"></label>
+      <label class="field"><span>Role</span><select class="input" id="uaRole"><option value="grader">Grader</option><option value="admin">Admin</option></select></label>
+      <label class="field"><span>Their own PIN</span><input class="input" type="password" inputmode="numeric" id="uaNewPin"></label>
+    </div>
+    <div class="row" style="margin-top:10px"><button class="btn primary sm" id="uaAdd">Add person</button></div>
+    <h3>Shared PINs</h3>
+    <div class="grid">
+      <label class="field"><span>New admin PIN (6 to 8 digits)</span><input class="input" type="password" inputmode="numeric" id="uaAdmPin"></label>
+      <label class="field"><span>New grader PIN ${rp.grader?'(set)':'(none)'}</span><input class="input" type="password" inputmode="numeric" id="uaGrdPin" placeholder="4 to 8 digits"></label>
+    </div>
+    <div class="row" style="margin-top:10px"><button class="btn sm" id="uaRolePins">Update shared PINs</button>${rp.grader?'<button class="btn sm" id="uaGrdOff">Remove the grader PIN</button>':''}</div>
+    <details class="tbl" style="margin-top:14px"><summary>Soldiers (${sold.length})</summary>${sold.map(row).join('')}</details>
+    <div id="uaMsg" style="margin-top:10px"></div></div>`;
+}
+async function syncAdminOps(ops, okMsg){
+  try{
+    const r=await syncApi('push',{token:SYNC.cfg.token, ops});
+    if(r.auth===false) return syncSignedOutByServer(r.error);
+    const bad=(r.results||[]).find(x=>!x.ok);
+    if(!r.ok || bad){ toast((bad&&bad.error)||r.error||'That didn\'t work.'); return false; }
+    STATE.ua={}; toast(okMsg); await syncPull(false); render(); return true;
+  }catch(e){ toast('No connection. Try again when you have signal.'); return false; }
+}
+function syncWireAccess(){
+  const P=$('uaPanel'); if(!P) return;
+  STATE.ua=STATE.ua||{};
+  P.querySelectorAll('[data-uapin]').forEach(b=>b.onclick=()=>{ STATE.ua={pin:b.dataset.uapin}; render(); const i=$('uaPinIn'); if(i) i.focus(); });
+  P.querySelectorAll('[data-uadel]').forEach(b=>b.onclick=()=>{ STATE.ua={del:b.dataset.uadel}; render(); });
+  P.querySelectorAll('[data-uacancel]').forEach(b=>b.onclick=()=>{ STATE.ua={}; render(); });
+  P.querySelectorAll('[data-uapinsave]').forEach(b=>b.onclick=()=>{ const p=$('uaPinIn').value.trim(); if(!/^\d{4,8}$/.test(p)) return toast('PIN must be 4 to 8 digits.'); syncAdminOps([{op:'user', id:b.dataset.uapinsave, pin:p}], 'PIN saved.'); });
+  P.querySelectorAll('[data-uaunlock]').forEach(b=>b.onclick=()=>syncAdminOps([{op:'user', id:b.dataset.uaunlock, unlock:true}], 'Unlocked.'));
+  P.querySelectorAll('[data-uadelyes]').forEach(b=>b.onclick=()=>syncAdminOps([{op:'userDel', id:b.dataset.uadelyes}], 'Removed.'));
+  $('uaAdd').onclick=()=>{ const name=$('uaName').value.trim(), role=$('uaRole').value, pin=$('uaNewPin').value.trim();
+    if(!name) return toast('Enter their name.'); if(!/^\d{4,8}$/.test(pin)) return toast('Their PIN must be 4 to 8 digits.');
+    syncAdminOps([{op:'user', patch:{name, role}, pin}], `${name} can now sign in as ${role==='admin'?'an admin':'a grader'}.`); };
+  $('uaRolePins').onclick=()=>{ const a=$('uaAdmPin').value.trim(), gp=$('uaGrdPin').value.trim(), ops=[];
+    if(a){ if(!/^\d{6,8}$/.test(a)) return toast('The admin PIN must be 6 to 8 digits.'); ops.push({op:'rolePin', role:'admin', pin:a}); }
+    if(gp){ if(!/^\d{4,8}$/.test(gp)) return toast('The grader PIN must be 4 to 8 digits.'); ops.push({op:'rolePin', role:'grader', pin:gp}); }
+    if(!ops.length) return toast('Type a new PIN first.');
+    syncAdminOps(ops, 'Shared PINs updated. Tell your admins and graders.'); };
+  const off=$('uaGrdOff'); if(off) off.onclick=()=>syncAdminOps([{op:'rolePin', role:'grader', pin:null}], 'Graders now sign in with just their own PIN.');
 }
 
 load();
