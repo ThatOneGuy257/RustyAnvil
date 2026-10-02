@@ -536,6 +536,36 @@ tr.editing td{background:var(--panelAlt)}
 .drill.embed{background:transparent;font-size:15px}
 .drill.embed .pg-tiles b{font-size:1.6rem}
 
+/* ---- admin/grader layout: help, needs attention, people, grade ---- */
+.help-q{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;padding:0;margin-left:4px;border-radius:50%;border:1px solid var(--line);background:var(--panelAlt);color:var(--inkSoft);font:600 12px/1 var(--sans,inherit);cursor:pointer;vertical-align:middle}
+.help-q[aria-expanded="true"]{background:var(--brassBg);color:var(--brass);border-color:var(--brass)}
+h2 .help-q{position:relative;top:-2px}
+.help-box{margin:8px 0 12px;padding:10px 12px;border-left:3px solid var(--brass);background:var(--panelAlt);border-radius:0 6px 6px 0;font-size:13.5px;color:var(--inkSoft);line-height:1.5}
+.tuck-more{color:var(--inkSoft)}
+.att .att-ok{margin:0;color:var(--good);font-weight:500}
+.att-items{list-style:none;margin:0;padding:0}
+.att-items>li{padding:10px 0;border-top:1px solid var(--line)}.att-items>li:first-child{border-top:0;padding-top:2px}
+.att-line{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+.att-list{list-style:none;margin:8px 0 0;padding:0 0 0 12px;border-left:2px solid var(--line)}
+.att-sub{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;padding:5px 0;font-size:14px}
+.tiles.tiles2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.tiles.tiles2 b{font-size:20px}.tiles b small{font-size:13px;color:var(--inkSoft);font-family:inherit;font-weight:400}
+.plist{display:flex;flex-direction:column}
+.prow{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:11px 6px;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);text-align:left;cursor:pointer;font:inherit;border-radius:0}
+.prow:first-child{border-top:0}.prow:hover{background:var(--panelAlt)}
+.prow-main{display:flex;flex-direction:column;gap:2px;min-width:0}.prow-main small,.prow-rank small{color:var(--inkSoft);font-size:12.5px}
+.prow-rank{display:flex;flex-direction:column;align-items:flex-end;font-family:var(--mono)}
+.person-score{text-align:right}.person-score b{display:block;font-family:var(--mono);font-size:28px;line-height:1.1}.person-score small{color:var(--inkSoft);font-size:12.5px}
+details.manage{border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--panel)}
+details.manage>summary{cursor:pointer;color:var(--inkSoft);font-weight:500}
+details.manage[open]>summary{margin-bottom:10px}
+details.manage .panel{border:0;padding:0;background:none}
+.grade-nav{display:flex;gap:8px;align-items:flex-start;margin-bottom:16px}
+.grade-nav .subtabs{margin-bottom:0;flex:1}
+@media (max-width:760px){.grade-nav .subtabs,.subtabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.subtabs::-webkit-scrollbar{display:none}.subtabs>button{flex:0 0 auto}.layout .list{max-height:38vh;overflow:auto}}
+details.steps-ref>summary{cursor:pointer}
+.guide-btn[aria-pressed="true"]{background:var(--brassBg);color:var(--brass);border-color:var(--brass)}
+@media (min-width:761px){.sheet-wrap{align-items:center}.sheet{border-radius:14px;max-width:360px;padding:10px}}
 </style>
 
 <div id="app"></div>
@@ -1929,7 +1959,7 @@ function testMed(el, k){
         <p class="sub" style="margin:10px 0 0;font-size:13px">Mark No-Go below for anything that harms the casualty even if the order is right: ${k==='fracture'?'straightening or repositioning the limb, a cravat or swathe over the fracture, or pushing a bone back in':'touching an electrical casualty bare-handed, pulling off stuck clothing, breaking blisters, putting grease or ointment on the burn, or dressing the face'}.</p>
       </div>
       <div class="panel">${R.show?`<h2>What right looks like for this casualty</h2><ul class="plain">${sc.notes.map(n=>`<li>${esc(n)}</li>`).join('')}</ul><h3>Each step</h3>${medGuideHtml(M.guide)}`
-        :`<h2>Steps in order</h2><p class="sub">What each step looks like. "Show what right looks like" adds this casualty's specifics.</p>${medGuideHtml(M.guide)}`}</div>
+        :`<details class="steps-ref"><summary><b>What each step looks like</b></summary>${medGuideHtml(M.guide)}</details>`}</div>
     </div>
     <div class="panel" style="padding-top:4px">${recorder(k, goButtons(k))}</div>
   </div>`;
@@ -2560,7 +2590,8 @@ function renderScreen(){
   if(!admin && !STATE.graderEvents){ renderPick(app); return; }
   const c=shell(app, admin?'admin':'grader', `${admin?'Admin':'Grader'} \u00B7 ${tryoutSoldiers().length} in tryout`);
   if(!c) return;
-  ({dash:renderDash, rank:renderRank, team:renderTeam, one:renderOne, health:renderHealth, tests:renderTests, data:renderData, settings:renderSettings})[STATE.tab](c);
+  ({home:renderHome, people:renderPeople, grade:renderGrade, data:renderData, settings:renderSettings})[STATE.tab](c);
+  tuckText(c);
 }
 
 /* ============================== grader: pick today's events ============================== */
@@ -2587,7 +2618,7 @@ function renderPick(app){
     const ks=[...app.querySelectorAll('.pick input:checked')].map(i=>i.value);
     if(!ks.length){ $('pkMsg').innerHTML='<div class="note warn">Check at least one event.</div>'; return; }
     STATE.graderEvents=ks; try{ localStorage.setItem(PICK_KEY, JSON.stringify(ks)); }catch(e){}
-    STATE.grid=null; STATE.tab='tests';
+    STATE.grid=null; STATE.tab='grade';
     const first=TEST_TABS.find(t=>t[2] && t[2].some(k=>ks.includes(k))); STATE.testTab = first ? first[0] : 'setup';
     render();
   };
@@ -2740,13 +2771,13 @@ function renderRank(c){
   let flag='';
   if(DATA.soldiers.length){
     flag = topF>=S.minFemale
-      ? `<div class="note ok">${topF} women are above the cut line (you want at least ${S.minFemale}).</div>`
+      ? ''
       : `<div class="note warn"><b>Only ${topF} ${topF===1?'woman is':'women are'} above the cut line.</b> You want at least ${S.minFemale}.${womenBelow.length?` Highest-ranked women below the line (overall):<ul class="plain">${womenBelow.map(x=>`<li>#${x.i+1} ${esc(x.r.s.name)}: ${fmt1(x.r.sc.total)} pts${cutScore!=null?`, ${fmt1(cutScore-x.r.sc.total)} behind #${cut}`:''}</li>`).join('')}</ul>`:' No women below the line to move up.'}</div>`;
   }
   c.innerHTML = `<div class="stack">
     <div class="panel">
       <div class="row" style="justify-content:space-between;align-items:flex-start">
-        <div><h2>Rankings</h2><p class="sub" style="margin-bottom:10px">${VIEWS[view].sub()}</p></div>
+        <div><h2>Rankings ${helpBtn('rankhow','How the ranking works')}</h2><p class="sub no-tuck" style="margin-bottom:10px">${VIEWS[view].sub()}</p></div>
         <button class="btn brass sm" id="xl">Export to Excel</button>
       </div>
       <div class="seg" role="group" aria-label="Ranking view">${viewsOn().map(v=>`<button data-v="${v}" aria-pressed="${v===view}">${VIEWS[v].label}</button>`).join('')}</div>
@@ -2776,14 +2807,14 @@ function renderRank(c){
             <td class="num"><b>${fmt1(sc.total)}</b></td>
             <td>${isCut(sc)?`<span class="badge b-bad">${esc(sc.cutBy.join(', '))} fail: cut</span> `:''}${sc.missing.length?`<span class="badge b-none" title="Missing: ${sc.missing.join(', ')}">${sc.missing.length} missing</span>`:''}</td>
           </tr>`; }).join('')}</tbody></table></div>`
-      : `<div class="stack" style="padding:30px 10px;align-items:center;text-align:center"><p class="sub">No one is on the roster yet. Add your team in Team entry, or import a .json file.</p><div class="row"><button class="btn primary" id="goTeam">Go to Team entry</button>${SYNC.on?'':'<button class="btn" id="sample">Load example team</button>'}</div></div>`}
+      : `<div class="stack" style="padding:30px 10px;align-items:center;text-align:center"><p class="sub">No one is on the roster yet.</p><div class="row"><button class="btn primary" id="goTeam">Add your team</button>${SYNC.on?'':'<button class="btn" id="sample">Load example team</button>'}</div></div>`}
     </div>
-    <p class="sub" style="font-size:12.5px">${aftOn?'Event columns show AFT points (hover for the raw result). AFT is the official 0\u2013500 total. ':''}${physOn()?`Physical uses ${aftOn?'your event weights':''}${aftOn&&cftOn?' and ':''}${cftOn?'CFT':''}. `:''}Total adds ${S.goPoints} points per Go${isOn('throw')?` and ${S.circleBonus} for a grenade in the circle`:''}.${aftOn&&S.aftFailCut?' Anyone who fails the AFT general standard is cut automatically.':''} Counted events: ${enabledKeys().map(eventShort).join(', ')||'none'}.</p>
+    ${helpBox('rankhow', `${aftOn?'Event columns show AFT points (hover for the raw result). AFT is the official 0\u2013500 total. ':''}${physOn()?`Physical uses ${aftOn?'your event weights':''}${aftOn&&cftOn?' and ':''}${cftOn?'CFT':''}. `:''}Total adds ${S.goPoints} points per Go${isOn('throw')?` and ${S.circleBonus} for a grenade in the circle`:''}.${aftOn&&S.aftFailCut?' Anyone who fails the AFT general standard is cut automatically.':''} Counted events: ${enabledKeys().map(eventShort).join(', ')||'none'}.`)}
   </div>`;
   c.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{ STATE.view=b.dataset.v; render(); });
-  c.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{ STATE.selectedId=b.dataset.open; STATE.newMode=false; STATE.tab='one'; render(); });
+  c.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPerson(b.dataset.open));
   $('xl').onclick=exportXlsx;
-  const gt=$('goTeam'); if(gt) gt.onclick=()=>{ STATE.tab='team'; render(); };
+  const gt=$('goTeam'); if(gt) gt.onclick=()=>goGrade('results', {gMode:'team'});
   const sm=$('sample'); if(sm) sm.onclick=loadSample;
 }
 function sampleScans(F, rnd){
@@ -2827,8 +2858,9 @@ function renderTeam(c){
   const recorded = (row,k) => { if(admin||!row.id) return ''; const s=soldierById(row.id); return s && s[k]!=null && s[k]!=='' ? 'recorded' : ''; };
   c.innerHTML = `<div class="stack">
     <div class="panel">
-      <h2>Team entry</h2>
-      <p class="sub">Enter the whole team at once. Times use m:ss (a 2-mile run of 14:32 is <span class="mono">14:32</span>).${VF.some(f=>f.k==='grenade')?` Grenade ID is the number correct out of ${DATA.settings.grenadeTotal}.`:''} ${admin?'Clearing a cell clears that result.':'Blank cells leave existing results alone; "recorded" means a result is already saved.'}</p>
+      <h2>Whole team ${helpBtn('teamhow','How the table works')}</h2>
+      <p class="sub no-tuck">Fill in the table, then Save all rows.</p>
+      ${helpBox('teamhow', `Times use m:ss (a 2-mile run of 14:32 is <span class="mono">14:32</span>).${VF.some(f=>f.k==='grenade')?` Grenade ID is the number correct out of ${DATA.settings.grenadeTotal}.`:''} ${admin?'Clearing a cell clears that result.':'Blank cells leave existing results alone; "recorded" means a result is already saved.'} New names are added to the tryout.`)}
       <details><summary style="cursor:pointer;font-weight:500">Paste from a spreadsheet</summary>
         <p class="sub" style="margin-top:8px">Copy rows from Excel or Google Sheets in this column order: <span class="mono">${['Name','Age','Sex',...VF.map(f=>f.label)].join(', ')}</span>. A header row is skipped. Names already on the roster update that soldier.</p>
         <textarea class="input" id="paste" placeholder="Smith, John	21	M"></textarea>
@@ -2921,7 +2953,6 @@ function saveGrid(){
 /* ============================== individual ============================== */
 function renderOne(c){
   const admin=isAdmin(), list=sortedByName();
-  if(admin && STATE.weekend) return renderWeekend(c);
   let s = STATE.newMode ? null : soldierById(STATE.selectedId);
   if(!s && !STATE.newMode && list.length){ s=list[0]; STATE.selectedId=s.id; }
   const mode = s ? 'edit' : 'new';
@@ -2932,13 +2963,13 @@ function renderOne(c){
     <div class="stack" style="gap:10px">
       <input class="input" id="q" placeholder="Search name" aria-label="Search name">
       <button class="btn ${mode==='new'?'primary':''}" id="newS">+ New soldier</button>
-      ${admin?'<button class="btn" id="wkOpen">Log a weekend run or ruck</button>':''}
       <div class="list" id="list"></div>
     </div>
     <div class="stack">
       <div class="panel">
         <h2>${mode==='new'?'New soldier':esc(s.name)}</h2>
-        <p class="sub">${mode==='new'?'Name, age, and sex are required.':admin?'Change any value and save. Clearing a box clears that result.':'Enter new results. Boxes marked "recorded" already have a result; typing replaces it.'}</p>
+        ${sc?`<p class="sub no-tuck" style="margin:0 0 10px">Total <b>${fmt1(sc.total)}</b> \u00B7 rank ${ranked('overall').findIndex(r=>r.s.id===s.id)+1} \u00B7 <button class="linkish" id="oneProfile">Profile</button></p>`:''}
+        <p class="sub no-tuck">${mode==='new'?'Name, age, and sex are required.':admin?'Change any value and save. Clearing a box clears it.':'Typing in a "recorded" box replaces that result.'}</p>
         <div class="grid">
           <label class="field" style="grid-column:span 2"><span>Name</span><input class="input" id="i-name" value="${esc(s?s.name:'')}" placeholder="Last, First"></label>
           <label class="field"><span>Age</span><input class="input" id="i-age" inputmode="numeric" value="${esc(s?s.age:'')}"></label>
@@ -2957,29 +2988,18 @@ function renderOne(c){
           return `<label class="field"><span>${lbl}</span>${ctl}</label>`; }).join('')}</div>`:''}
         <div class="row" style="margin-top:16px;justify-content:space-between">
           <button class="btn primary" id="saveOne">${mode==='new'?'Add soldier':'Save changes'}</button>
-          ${admin&&s?`<button class="btn danger sm" id="delOne">Remove from tryout</button>`:''}
         </div>
         <div id="oneMsg" style="margin-top:10px"></div>
       </div>
-      ${sc?renderScoreCard(s,sc):''}
-      ${admin&&s?indivTimesHtml(s):''}
-      ${admin&&s?`<h2 class="sect-h">Health and practice</h2>${healthProfileHtml(s,true)}`:''}
     </div>
   </div>`;
   const drawList = q => { q=normName(q);
     $('list').innerHTML = list.filter(x=>normName(x.name).includes(q)).map(x=>`<button data-id="${x.id}" aria-current="${s&&x.id===s.id}"><span>${esc(x.name)}</span><span class="soft" style="font-size:12.5px">${esc(x.sex)} ${esc(x.age)}</span></button>`).join('') || `<p class="sub">No one matches.</p>`;
-    $('list').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{ STATE.selectedId=b.dataset.id; STATE.newMode=false; render(); }); };
+    $('list').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{ STATE.selectedId=b.dataset.id; STATE.newMode=false; render(); if(window.innerWidth<820){ const f=$('i-name'); if(f) f.closest('.panel').scrollIntoView({block:'start'}); } }); };
   drawList(''); $('q').oninput=e=>drawList(e.target.value);
   $('newS').onclick=()=>{ STATE.newMode=true; STATE.selectedId=null; render(); };
-  const wk=$('wkOpen'); if(wk) wk.onclick=()=>{ STATE.weekend=true; if(STATE.wk) STATE.wk.flash=''; render(); window.scrollTo(0,0); };
   $('saveOne').onclick=()=>saveOne(s);
-  if(admin && s) wireHealthProfile(s,true);
-  if(admin && s) wireIndivTimes(s);
-  const d=$('delOne'); if(d) d.onclick=()=>{
-    $('oneMsg').innerHTML=`<div class="note warn">Take ${esc(s.name)} out of the tryout? Their results, health scans, and practice history are kept, and you can put them back from Health. To delete them completely, use Delete person in Health. <div class="row" style="margin-top:8px"><button class="btn danger sm" id="delYes">Remove from tryout</button><button class="btn sm" id="delNo">Keep</button></div></div>`;
-    $('delYes').onclick=()=>{ s.tryout=false; STATE.selectedId=null; STATE.grid=null; save(); toast(`${s.name} is out of the tryout.`); render(); };
-    $('delNo').onclick=()=>{ $('oneMsg').innerHTML=''; };
-  };
+  const op=$('oneProfile'); if(op) op.onclick=()=>openPerson(s.id);
 }
 function recSelect(id, ph){ return `<select class="input" id="${id}"><option value="">${ph||'\u2014'}</option><option value="go">Go</option><option value="nogo">No-Go</option></select>`; }
 function saveOne(s){
@@ -3000,11 +3020,11 @@ function saveOne(s){
   s.updated=new Date().toISOString();
   save(); STATE.selectedId=s.id; STATE.newMode=false; STATE.grid=null; toast(`Saved ${s.name}.`); render();
 }
-function renderScoreCard(s,sc){
-  const S=DATA.settings, idx=ranked('overall').findIndex(r=>r.s.id===s.id);
+function renderScoreCard(s,sc,noHead){
+  const S=DATA.settings, ov=ranked('overall'), idx=ov.findIndex(r=>r.s.id===s.id);
   return `<div class="panel">
     <div class="row" style="justify-content:space-between;align-items:flex-end">
-      <div><h2>Score</h2><div class="big">${fmt1(sc.total)}</div><div class="soft" style="font-size:13px">Overall rank ${idx+1} of ${DATA.soldiers.length}${isCut(sc)?` \u00B7 cut (failed ${esc(sc.cutBy.join(', '))})`:idx<cutIndex(ranked('overall'))?' \u00B7 above the cut line':' \u00B7 below the cut line'}</div></div>
+      ${noHead?'<h2 style="margin:0">Score breakdown</h2>':`<div><h2>Score</h2><div class="big">${fmt1(sc.total)}</div><div class="soft" style="font-size:13px">Overall rank ${idx+1} of ${ov.length}${isCut(sc)?` \u00B7 cut (failed ${esc(sc.cutBy.join(', '))})`:idx<cutIndex(ov)?' \u00B7 above the cut line':' \u00B7 below the cut line'}</div></div>`}
       <span class="chips">${SKILLS_ON().map(k=>chip(skillResult(s,k.k),k.short)).join('')}</span>
     </div>
     <div class="two" style="margin-top:14px">
@@ -3035,16 +3055,9 @@ const TEST_TABS=[['setup','Setup guide',null],['rules','Scoring',null],['aft','A
 function testTabsOn(){
   const a=activeKeys(), all=TEST_TABS.slice(), at=all.findIndex(t=>t[0]==='cft')+1;
   all.splice(at,0,...customTests().map(t=>[ctKey(t), t.short||t.name, [ctKey(t)]]));
-  if(isAdmin()) all.push(['practice','Practice',null]);
   return all.filter(t=>!t[2] || t[2].some(k=>a.includes(k)));
 }
-function renderTests(c){
-  const tabs=testTabsOn();
-  if(!tabs.some(x=>x[0]===STATE.testTab)) STATE.testTab='setup';
-  const t=STATE.testTab;
-  c.innerHTML = `<div class="subtabs seg" role="group" aria-label="Test">${tabs.map(([k,l])=>`<button data-t="${k}" aria-pressed="${k===t}">${l}</button>`).join('')}</div><div id="testBody"></div>`;
-  c.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{ STATE.testTab=b.dataset.t; render(); });
-  const body=$('testBody');
+function renderTestBody(body, t){
   if(WEAPON_KEYS.includes(t)) return testWeapon(body, t);
   if(REPORT_KEYS.includes(t)) return testReport(body, t);
   if(t.startsWith('ct_')) return testCustom(body, ctByKey(t));
@@ -3057,11 +3070,11 @@ function testSetup(el){
   el.innerHTML = `<div class="stack guide">
     <div class="panel">
       <h2>How to run the tryout</h2>
-      <p class="sub">Follow this page exactly so every team tests the same way. Each event also has its own screen under Tests &amp; rules with the tools the grader needs.</p>
+      <p class="sub">Follow this page exactly so every team tests the same way. Each event also has its own screen under Grade with the tools the grader needs.</p>
       <h3>Before test day</h3>
       <ol class="plain">
         <li>One person is the admin and keeps the master copy of Rusty Anvil on their device. Set the admin PIN when you first open it, and a grader PIN in Settings if you want one.</li>
-        <li>Enter the roster in <b>Team entry</b> (name, age, sex). You can paste it from a spreadsheet.</li>
+        <li>Enter the roster in <b>Grade \u2192 Enter results \u2192 Whole team</b> (name, age, sex). You can paste it from a spreadsheet.</li>
         <li>In <b>Settings</b>, check the events that count, then don't change the settings during the tryout. Events this tryout: ${enabledKeys().map(k=>esc(eventName(k))).join(', ')||'none yet'}. Current settings: ${S.goPoints} points per Go, ${isOn('throw')?`${S.circleBonus} for a grenade in the circle, `:''}cut line at the top ${S.cutLine}, flag if fewer than ${S.minFemale} women are above it${isOn('aft')&&S.aftFailCut?', AFT failure is an automatic cut':''}.</li>
         <li>Graders pick the events they're running when they log in and only see those screens.</li>
         <li>If graders use their own devices, the admin exports a .json from <b>Export / import</b> and sends it to them. After testing, graders send their .json back and the admin imports it. Only import files from graders.</li>
@@ -3084,7 +3097,7 @@ function testSetup(el){
 
     ${customTests().filter(t=>isActive(ctKey(t))).map(t=>`<div class="panel">
       <h2>${esc(t.name)}</h2>
-      <p>Run the test to its own official standard. Enter each soldier's results in <b>Team entry</b> or <b>Individual</b>: ${t.events.map(e=>{ const ty=CT_TYPES[e.type]||{}; return `${esc(e.name)} (${ty.time?'m:ss':esc(e.unit||'number')})`; }).join(', ')}.</p>
+      <p>Run the test to its own official standard. Enter each soldier's results in <b>Grade \u2192 Enter results</b>: ${t.events.map(e=>{ const ty=CT_TYPES[e.type]||{}; return `${esc(e.name)} (${ty.time?'m:ss':esc(e.unit||'number')})`; }).join(', ')}.</p>
       <p class="soft">Rusty Anvil scores each event from the point tables the admin entered, by age and sex.${t.totalMin!=null||t.events.some(e=>e.min!=null)?` Falling below a minimum fails the test${t.failCut?' and is an automatic cut':''}.`:''}</p>
     </div>`).join('')}
     <div class="panel" ${isActive('cft')?'':'hidden'}>
@@ -3094,7 +3107,7 @@ function testSetup(el){
 
     <div class="panel" ${isActive('cff')?'':'hidden'}>
       <h2>Call for fire</h2>
-      <p><b>Setup:</b> a quiet place where the soldier can sit at the device running Rusty Anvil. Open <b>Tests &amp; rules \u2192 Call for fire</b>, leave bracketing on <b>Standard</b>, and choose the soldier in the recorder.</p>
+      <p><b>Setup:</b> a quiet place where the soldier can sit at the device running Rusty Anvil. Open <b>Grade \u2192 Call for fire</b>, leave bracketing on <b>Standard</b>, and choose the soldier in the recorder.</p>
       <ol class="plain">
         <li>Seat the soldier and let them read the written scenario on the screen.</li>
         <li>Press <b>Start mission</b>. The clock gives them 5:00 to send the three transmissions of the initial call for fire.</li>
@@ -3127,7 +3140,7 @@ function testSetup(el){
 
     <div class="panel" ${isActive('tccc')?'':'hidden'}>
       <h2>TCCC</h2>
-      <p><b>Setup:</b> mark a start line. A willing role player lies about 10 meters in front of it as the injured battle buddy. Have a training tourniquet and something to simulate the radio. Open <b>Tests &amp; rules \u2192 TCCC</b> and give the role player the injury from the scenario.</p>
+      <p><b>Setup:</b> mark a start line. A willing role player lies about 10 meters in front of it as the injured battle buddy. Have a training tourniquet and something to simulate the radio. Open <b>Grade \u2192 TCCC</b> and give the role player the injury from the scenario.</p>
       <ol class="plain">
         <li>The soldier starts in the prone at the start line. Read them the scenario.</li>
         <li>Say <b>"Go"</b> and press <b>Start 10:00</b> at the same moment.</li>
@@ -3139,7 +3152,7 @@ function testSetup(el){
 
     ${['fracture','burn'].filter(isActive).map(k=>`<div class="panel">
       <h2>${k==='fracture'?'Fracture':'Burns'}</h2>
-      <p><b>Setup:</b> ${esc(MED[k].setup)} Open <b>Tests &amp; rules \u2192 ${k==='fracture'?'Fracture':'Burns'}</b> and choose the soldier in the recorder.</p>
+      <p><b>Setup:</b> ${esc(MED[k].setup)} Open <b>Grade \u2192 ${k==='fracture'?'Fracture':'Burns'}</b> and choose the soldier in the recorder.</p>
       <ol class="plain">
         <li>Read the scenario on the screen to the soldier and say <b>"Go."</b></li>
         <li>The grader taps each step as the soldier does it. Steps that don't apply to this casualty (${k==='fracture'?'the wound dressing for a closed fracture, or the sling for a leg':'the dressing for a face burn'}) are dimmed and skipped.</li>
@@ -3149,7 +3162,7 @@ function testSetup(el){
     </div>`).join('')}
     ${WEAPON_KEYS.filter(isActive).map(k=>{ const wp=Drill.WEAPONS[k], lim=S.timeLimits[k]; return `<div class="panel">
       <h2>${esc(wp.name)}</h2>
-      <p><b>Setup:</b> the ${esc(wp.name)} on a table or other flat surface, with no ammunition at the station. The soldier starts standing beside it. Open <b>Tests &amp; rules \u2192 ${esc(wp.name)}</b> and choose the soldier in the recorder.</p>
+      <p><b>Setup:</b> the ${esc(wp.name)} on a table or other flat surface, with no ammunition at the station. The soldier starts standing beside it. Open <b>Grade \u2192 ${esc(wp.name)}</b> and choose the soldier in the recorder.</p>
       <ol class="plain">
         <li>Say <b>"Go"</b> and press <b>Start clock</b> at the same moment.</li>
         <li>The soldier clears the weapon, disassembles it, assembles it, and does a functions check: ${wp.phases.map(ph=>esc(phaseTitle(ph)).toLowerCase()).join(', then ')}.</li>
@@ -3161,7 +3174,7 @@ function testSetup(el){
 
     ${REPORT_KEYS.filter(isActive).map(k=>`<div class="panel">
       <h2>${esc(eventName(k))}</h2>
-      <p><b>Setup:</b> the grader and soldier at the device running Rusty Anvil. Open <b>Tests &amp; rules \u2192 ${k==='medevac'?'9-line':k.toUpperCase()}</b> and choose the soldier in the recorder. Pick one way to test and use it for every soldier:</p>
+      <p><b>Setup:</b> the grader and soldier at the device running Rusty Anvil. Open <b>Grade \u2192 ${k==='medevac'?'9-line':k.toUpperCase()}</b> and choose the soldier in the recorder. Pick one way to test and use it for every soldier:</p>
       <ul class="plain">
         <li><b>Spoken:</b> the soldier reads the scenario, then sends the report out loud as if on the radio. The grader marks each line against the answer key, kept out of the soldier's sight.</li>
         <li><b>Typed:</b> the soldier reads the scenario and types each line, then presses Submit. The tool checks grids, date-time groups, and the lettered and numbered lines. The grader checks the lines written in the soldier's own words.</li>
@@ -3250,7 +3263,7 @@ function testCustom(el, t){
   const need=(e,p)=>{ const r=ctColumn(e,L.sex,AGE_BRACKETS.find(b=>b[1]===L.age)[0]); const row=r.find(x=>x[0]<=p)||null; if(!row) return '\u2013'; return (CT_TYPES[e.type]||{}).time?fmtTime(row[1]):row[1]+(e.unit?' '+esc(e.unit):''); };
   el.innerHTML = `<div class="stack">
     <div class="panel"><h2>${esc(t.name)}</h2>
-      <p class="sub">Run each event to its own standard. Record results in Team entry or Individual, and Rusty Anvil scores them from the point tables ${admin?'you set up in Settings':'the admin set up'}.${t.totalMin!=null||t.events.some(e=>e.min!=null)?` Minimums: ${[t.totalMin!=null?`${t.totalMin} total`:'', ...t.events.filter(e=>e.min!=null).map(e=>`${esc(e.name)} ${e.min}`)].filter(Boolean).join(', ')}.${t.failCut?' Failing a minimum is an automatic cut.':''}`:''}</p>
+      <p class="sub">Run each event to its own standard. Record results in Grade \u2192 Enter results, and Rusty Anvil scores them from the point tables ${admin?'you set up in Settings':'the admin set up'}.${t.totalMin!=null||t.events.some(e=>e.min!=null)?` Minimums: ${[t.totalMin!=null?`${t.totalMin} total`:'', ...t.events.filter(e=>e.min!=null).map(e=>`${esc(e.name)} ${e.min}`)].filter(Boolean).join(', ')}.${t.failCut?' Failing a minimum is an automatic cut.':''}`:''}</p>
       <table><thead><tr><th>#</th><th>Event</th><th>Record</th></tr></thead><tbody>
         ${t.events.map((e,i)=>{ const ty=CT_TYPES[e.type]||{}; return `<tr><td>${i+1}</td><td>${esc(e.name)}</td><td>${ty.time?`Time, m:ss (${ty.lower?'faster':'longer'} is better)`:`${esc(e.unit||'Number')} (${ty.lower?'lower':'higher'} is better)`}</td></tr>`; }).join('')}
       </tbody></table>
@@ -3519,7 +3532,7 @@ function testTccc(el){
         <ol class="lines">${sc.lines.slice(0,5).map(l=>`<li><span class="n">${l[0]}</span><div><div class="lbl">${esc(l[1])}</div><div class="val">${esc(l[2])}</div>${l[3]?`<div class="why">${esc(l[3])}</div>`:''}</div></li>`).join('')}</ol>
         <div class="script"><h3>Call through line 5</h3>${sc.script.slice(0,6).map(x=>`<p>${esc(x)}</p>`).join('')}</div>
       </div>
-      ${STATE.tcccShow?'':`<div class="panel"><h2>Steps in order</h2><p class="sub">What each step looks like. Show the solution for this casualty's specifics and the 9-line answer.</p>${tcccGuideHtml()}</div>`}
+      ${STATE.tcccShow?'':`<details class="manage steps-ref"><summary>What each step looks like</summary>${tcccGuideHtml()}</details>`}
     </div>
     <div class="panel" style="padding-top:4px">${recorder('tccc', goButtons('tccc'))}</div>
   </div>`;
@@ -4156,22 +4169,25 @@ function pasteBoxHtml(){
 function addScan(s, scan){ s.scans.push(scan); s.scans.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0); s.updated=new Date().toISOString(); save(); }
 
 /* ---------- a soldier's health profile (admin sees it for anyone; a soldier sees their own) ---------- */
-function healthProfileHtml(s, admin){
-  fixSoldier(s);
-  const scan=latestScan(s), prev=prevScan(s), P=practiceSummary(s);
-  const head = `<div class="row" style="justify-content:space-between;align-items:flex-start">
-      <div><h2 style="margin-bottom:2px">${esc(s.name)}</h2><p class="soft" style="margin:0">${s.age?`Age ${esc(s.age)} \u00B7 `:''}${s.sex==='F'?'Female':s.sex==='M'?'Male':''}${scan?` \u00B7 Last scan ${fmtDay(scan.date)}`:''}</p></div>
-      ${scan?statusBadge(pbfStatus(genderOf(s), numv(scan.pbf))):''}</div>`;
-  const adminBar = admin ? `<div class="panel no-print"><div class="row" style="justify-content:space-between">
-      <label class="row" style="gap:8px"><input type="checkbox" id="hTry" ${s.tryout!==false?'checked':''}> In the tryout <span class="soft" style="font-size:13px">(shows in rankings and entry screens)</span></label>
+function personManageHtml(s){
+  return `<div class="panel no-print"><div class="row" style="justify-content:space-between">
+      <label class="row" style="gap:8px"><input type="checkbox" id="hTry" ${s.tryout!==false?'checked':''}> In the tryout</label>
       <div class="row"><button class="btn sm" id="hPrint">Print</button><button class="btn sm" id="hPin" ${s.pinHash?'':'disabled'}>${s.pinHash?'Reset their PIN':'No PIN set yet'}</button><button class="btn danger sm" id="hDel">Delete person</button></div></div>
       <div class="row" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-        <label class="btn primary sm" style="cursor:pointer">Add InBody scan from a .json<input type="file" accept=".json,application/json" id="hImpFile" hidden></label>
+        <label class="btn sm" style="cursor:pointer">Add InBody scans from a .json<input type="file" accept=".json,application/json" id="hImpFile" hidden></label>
         <button class="btn sm" id="hMergeBtn">Merge a duplicate into ${esc(s.name)}</button>
         ${s.scans.length?`<button class="btn sm" id="hClear">Remove all health data</button>`:''}
       </div>
-      ${healthToolHtml(s)}<div id="hAdminMsg"></div></div>` : '';
-  if(!scan) return `<div class="stack">${adminBar}<div class="panel">${head}<p class="sub" style="margin-top:12px">No scans logged yet.${admin?' Use Log a scan to add one.':' Use Log my scan to add your first one.'}</p></div>${practicePanel(s, P, admin)}</div>`;
+      ${healthToolHtml(s)}<div id="hAdminMsg"></div></div>`;
+}
+function healthProfileHtml(s, admin, opts){
+  fixSoldier(s); opts=opts||{};
+  const scan=latestScan(s), prev=prevScan(s), P=practiceSummary(s);
+  const head = opts.compact ? (scan?`<p class="soft" style="margin:0">Last scan ${fmtDay(scan.date)}</p>`:'') : `<div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div><h2 style="margin-bottom:2px">${esc(s.name)}</h2><p class="soft" style="margin:0">${s.age?`Age ${esc(s.age)} \u00B7 `:''}${s.sex==='F'?'Female':s.sex==='M'?'Male':''}${scan?` \u00B7 Last scan ${fmtDay(scan.date)}`:''}</p></div>
+      ${scan?statusBadge(pbfStatus(genderOf(s), numv(scan.pbf))):''}</div>`;
+  const adminBar = admin && !opts.noAdminBar ? personManageHtml(s) : '';
+  if(!scan) return `<div class="stack">${adminBar}<div class="panel">${head}<p class="sub" style="margin-top:12px">No scans logged yet.${admin?'':' Use Log my scan to add your first one.'}</p></div>${opts.noPractice?'':practicePanel(s, P, admin)}</div>`;
   const t=calcTargets(scan), trend=s.scans.filter(h=>h.date).map(h=>({label:fmtDay(h.date), smm:numv(h.smmLb), pbf:numv(h.pbf)}));
   const rows=[['Weight (lb)','weightLb'],['BMI',null],['Skeletal muscle mass (lb)','smmLb'],['Body fat mass (lb)','bodyFatMassLb'],['Percent body fat','pbf'],['Visceral fat level','visceralFat'],['BMR (kcal)','bmr']];
   const val=(sc,k)=> k ? sc[k] : bmiOf(sc.weightLb, sc.heightIn);
@@ -4184,7 +4200,7 @@ function healthProfileHtml(s, admin){
       </tbody></table>
     </div>
     ${progressPanel(s)}
-    <div class="panel"><h3 style="margin-top:0">Daily calorie and macro targets</h3>
+    ${opts.compact?'<details class="manage"><summary>Calorie, macro, and food targets</summary>':''}<div class="panel"><h3 style="margin-top:0">Daily calorie and macro targets</h3>
       <div class="goal-grid">${GOALS.map(g=>{ const x=t.goals[g.id]; return `<div class="goal-card"><div class="goal-h">${g.label}</div><div class="goal-cal">${x.calories} <span>kcal / day</span></div>
         <div class="kv"><span>Protein</span><b>${x.proteinG} g</b></div><div class="kv"><span>Carbohydrates</span><b>${x.carbG} g</b></div><div class="kv"><span>Fat</span><b>${x.fatG} g</b></div></div>`; }).join('')}</div>
       <div class="note info" style="margin-top:12px">Hydration target: <b>${t.waterOz} oz / day</b> (${(t.waterOz/33.8).toFixed(1)} L) at ${activityById(scan.activityLevel).label.toLowerCase()}</div>
@@ -4193,9 +4209,10 @@ function healthProfileHtml(s, admin){
       <div class="goal-grid">${GOALS.map(g=>`<div class="goal-card"><div class="goal-h">${g.label}</div><p class="sub" style="font-size:13px">${FOOD_TIPS[g.id].tip}</p>
         <p class="food"><b>Protein:</b> ${FOOD_TIPS[g.id].protein.join(', ')}</p><p class="food"><b>Carbs:</b> ${FOOD_TIPS[g.id].carb.join(', ')}</p><p class="food"><b>Fat:</b> ${FOOD_TIPS[g.id].fat.join(', ')}</p></div>`).join('')}</div>
     </div>
+    ${opts.compact?'</details>':''}
     <div class="panel"><h3 style="margin-top:0">Focus areas</h3><ul class="plain">${focusAreas(s).map(n=>`<li>${esc(n)}</li>`).join('')}</ul></div>
     ${scansPanel(s)}
-    ${practicePanel(s, P, admin)}
+    ${opts.noPractice?'':practicePanel(s, P, admin)}
   </div>`;
 }
 // Every scan, newest first, each with Edit and Delete. Editing opens the form right under the table.
@@ -4304,12 +4321,12 @@ function wireHealthProfile(s, admin){
   const es=$('hEditSave'); if(es) es.onclick=()=>{ const sc=readScanForm('he-', $('hEditMsg'), st); if(!sc) return; s.scans[STATE.hEdit.i]=sc; s.scans.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0); save(); STATE.hEdit=null; toast('Scan updated.'); render(); };
   if(!admin) return;
   wireHealthTools(s);
-  $('hTry').onchange=e=>{ s.tryout=e.target.checked; STATE.grid=null; save(); toast(s.tryout?`${s.name} is in the tryout.`:`${s.name} is out of the tryout. Their results are kept.`); render(); };
+  $('hTry').onchange=e=>{ s.tryout=e.target.checked; s.reviewed=true; STATE.grid=null; save(); toast(s.tryout?`${s.name} is in the tryout.`:`${s.name} is out of the tryout. Their results are kept.`); render(); };
   $('hPrint').onclick=()=>window.print();
   const pb=$('hPin'); if(pb) pb.onclick=()=>{ $('hAdminMsg').innerHTML=`<div class="note warn" style="margin-top:10px">Reset ${esc(s.name)}'s PIN? They'll choose a new one the next time they sign in. <div class="row" style="margin-top:8px"><button class="btn danger sm" id="hPinYes">Reset PIN</button><button class="btn sm" id="hPinNo">Cancel</button></div></div>`;
     $('hPinYes').onclick=()=>{ s.pinHash=null; save(); toast('PIN reset.'); render(); }; $('hPinNo').onclick=()=>{ $('hAdminMsg').innerHTML=''; }; };
   $('hDel').onclick=()=>{ $('hAdminMsg').innerHTML=`<div class="note warn" style="margin-top:10px">Delete ${esc(s.name)} completely: tryout results, scans, and practice history, from this device? Download a .json first if you might need it. <div class="row" style="margin-top:8px"><button class="btn danger sm" id="hDelYes">Delete</button><button class="btn sm" id="hDelNo">Cancel</button></div></div>`;
-    $('hDelYes').onclick=()=>{ DATA.soldiers=DATA.soldiers.filter(x=>x.id!==s.id); STATE.hSel=null; STATE.grid=null; save(); toast(`Deleted ${s.name}.`); render(); }; $('hDelNo').onclick=()=>{ $('hAdminMsg').innerHTML=''; }; };
+    $('hDelYes').onclick=()=>{ DATA.soldiers=DATA.soldiers.filter(x=>x.id!==s.id); STATE.hSel=null; STATE.personId=null; STATE.grid=null; save(); toast(`Deleted ${s.name}.`); render(); }; $('hDelNo').onclick=()=>{ $('hAdminMsg').innerHTML=''; }; };
 }
 
 /* ---------- admin: Health tab ---------- */
@@ -4326,7 +4343,7 @@ function healthDash(el){
   el.innerHTML=`<div class="stack">
     <div class="two">
       <div class="panel"><h2>Unit readiness index</h2><div class="hero">${readinessIndex(list)}<span>%</span></div>
-        <p class="sub" style="margin:8px 0 0">Share of soldiers with a scan who are within (or only slightly above) their body-fat target and below the elevated visceral-fat level, from each soldier's latest scan.</p></div>
+        <p class="sub" style="margin:8px 0 0">Share of scanned soldiers in (or just above) their body-fat target and below the elevated visceral-fat level.</p></div>
       <div class="panel"><h2>Roster snapshot</h2>
         <div class="kv"><span>Soldiers on the roster</span><b>${all.length}</b></div><div class="kv"><span>In the tryout</span><b>${tryoutSoldiers().length}</b></div>
         <div class="kv"><span>Awaiting a first scan</span><b>${all.length-list.length}</b></div><div class="kv"><span>Flagged for follow-up</span><b class="${flagged.length?'flag':''}">${flagged.length}</b></div>
@@ -4339,11 +4356,11 @@ function healthDash(el){
     ${trend.length>1?`<div class="panel"><h2>Team progress over time</h2>${trendCharts(trend,'Average ')}</div>`:''}
     <div class="panel"><h2>High-risk and outlier alerts</h2>
       ${!flagged.length?'<p class="sub" style="margin:0">No soldiers flagged right now.</p>':flagged.map(({s,flags})=>`<div class="alert-row"><button class="linkish" data-hopen="${s.id}">${esc(s.name)}</button><ul class="plain">${flags.map(f=>`<li class="${f.level==='high'?'flag':''}">${esc(f.label)}</li>`).join('')}</ul></div>`).join('')}</div>
-    ${!all.length?`<div class="panel"><p class="sub" style="margin:0">No one is on the roster yet. Log a scan, add soldiers in Team entry, or import a .json (your old fitness tracker file works too) from Export / import.</p></div>`:''}
+    ${!all.length?`<div class="panel"><p class="sub" style="margin:0">No one is on the roster yet.</p></div>`:''}
   </div>`;
   $('hPrintAll').onclick=()=>window.print();
   $('hCsv').onclick=exportHealthCsv;
-  el.querySelectorAll('[data-hopen]').forEach(b=>b.onclick=()=>{ STATE.hSel=b.dataset.hopen; STATE.hTab='people'; render(); });
+  el.querySelectorAll('[data-hopen]').forEach(b=>b.onclick=()=>openPerson(b.dataset.hopen,'health'));
 }
 function healthPeople(el){
   const list=DATA.soldiers.slice().sort((a,b)=>a.name.localeCompare(b.name));
@@ -4378,19 +4395,18 @@ function healthLog(el){
     const scan=readScanForm('hl-', msg, st); if(!scan) return;
     if(mode==='new'){ s=fixSoldier({id:uid(), name:$('hl-name').value.trim(), age:+$('hl-age').value||'', sex:$('hl-sex').value, tryout:$('hl-try').checked}); FIELDS.forEach(f=>s[f.k]=null); DATA.soldiers.push(s); }
     else s=soldierById($('hl-who').value);
-    addScan(s, scan); STATE.hSel=s.id; STATE.hTab='people'; STATE.grid=null; toast(`Saved a scan for ${s.name}.`); render();
+    addScan(s, scan); STATE.hSel=s.id; STATE.hLogOpen=false; STATE.grid=null; toast(`Saved a scan for ${s.name}.`); openPerson(s.id,'health');
   };
 }
 function healthPractice(el){
   const rows=DATA.soldiers.map(s=>({s, P:practiceSummary(s)})).sort((a,b)=>(b.P?b.P.last:0)-(a.P?a.P.last:0)||a.s.name.localeCompare(b.s.name));
   const active=rows.filter(r=>r.P);
   el.innerHTML=`<div class="panel"><h2>Practice across the roster</h2>
-    <p class="sub">Practice done while signed in as a soldier. Anonymous practice from the login screen isn't counted. Right means a Go, a full grenade quiz, a clean weapons order, or "Got it all right" on a self-checked report.</p>
+    <p class="sub">Practice done while signed in as a soldier. Practice from the login screen without signing in isn't counted. "Right" means a Go, a full grenade quiz, a clean weapons order, or "Got it all right" on a self-checked report.</p>
     ${active.length?`<div class="scroll"><table><thead><tr><th>Soldier</th><th class="num">Tries</th><th class="num">Right</th><th class="num">Last 7 days</th><th>Last practiced</th><th>Needs work</th></tr></thead><tbody>
       ${rows.map(({s,P})=>`<tr><td><button class="linkish" data-hopen="${s.id}">${esc(s.name)}</button></td>${P?`<td class="num">${P.n}</td><td class="num">${P.pct}%</td><td class="num">${P.week}</td><td>${new Date(P.last).toLocaleDateString()}</td><td>${esc(P.weak)||'<span class="soft">\u2013</span>'}</td>`:'<td class="num soft">0</td><td></td><td></td><td class="soft">Not yet</td><td></td>'}</tr>`).join('')}
     </tbody></table></div>`:'<p class="sub" style="margin:0">Nobody has practiced while signed in yet.</p>'}</div>`;
-  el.querySelectorAll('[data-hopen]').forEach(b=>b.onclick=()=>{ const x=soldierById(b.dataset.hopen);
-    if(x && x.tryout!==false){ STATE.selectedId=x.id; STATE.newMode=false; STATE.tab='one'; } else { STATE.hSel=b.dataset.hopen; STATE.hTab='people'; STATE.tab='health'; } render(); window.scrollTo(0,0); });
+  el.querySelectorAll('[data-hopen]').forEach(b=>b.onclick=()=>openPerson(b.dataset.hopen,'practice'));
 }
 function exportHealthCsv(){
   const rows=[['Name','In tryout','Scan date','Weight (lb)','BMI','SMM (lb)','Body fat mass (lb)','PBF (%)','Visceral fat','BMR','TDEE','Status']];
@@ -4567,15 +4583,15 @@ function tlWire(c){
 function tlInit(){ STATE.tl = STATE.tl || {open:null, dist:{}, del:null, flash:'', showAll:null, indKind:'run', sid:null}; }
 
 /* ---------- Dashboard: team times ---------- */
-function tlTeamPanel(kind){
+function tlTeamPanel(kind, kindSeg){
   const K=TL_KINDS[kind], all=tlOf(kind,'team');
   let seg='', list=all, cap='Best time each day';
   if(kind!=='rope'){ const p=tlPickDist(kind,'team',all); seg=tlDistSeg(kind,'team',p.ds,p.d); list=all.filter(e=>tlDist(e.dist)===p.d); if(p.d) cap=`Best ${p.d} mi time each day`; }
   const top=[...list].sort((a,b)=>a.sec-b.sec).slice(0,5);
   return `<div class="panel tl-panel" data-kind="${kind}">
     <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-      <div><h2>Team ${K.label.toLowerCase()}</h2><p class="sub" style="margin:0">Fastest team times${kind==='rope'?'':' at this distance'}.</p></div>
-      ${tlLogButton(kind,'team')}
+      <div><h2 style="margin:0 0 8px">Team times</h2>${kindSeg||''}</div>
+      <div class="row" style="gap:6px">${tlLogButton(kind,'team')}<button class="btn sm" id="dashWk">Log individual times</button></div>
     </div>
     ${tlFormBlock(kind,'team')}
     ${seg}
@@ -4585,42 +4601,6 @@ function tlTeamPanel(kind){
     ${tlAllTable(kind,'team',all)}
   </div>`;
 }
-function renderDash(c){
-  tlInit();
-  const top=ranked('overall').slice(0,5), n=tryoutSoldiers().length;
-  const best=kind=>{ const all=tlOf(kind,'team'); if(!all.length) return null; const d=kind==='rope'?null:tlDistances(all)[0]; const b=all.filter(e=>!d||tlDist(e.dist)===d).sort((a,b)=>a.sec-b.sec)[0]; return {t:fmtLong(b.sec), s:esc(b.team)+(d?`, ${d} mi`:'')}; };
-  const tile=(kind,lbl)=>{ const b=best(kind); return `<div><b>${b?b.t:'\u2013'}</b><span>${b?`${lbl} (${b.s})`:lbl}</span></div>`; };
-  const empty = !DATA.soldiers.length ? `<div class="panel" style="text-align:center;padding:26px 16px"><p class="sub" style="margin:0 auto 12px">No one is on the roster yet. Add your team in Team entry, or import a .json file.</p><div class="row" style="justify-content:center"><button class="btn primary" id="goTeam">Go to Team entry</button>${SYNC.on?'':'<button class="btn" id="sample">Load example team</button>'}</div></div>` : '';
-  c.innerHTML=`<div class="stack">
-    ${backupBannerHtml()}
-    ${empty}
-    <div class="tiles">
-      <div><b>${n}</b><span>soldiers in tryout</span></div>
-      ${tile('rope','best rope bridge')}${tile('ruck','best team ruck')}${tile('run','best team run')}
-    </div>
-    <div class="two">
-      <div class="panel">
-        <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px"><div><h2>Top 5 overall</h2><p class="sub" style="margin:0">From tryout rankings.</p></div><button class="btn sm" id="dashRank">Full rankings</button></div>
-        ${top.length?`<ol class="top5">${top.map((r,i)=>`<li><span class="t5n">${i+1}</span><span class="t5who"><button class="linkish" data-open="${r.s.id}">${esc(r.s.name)}</button><small>${SKILLS_ON().length?`${r.sc.gos} Go${r.sc.gos===1?'':'s'}`:''}${isCut(r.sc)?' \u00B7 <span style="color:var(--alert)">PT fail</span>':''}</small></span><b>${fmt1(r.sc.total)}</b></li>`).join('')}</ol>`
-          :`<p class="sub" style="margin:6px 0 0">No one is on the tryout roster yet.</p>`}
-      </div>
-      ${tlTeamPanel('rope')}
-    </div>
-    <div class="two">${tlTeamPanel('ruck')}${tlTeamPanel('run')}</div>
-    ${recentPracticeHtml()}
-    <div class="row"><button class="btn" id="dashWk">Log a weekend run or ruck (individual times)</button><span class="sub" style="margin:0;font-size:12.5px">Individual times show on each soldier's page in Individual, not here.</span></div>
-  </div>`;
-  $('dashRank').onclick=()=>{ STATE.tab='rank'; render(); };
-  c.querySelectorAll('[data-tlphoto]').forEach(b=>b.onclick=()=>showPhoto(b.dataset.tlphoto));
-  const ap=$('dashPrac'); if(ap) ap.onclick=()=>{ STATE.tab='tests'; STATE.testTab='practice'; render(); window.scrollTo(0,0); };
-  wireBackupBanner();
-  $('dashWk').onclick=()=>{ STATE.weekend=true; STATE.tab='one'; render(); window.scrollTo(0,0); };
-  const gt=$('goTeam'); if(gt) gt.onclick=()=>{ STATE.tab='team'; render(); };
-  const sm=$('sample'); if(sm) sm.onclick=loadSample;
-  c.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{ STATE.selectedId=b.dataset.open; STATE.newMode=false; STATE.tab='one'; render(); });
-  tlWire(c);
-}
-
 /* ---------- Individual page: one soldier's ruck and run times ---------- */
 function indivTimesHtml(s, ro){
   tlInit();
@@ -4630,7 +4610,7 @@ function indivTimesHtml(s, ro){
   const counts={ruck:tlOf('ruck',s.id).length, run:tlOf('run',s.id).length};
   return `<div class="panel tl-panel" id="indTimes">
     <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-      <div><h2>${ro?'My ruck and run times':'Ruck and run times'}</h2><p class="sub" style="margin:0">${ro?'Log your own runs and rucks. Leadership sees them too, along with times they log for you.':esc(s.name)+"'s times, from weekend runs and the ones they log themselves."}</p></div>
+      <div><h2>${ro?'My ruck and run times':'Runs and rucks'}</h2><p class="sub" style="margin:0">${ro?'Log your own runs and rucks. Leadership sees them too, along with times they log for you.':'Weekend times and the ones they log themselves.'}</p></div>
       ${tlLogButton(kind,s.id)}
     </div>
     <div class="seg" style="margin-bottom:10px" role="group" aria-label="Event">${['run','ruck'].map(k=>`<button data-tlind="${k}" aria-pressed="${k===kind}">${TL_KINDS[k].label}s${counts[k]?` (${counts[k]})`:''}</button>`).join('')}</div>
@@ -4684,8 +4664,7 @@ function renderWeekend(c){
   c.innerHTML=`<div class="stack">
     <div class="panel">
       <div class="row" style="justify-content:space-between;align-items:flex-start">
-        <div><h2>Log a weekend ${W.kind}</h2><p class="sub" style="margin:0">Type everyone's time from one ${W.kind}. Leave a box blank for anyone who didn't go. Each time lands on that soldier's Individual page.</p></div>
-        <button class="btn sm" id="wkBack">Back to Individual</button>
+        <div><h2>Log a ${W.kind} for everyone ${helpBtn('wkhow','How this works')}</h2><p class="sub no-tuck" style="margin:0">Leave blank anyone who didn't go.</p></div>
       </div>
       <div class="seg" style="margin:14px 0 12px" role="group" aria-label="Event">${['run','ruck'].map(k=>`<button data-wkkind="${k}" aria-pressed="${k===W.kind}">${TL_KINDS[k].label}</button>`).join('')}</div>
       <div class="grid">
@@ -4693,7 +4672,7 @@ function renderWeekend(c){
         <label class="field"><span>Distance (miles)</span><input class="input" inputmode="decimal" id="wk_dist" value="${esc(W.dist)}"></label>
         <label class="field" style="grid-column:span 2"><span>Note for everyone (optional)</span><input class="input" id="wk_note" value="${esc(W.note)}" placeholder="e.g. hills, hot day"></label>
       </div>
-      <p class="sub" style="margin:10px 0 0;font-size:13px">Digits only works: 1405 = 14:05${W.kind==='ruck'?', 24830 = 2:48:30':''}. Enter jumps to the next person. A new time for someone already logged on this date replaces theirs.</p>
+      ${helpBox('wkhow', `Each time lands on that soldier's profile. Digits only works: 1405 = 14:05${W.kind==='ruck'?', 24830 = 2:48:30':''}. Enter jumps to the next person. A new time for someone already logged on this date replaces theirs.`)}
       ${W.flash?`<div class="note ok" style="margin-top:12px">${esc(W.flash)}</div>`:''}
     </div>
     <div class="panel" style="padding:8px 14px">
@@ -4707,7 +4686,6 @@ function renderWeekend(c){
     </div>
   </div>`;
   const keep=()=>{ W.date=$('wk_date').value||todayISO(); W.dist=$('wk_dist').value.trim(); W.note=$('wk_note').value.trim(); c.querySelectorAll('[data-wk]').forEach(i=>W.vals[i.dataset.wk]=i.value.trim()); };
-  $('wkBack').onclick=()=>{ STATE.weekend=false; render(); };
   c.querySelectorAll('[data-wkkind]').forEach(b=>b.onclick=()=>{ keep(); if(W.kind!==b.dataset.wkkind){ W.kind=b.dataset.wkkind; W.dist=String(avgCfg(W.kind).dist); W.vals={}; W.bad={}; } W.flash=''; render(); });
   ['wk_date','wk_dist'].forEach(id=>$(id).onchange=()=>{ keep(); W.flash=''; render(); });
   const ins=[...c.querySelectorAll('[data-wk]')];
@@ -4748,7 +4726,7 @@ function recentPracticeHtml(){
   const pr=all.filter(x=>!x.e.time), people=new Set(pr.filter(x=>x.e.t>=weekAgo).map(x=>x.s.id)).size, wk=pr.filter(x=>x.e.t>=weekAgo), right=wk.filter(x=>x.e.ok).length;
   return `<div class="panel">
     <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-      <div><h2>Recent activity</h2><p class="sub" style="margin:0">${wk.length?`Practice, last 7 days: ${people} ${people===1?'person':'people'}, ${wk.length} attempt${wk.length===1?'':'s'}, ${Math.round(right/wk.length*100)}% right.`:'Practice, and runs and rucks soldiers log themselves, show up here.'}</p></div>
+      <div><h2 style="margin:0 0 2px">Recent activity</h2><p class="sub no-tuck" style="margin:0">${wk.length?`Last 7 days: ${people} ${people===1?'person':'people'} practiced, ${Math.round(right/wk.length*100)}% right.`:'Practice and self-logged runs and rucks.'}</p></div>
       <button class="btn sm" id="dashPrac">Everyone's practice</button>
     </div>
     ${all.length?`<ol class="top5 prac-feed">${all.slice(0,8).map(({s,e})=>e.time
@@ -4793,33 +4771,38 @@ function navFor(role){
   const news = whatsNewReady() ? [{id:'news', label:'What\'s new', icon:'news'}] : [];
   if(syncActive()) news.unshift({id:'mypin', label:'Change my PIN', icon:'settings'});
   if(role==='admin') return {
-    tabs:[['dash','Dashboard'],['cal','Calendar'],['rank','Rankings'],['team','Team entry'],['one','Individual'],['health','Health'],['tests','Tests & rules'],['ref','Reference'],['data','Export / import'],['settings','Settings']],
-    bar:['dash','cal','rank','one'], actions:[shareA, ...news, outA]};
+    tabs:[['home','Home'],['people','People'],['grade','Grade'],['cal','Calendar'],['ref','Reference'],['data','Export / import'],['settings','Settings']],
+    primary:['home','people','grade','cal'], bar:['home','people','grade','cal'], actions:[shareA, ...news, outA]};
   if(role==='soldier') return {
     tabs:[['mydash','Home'],['myhealth','My health'],['mylog','Log my scan'],...(meSoldier() && meSoldier().tryout!==false?[['myresults','My tryout results']]:[]),['cal','Calendar'],['mytimes','My times'],['mypractice','Practice'],['ref','Reference']],
     bar:['mydash','cal','mytimes','mypractice'], actions:[{id:'myexport', label:'Export my data', icon:'export'}, shareA, ...news, outA]};
   if(role==='practice') return {
     tabs:[['practice','Practice'],['ref','Reference']], bar:['practice','ref'], barActions:[shareA, {id:'signout', label:'Exit', icon:'signout'}], actions:[...news]};
   return { // grader
-    tabs:[['team','Team entry'],['one','Individual'],['tests','Tests & rules'],['cal','Calendar'],['ref','Reference'],['data','Export / import']],
-    bar:['team','one','tests','cal'], actions:[{id:'events', label:'Change events', icon:'events'}, shareA, ...news, outA]};
+    tabs:[['grade','Grade'],['cal','Calendar'],['ref','Reference'],['data','Export / import']],
+    primary:['grade','cal','ref'], bar:['grade','cal','ref'], actions:[{id:'events', label:'Change events', icon:'events'}, shareA, ...news, outA]};
 }
-const TAB_ICON = {mydash:'dash',cal:'cal',dash:'dash',rank:'rank',team:'team',one:'one',health:'health',tests:'tests',ref:'ref',data:'data',settings:'settings',myhealth:'health',mylog:'mylog',myresults:'myresults',mytimes:'mytimes',mypractice:'practice',practice:'practice'};
+const TAB_ICON = {home:'dash',people:'one',grade:'tests',mydash:'dash',cal:'cal',dash:'dash',rank:'rank',team:'team',one:'one',health:'health',tests:'tests',ref:'ref',data:'data',settings:'settings',myhealth:'health',mylog:'mylog',myresults:'myresults',mytimes:'mytimes',mypractice:'practice',practice:'practice'};
 
 // Draws the frame and returns the content element, or null when the frame handled the screen itself (Reference, Share).
 function shell(app, role, who){
   const N=navFor(role), keys=N.tabs.map(t=>t[0]);
+  if(OLD_TAB[STATE.tab] && keys.includes(OLD_TAB[STATE.tab])){
+    if(STATE.tab==='tests') STATE.gView=STATE.testTab; else if(STATE.tab==='team'||STATE.tab==='one'){ STATE.gView='results'; STATE.gMode=STATE.tab; }
+    STATE.tab=OLD_TAB[STATE.tab];
+  }   // saved sessions from before the new layout
   if(!keys.includes(STATE.tab) && STATE.tab!=='share') STATE.tab=keys[0];
+  const prim=N.primary||keys, deskMore=!!N.primary;
   const label=k=>(N.tabs.find(t=>t[0]===k)||[k,k])[1];
   const moreTabs=N.tabs.filter(t=>!N.bar.includes(t[0]));
   const hasMore = moreTabs.length || N.actions.length;
   const inMore = moreTabs.some(t=>t[0]===STATE.tab) || STATE.tab==='share' && role!=='practice';
   const barBtn=(k,lbl,ic,cur,attr)=>`<button class="bb" ${attr} ${cur?'aria-current="page"':''}>${icon(ic)}<span>${esc(lbl)}</span></button>`;
-  const deskBtns = N.actions.concat(N.barActions||[]).filter(a=>a.id!=='news').map(a=>`<button class="btn sm" data-act="${a.id}" ${a.id==='signout'?'id="logout"':a.id==='events'?'id="chgEv"':a.id==='myexport'?'id="myExport"':''}>${esc(a.label)}</button>`).join('');
+  const deskBtns = deskMore ? '' : N.actions.concat(N.barActions||[]).filter(a=>a.id!=='news').map(a=>`<button class="btn sm" data-act="${a.id}" ${a.id==='signout'?'id="logout"':a.id==='events'?'id="chgEv"':a.id==='myexport'?'id="myExport"':''}>${esc(a.label)}</button>`).join('');
   app.innerHTML = `
   <header class="app-header">
     <div class="app-title">${logoImg()}<span>Rusty Anvil</span><span class="app-sub">ROTC UCM Skills Trainer</span></div>
-    <nav class="tabs" aria-label="Sections">${N.tabs.map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${esc(l)}${k==='cal'&&calUnseen()?'<i class="nav-dot" aria-label="updated"></i>':''}</button>`).join('')}</nav>
+    <nav class="tabs" aria-label="Sections">${N.tabs.filter(([k])=>prim.includes(k)).map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${esc(l)}${k==='cal'&&calUnseen()?'<i class="nav-dot" aria-label="updated"></i>':''}</button>`).join('')}${deskMore?`<button class="tab" id="tabMore" aria-haspopup="true" ${inMore?'aria-current="page"':''}>More \u25BE</button>`:''}</nav>
     <div class="who"><span>${esc(who)}${syncActive()?'<span id="syncStat" class="sync-stat"></span>':''}</span><span class="who-btns">${deskBtns}</span></div>
   </header>
   <main class="main"><div id="calRemind">${calReminderHtml()}</div><div id="content"></div></main>
@@ -4835,10 +4818,12 @@ function shell(app, role, who){
     <button class="sheet-item sheet-close" id="sheetClose">Close</button>
   </div></div>`;
   const sheet=$('moreSheet');
-  const go=k=>{ if(STATE.cal && k!=='cal') delete STATE.cal.seenAtOpen; STATE.tab=k; STATE.weekend=false; sheet.hidden=true; render(); window.scrollTo(0,0); };
+  const go=k=>{ if(STATE.cal && k!=='cal') delete STATE.cal.seenAtOpen; if(k===STATE.tab && k==='people') STATE.personId=null; STATE.tab=k; STATE.weekend=false; sheet.hidden=true; render(); window.scrollTo(0,0); };
   app.querySelectorAll('[data-tab],[data-nav]').forEach(b=>b.onclick=()=>go(b.dataset.tab||b.dataset.nav));
   app.querySelectorAll('[data-act],[data-navact]').forEach(b=>b.onclick=()=>{ sheet.hidden=true; shellAction(b.dataset.act||b.dataset.navact, role); });
-  const mb=$('bbMore'); if(mb) mb.onclick=()=>{ sheet.hidden=false; const f=sheet.querySelector('.sheet-item'); if(f) f.focus(); };
+  const openMore=()=>{ sheet.hidden=false; const f=sheet.querySelector('.sheet-item'); if(f) f.focus(); };
+  const mb=$('bbMore'); if(mb) mb.onclick=openMore;
+  const tm=$('tabMore'); if(tm) tm.onclick=openMore;
   $('sheetClose').onclick=()=>{ sheet.hidden=true; };
   sheet.onclick=e=>{ if(e.target===sheet) sheet.hidden=true; };
   sheet.onkeydown=e=>{ if(e.key==='Escape') sheet.hidden=true; };
@@ -4860,7 +4845,7 @@ function shellAction(id, role){
 }
 function signOut(){
   if(SYNC.on && STATE.session && STATE.session.role!=='practice' && SYNC.cfg.token && !syncSignOut()) return;
-  STATE.session=null; STATE.graderEvents=null; STATE.weekend=false; STATE.gate={step:'choose',error:''};
+  STATE.session=null; STATE.graderEvents=null; STATE.weekend=false; STATE.gView=null; STATE.gMode=null; STATE.personId=null; STATE.pView=null; STATE.selectedId=null; STATE.gate={step:'choose',error:''};
   forgetSession(); render(); window.scrollTo(0,0);
 }
 
@@ -5263,8 +5248,8 @@ async function syncSignedIn(res, keep){
   STATE.session = u.role==='soldier' ? {role:'soldier', soldierId:u.sid} : {role:ROLE_FROM_SERVER[u.role]};
   STATE.gate={step:'choose', error:''};
   await syncPull(true);
-  if(u.role==='admin') STATE.tab='dash';
-  else if(u.role==='grader'){ STATE.graderEvents=null; STATE.tab='team'; }
+  if(u.role==='admin') STATE.tab='home';
+  else if(u.role==='grader'){ STATE.graderEvents=null; STATE.tab='grade'; }
   else STATE.tab='mydash';
   syncStart(); render(); window.scrollTo(0,0);
 }
@@ -6061,6 +6046,257 @@ function renderSoldierHome(c, s){
   $('shCal').onclick=()=>{ STATE.tab='cal'; render(); window.scrollTo(0,0); };
   $('shProg').onclick=()=>{ STATE.practiceMode='progress'; STATE.tab='mypractice'; render(); window.scrollTo(0,0); };
   c.querySelectorAll('[data-shprac]').forEach(b=>b.onclick=()=>{ STATE.practiceMode=PRACTICE_MODE[b.dataset.shprac]||'medevac'; STATE.tab='mypractice'; render(); window.scrollTo(0,0); });
+}
+
+/* ============================== admin and grader layout: Home, People, Grade ============================== */
+// Old tab names (saved sessions, older links in the code) map onto the new ones.
+const OLD_TAB = {dash:'home', rank:'people', one:'grade', team:'grade', health:'people', tests:'grade'};
+
+/* ---------- "?" help: extra words stay one tap away ---------- */
+function helpBtn(key, label){ return `<button type="button" class="help-q" data-help="${key}" aria-expanded="false" aria-label="${esc(label||'More about this')}">?</button>`; }
+function helpBox(key, html){ return `<div class="help-box" data-helpbox="${key}" hidden>${html}</div>`; }
+// Long intro text under a heading: keep the first sentence, tuck the rest behind a "?".
+function splitFirstSentence(html){
+  let depth=0;
+  for(let i=0;i<html.length-1;i++){
+    const ch=html[i];
+    if(ch==='<') depth++; else if(ch==='>') depth--;
+    else if(!depth && (ch==='.'||ch==='?'||ch==='!') && /\s/.test(html[i+1])){
+      const rest=html.slice(i+1).trim(); if(rest.replace(/<[^>]*>/g,'').trim().length<2) return null;
+      return [html.slice(0,i+1), rest];
+    }
+  }
+  return null;
+}
+function tuckText(root){
+  if(!root) return;
+  root.querySelectorAll('p.sub, p.soft').forEach(p=>{
+    if(p.id || p.dataset.tucked || p.closest('.drill,.guide,.help-box,.recorder,.no-tuck')) return;
+    const prev=p.previousElementSibling; if(!prev || !/^H[23]$/.test(prev.tagName)) return;
+    if(p.querySelector('button,input,select,textarea,a,label')) return;
+    if(p.textContent.trim().length<90) return;
+    const parts=splitFirstSentence(p.innerHTML); if(!parts) return;
+    p.dataset.tucked='1';
+    p.innerHTML=`${parts[0]} <button type="button" class="help-q" data-tuck aria-expanded="false" aria-label="More about this">?</button><span class="tuck-more" hidden> ${parts[1]}</span>`;
+  });
+}
+document.addEventListener('click', e=>{
+  const b=e.target.closest('[data-help],[data-tuck]'); if(!b) return;
+  const box = b.dataset.help!=null ? document.querySelector(`[data-helpbox="${b.dataset.help}"]`) : b.nextElementSibling;
+  if(!box) return;
+  box.hidden=!box.hidden; b.setAttribute('aria-expanded', String(!box.hidden));
+});
+
+/* ---------- small shared bits ---------- */
+function openPerson(id, view){ STATE.tab='people'; STATE.personId=id; if(view) STATE.personView=view; render(); window.scrollTo(0,0); }
+function goGrade(view, extra){ STATE.tab='grade'; STATE.gView=view||'results'; Object.assign(STATE, extra||{}); render(); window.scrollTo(0,0); }
+function segHtml(name, opts, cur, label){ return `<div class="seg" role="group" aria-label="${esc(label||name)}">${opts.map(([k,l])=>`<button data-${name}="${k}" aria-pressed="${k===cur}">${l}</button>`).join('')}</div>`; }
+function testTabFor(k){ const t=TEST_TABS.find(x=>x[2]&&x[2].includes(k)); return t?t[0]:'results'; }
+
+/* ============================== Home ============================== */
+// Events where someone in the tryout still has no result.
+function gradeGaps(){
+  const T=tryoutSoldiers(), gaps=[];
+  if(!T.length) return gaps;
+  const add=(name, view, miss)=>{ const n=T.filter(miss).length; if(n) gaps.push({name, view, n}); };
+  if(isOn('aft')) add('AFT','aft', s=>EVENTS.some(e=>s[e.k]==null));
+  if(isOn('cft')) add('CFT','cft', s=>s.cft==null);
+  customTests().filter(t=>isOn(ctKey(t))).forEach(t=>add(t.short||t.name, ctKey(t), s=>!score(s).ct[t.id].complete));
+  SKILLS_ON().forEach(sk=>add(sk.name, testTabFor(sk.k), s=>!skillResult(s,sk.k)));
+  return gaps;
+}
+function attentionItems(){
+  const out=[], T=tryoutSoldiers(), S=DATA.settings;
+  const fresh=DATA.soldiers.filter(s=>s.tryout===false && !s.reviewed && !s.sample);
+  if(fresh.length) out.push({kind:'fresh', list:fresh});
+  const gaps=gradeGaps();
+  if(gaps.length) out.push({kind:'gaps', list:gaps, total:T.length});
+  if(T.length){
+    const overall=ranked('overall'), cut=cutIndex(overall), topF=overall.slice(0,cut).filter(r=>r.s.sex==='F').length;
+    if(T.length>cut && topF<S.minFemale) out.push({kind:'line', text:`Only ${topF} ${topF===1?'woman is':'women are'} above the cut line (you want ${S.minFemale}).`, btn:'Rankings', go:()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='rank'; }});
+  }
+  const list=withScans(); if(list.length){ const st=bmrSmmStats(list), fl=list.filter(s=>riskFlags(s,st).length).length;
+    if(fl) out.push({kind:'line', text:`${fl} ${fl===1?'soldier is':'soldiers are'} flagged for a health follow-up.`, btn:'See who', go:()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='health'; }}); }
+  const t=todayISO(), occ=calExpand(t, addDays(t,6));
+  if(!Object.values(occ).some(L=>L&&L.length)) out.push({kind:'line', text:'Nothing on the calendar for the next 7 days.', btn:'Calendar', go:()=>{ STATE.tab='cal'; }});
+  return out;
+}
+function attentionHtml(){
+  const items=attentionItems();
+  if(!items.length) return `<div class="panel att"><h2>Needs attention</h2><p class="att-ok">You're all caught up.</p></div>`;
+  const rows=items.map((it,i)=>{
+    if(it.kind==='fresh'){
+      const L=it.list, few=L.length<=3;
+      if(L.length===1) return `<li><div class="att-line"><span><b>${esc(L[0].name)}</b> signed up and isn't in the tryout.</span><span class="row" style="gap:6px;flex-wrap:nowrap"><button class="btn primary sm" data-attadd="${L[0].id}">Add</button><button class="btn sm" data-attskip="${L[0].id}">Not now</button></span></div></li>`;
+      const person=s=>`<li class="att-sub"><span>${esc(s.name)}</span><span class="row" style="gap:6px"><button class="btn primary sm" data-attadd="${s.id}">Add to tryout</button><button class="btn sm" data-attskip="${s.id}">Not now</button></span></li>`;
+      return `<li><div class="att-line"><span>${L.length===1?`<b>${esc(L[0].name)}</b> signed up and isn't in the tryout.`:`<b>${L.length} people</b> signed up and aren't in the tryout.`}</span>${few?'':`<button class="btn sm" data-atttoggle="fresh">Review</button>`}</div>
+        <ul class="att-list" data-attlist="fresh" ${few?'':'hidden'}>${L.map(person).join('')}${L.length>1?`<li class="att-sub"><span></span><button class="btn sm" data-attskipall="1">Not now for all</button></li>`:''}</ul></li>`;
+    }
+    if(it.kind==='gaps'){
+      const L=it.list, top=L.slice(0,3);
+      const g=x=>`<li class="att-sub"><span><b>${esc(x.name)}</b>: ${x.n} of ${it.total} still need a result</span><button class="btn sm" data-attgrade="${x.view}">Grade</button></li>`;
+      return `<li><div class="att-line"><span>Results still needed in <b>${L.length} event${L.length===1?'':'s'}</b>.</span>${L.length>3?`<button class="btn sm" data-atttoggle="gaps">Show all</button>`:''}</div>
+        <ul class="att-list">${top.map(g).join('')}</ul>${L.length>3?`<ul class="att-list" data-attlist="gaps" hidden>${L.slice(3).map(g).join('')}</ul>`:''}</li>`;
+    }
+    return `<li><div class="att-line"><span>${esc(it.text)}</span><button class="btn sm" data-attgo="${i}">${esc(it.btn)}</button></div></li>`;
+  }).join('');
+  return `<div class="panel att"><h2>Needs attention</h2><ul class="att-items">${rows}</ul></div>`;
+}
+function wireAttention(c){
+  const items=attentionItems();
+  c.querySelectorAll('[data-attgo]').forEach(b=>b.onclick=()=>{ const it=items[+b.dataset.attgo]; if(it&&it.go){ it.go(); render(); window.scrollTo(0,0); } });
+  c.querySelectorAll('[data-attgrade]').forEach(b=>b.onclick=()=>goGrade(b.dataset.attgrade));
+  c.querySelectorAll('[data-atttoggle]').forEach(b=>b.onclick=()=>{ const l=c.querySelector(`[data-attlist="${b.dataset.atttoggle}"]`); if(l){ l.hidden=!l.hidden; b.textContent=l.hidden?(b.dataset.atttoggle==='fresh'?'Review':'Show all'):'Hide'; } });
+  c.querySelectorAll('[data-attadd]').forEach(b=>b.onclick=()=>{ const s=soldierById(b.dataset.attadd); if(!s) return; s.tryout=true; s.reviewed=true; STATE.grid=null; save(); toast(`${s.name} is in the tryout.`); render(); });
+  c.querySelectorAll('[data-attskip]').forEach(b=>b.onclick=()=>{ const s=soldierById(b.dataset.attskip); if(!s) return; s.reviewed=true; save(); render(); });
+  c.querySelectorAll('[data-attskipall]').forEach(b=>b.onclick=()=>{ DATA.soldiers.forEach(s=>{ if(s.tryout===false && !s.reviewed) s.reviewed=true; }); save(); render(); });
+}
+function healthSnapHtml(){
+  const all=DATA.soldiers, list=withScans();
+  if(!list.length) return `<div class="panel"><div class="row" style="justify-content:space-between;align-items:flex-start"><h2 style="margin:0">Health</h2><button class="btn sm" data-gohealth="1">Health details</button></div><p class="sub" style="margin:8px 0 0">No InBody scans yet.</p></div>`;
+  const st=bmrSmmStats(list), fl=list.filter(s=>riskFlags(s,st).length).length, ov=teamOverview(list);
+  return `<div class="panel"><div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:10px"><h2 style="margin:0">Health</h2><button class="btn sm" data-gohealth="1">Health details</button></div>
+    <div class="tiles tiles2">
+      <div><b>${readinessIndex(list)}%</b><span>readiness ${helpBtn('ready','What is readiness?')}</span></div>
+      <div><b>${ov.avgPBF}%</b><span>average body fat</span></div>
+      <div><b>${list.length}<small> of ${all.length}</small></b><span>have a scan</span></div>
+      <div><b class="${fl?'flag':''}">${fl}</b><span>flagged for follow-up</span></div>
+    </div>${helpBox('ready','Readiness is the share of soldiers with a scan who are in (or just above) their body-fat target and below the elevated visceral-fat level, from each soldier\'s latest scan.')}</div>`;
+}
+function renderHome(c){
+  tlInit();
+  const top=ranked('overall').slice(0,5), kind=STATE.homeKind||'rope';
+  const empty = !DATA.soldiers.length ? `<div class="panel" style="text-align:center;padding:26px 16px"><h2>Add your team</h2><p class="sub" style="margin:0 auto 12px">Type or paste your roster, or import a .json file.</p><div class="row" style="justify-content:center"><button class="btn primary" id="goTeam">Add your team</button>${SYNC.on?'':'<button class="btn" id="sample">Load example team</button>'}</div></div>` : '';
+  c.innerHTML=`<div class="stack">
+    ${backupBannerHtml()}
+    ${empty}
+    ${DATA.soldiers.length?attentionHtml():''}
+    <div class="two">
+      <div class="panel">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px"><h2 style="margin:0">Top 5</h2><button class="btn sm" id="dashRank">Rankings</button></div>
+        ${top.length?`<ol class="top5">${top.map((r,i)=>`<li><span class="t5n">${i+1}</span><span class="t5who"><button class="linkish" data-open="${r.s.id}">${esc(r.s.name)}</button><small>${SKILLS_ON().length?`${r.sc.gos} Go${r.sc.gos===1?'':'s'}`:''}${isCut(r.sc)?' \u00B7 <span style="color:var(--alert)">PT fail</span>':''}</small></span><b>${fmt1(r.sc.total)}</b></li>`).join('')}</ol>`
+          :`<p class="sub" style="margin:6px 0 0">No one is in the tryout yet.</p>`}
+      </div>
+      ${healthSnapHtml()}
+    </div>
+    ${tlTeamPanel(kind, segHtml('homekind', ['rope','ruck','run'].map(k=>[k, TL_KINDS[k].label]), kind, 'Team event'))}
+    ${recentPracticeHtml()}
+  </div>`;
+  $('dashRank').onclick=()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='rank'; render(); window.scrollTo(0,0); };
+  c.querySelectorAll('[data-homekind]').forEach(b=>b.onclick=()=>{ STATE.homeKind=b.dataset.homekind; if(STATE.tl.open && STATE.tl.open.startsWith('team:')) STATE.tl.open=null; render(); });
+  c.querySelectorAll('[data-gohealth]').forEach(b=>b.onclick=()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='health'; render(); window.scrollTo(0,0); });
+  c.querySelectorAll('[data-tlphoto]').forEach(b=>b.onclick=()=>showPhoto(b.dataset.tlphoto));
+  const ap=$('dashPrac'); if(ap) ap.onclick=()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='practice'; render(); window.scrollTo(0,0); };
+  const iw=$('dashWk'); if(iw) iw.onclick=()=>goGrade('times');
+  wireBackupBanner();
+  const gt=$('goTeam'); if(gt) gt.onclick=()=>goGrade('results', {gMode:'team'});
+  const sm=$('sample'); if(sm) sm.onclick=loadSample;
+  c.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPerson(b.dataset.open));
+  if(DATA.soldiers.length) wireAttention(c);
+  tlWire(c);
+}
+
+/* ============================== People ============================== */
+const PVIEWS=[['rank','Rankings'],['all','Everyone'],['health','Health'],['practice','Practice']];
+function renderPeople(c){
+  const s=STATE.personId && soldierById(STATE.personId);
+  if(s) return renderPerson(c, s);
+  STATE.personId=null;
+  if(!PVIEWS.some(v=>v[0]===STATE.pView)) STATE.pView='rank';
+  const v=STATE.pView;
+  c.innerHTML=`<div class="subtabs seg no-print" role="group" aria-label="People">${PVIEWS.map(([k,l])=>`<button data-pview="${k}" aria-pressed="${k===v}">${l}</button>`).join('')}</div><div id="pBody"></div>`;
+  c.querySelectorAll('[data-pview]').forEach(b=>b.onclick=()=>{ STATE.pView=b.dataset.pview; render(); });
+  const body=$('pBody');
+  if(v==='rank') return renderRank(body);
+  if(v==='all') return peopleList(body);
+  if(v==='practice') return healthPractice(body);
+  // health: the team picture, with logging a scan one tap away
+  if(STATE.hLogOpen){ body.innerHTML=`<div class="row" style="margin-bottom:10px"><button class="btn sm" id="hLogBack">\u2190 Health</button></div><div id="hLogBody"></div>`; $('hLogBack').onclick=()=>{ STATE.hLogOpen=false; render(); }; return healthLog($('hLogBody')); }
+  body.innerHTML=`<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn primary sm" id="hLogOpen">Log a scan</button></div><div id="hDashBody"></div>`;
+  $('hLogOpen').onclick=()=>{ STATE.hLogOpen=true; render(); };
+  healthDash($('hDashBody'));
+}
+function peopleList(el){
+  const f=STATE.pFilter||'all', q=STATE.pQuery||'';
+  const all=DATA.soldiers.slice().sort((a,b)=>a.name.localeCompare(b.name));
+  const ranks={}; ranked('overall').forEach((r,i)=>ranks[r.s.id]={i:i+1, t:r.sc.total});
+  const pass=x=>f==='all'||(f==='in'?x.tryout!==false:x.tryout===false);
+  el.innerHTML=`<div class="panel">
+    <div class="row" style="justify-content:space-between;gap:10px;margin-bottom:10px">
+      ${segHtml('pfilter', [['all',`All (${all.length})`],['in',`In tryout (${all.filter(x=>x.tryout!==false).length})`],['out','Not in tryout']], f, 'Filter')}
+      <button class="btn primary sm" id="pAdd">+ Add person</button>
+    </div>
+    <input class="input" id="pq" placeholder="Search name" aria-label="Search name" value="${esc(q)}" autocomplete="off" style="margin-bottom:8px">
+    <div class="plist" id="pList"></div></div>`;
+  const draw=()=>{ const n=normName(STATE.pQuery||''); const L=all.filter(x=>pass(x) && normName(x.name).includes(n));
+    $('pList').innerHTML = L.map(x=>{ const sc=latestScan(fixSoldier(x)), r=ranks[x.id];
+      return `<button class="prow" data-pid="${x.id}"><span class="prow-main"><b>${esc(x.name)}</b><small>${[x.sex, x.age, x.tryout!==false?'In tryout':'Not in tryout', sc?'Scan '+fmtDay(sc.date):''].filter(Boolean).map(esc).join(' \u00B7 ')}</small></span>${r?`<span class="prow-rank"><b>${fmt1(r.t)}</b><small>#${r.i}</small></span>`:''}</button>`; }).join('') || `<p class="sub" style="margin:8px 0">${all.length?'No one matches.':'No one on the roster yet.'}</p>`;
+    $('pList').querySelectorAll('[data-pid]').forEach(b=>b.onclick=()=>openPerson(b.dataset.pid)); };
+  draw();
+  $('pq').oninput=e=>{ STATE.pQuery=e.target.value; draw(); };
+  el.querySelectorAll('[data-pfilter]').forEach(b=>b.onclick=()=>{ STATE.pFilter=b.dataset.pfilter; render(); });
+  $('pAdd').onclick=()=>goGrade('results', {gMode:'one', newMode:true, selectedId:null});
+}
+function renderPerson(c, s){
+  fixSoldier(s);
+  const inT=s.tryout!==false, views=[...(inT?[['scores','Scores']]:[]),['times','Times'],['health','Health'],['practice','Practice']];
+  if(!views.some(v=>v[0]===STATE.personView)) STATE.personView=views[0][0];
+  const v=STATE.personView, sc=inT?score(s):null, ov=ranked('overall'), idx=inT?ov.findIndex(r=>r.s.id===s.id):-1, scan=latestScan(s);
+  c.innerHTML=`<div class="stack">
+    <div class="row no-print"><button class="btn sm" id="pBack">\u2190 People</button></div>
+    <div class="panel person-head">
+      <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px">
+        <div><h2 style="margin:0 0 2px">${esc(s.name)}</h2><p class="soft" style="margin:0">${[s.sex==='F'?'Female':s.sex==='M'?'Male':'', s.age?'Age '+s.age:''].filter(Boolean).join(' \u00B7 ')}${inT?'':' \u00B7 <span class="badge b-none">Not in tryout</span>'}</p></div>
+        ${inT?`<div class="person-score"><b>${fmt1(sc.total)}</b><small>Rank ${idx+1} of ${ov.length}${isCut(sc)?' \u00B7 cut':idx<cutIndex(ov)?' \u00B7 above the line':' \u00B7 below the line'}</small></div>`:''}
+      </div>
+      <div class="row" style="margin-top:12px;gap:8px">${inT?`<button class="btn primary sm" id="pGrade">Enter results</button>`:''}${scan?statusBadge(pbfStatus(genderOf(s), numv(scan.pbf))):''}</div>
+    </div>
+    <div class="subtabs seg no-print" role="group" aria-label="${esc(s.name)}">${views.map(([k,l])=>`<button data-perview="${k}" aria-pressed="${k===v}">${l}</button>`).join('')}</div>
+    <div id="perBody">${
+      v==='scores' ? renderScoreCard(s,sc,true)
+      : v==='times' ? indivTimesHtml(s)
+      : v==='health' ? `${STATE.pAddScan?`<div class="panel"><h2>Add a scan</h2>${pasteBoxHtml()}${scanFormHtml('pa-')}<div class="row" style="margin-top:14px"><button class="btn primary" id="paSave">Save scan</button><button class="btn" id="paCancel">Cancel</button></div><div id="paMsg" style="margin-top:10px"></div></div>`
+          :`<div class="row" style="justify-content:flex-end;margin-bottom:10px"><button class="btn primary sm" id="paOpen">Add a scan</button></div>`}${healthProfileHtml(s,true,{noAdminBar:true,noPractice:true,compact:true})}`
+      : practicePanel(s, practiceSummary(s), true)
+    }</div>
+    <details class="manage person-manage no-print" ${STATE.manageOpen?'open':''}><summary>Manage ${esc(s.name)}</summary>${personManageHtml(s)}</details>
+  </div>`;
+  $('pBack').onclick=()=>{ STATE.personId=null; STATE.hTool=null; STATE.pAddScan=false; render(); window.scrollTo(0,0); };
+  const pg=$('pGrade'); if(pg) pg.onclick=()=>goGrade('results', {gMode:'one', selectedId:s.id, newMode:false});
+  c.querySelectorAll('[data-perview]').forEach(b=>b.onclick=()=>{ STATE.personView=b.dataset.perview; STATE.pAddScan=false; render(); });
+  const md=c.querySelector('details.person-manage'); md.addEventListener('toggle',()=>{ STATE.manageOpen=md.open; });
+  if(v==='times') wireIndivTimes(s);
+  const po=$('paOpen'); if(po) po.onclick=()=>{ STATE.pAddScan=true; render(); const d=$('pa-date'); if(d) d.focus(); };
+  const pc=$('paCancel'); if(pc) pc.onclick=()=>{ STATE.pAddScan=false; render(); };
+  if($('paSave')){ const st={}; wirePasteFill('pa-'); $('paSave').onclick=()=>{ const scan=readScanForm('pa-', $('paMsg'), st); if(!scan) return; addScan(s, scan); STATE.pAddScan=false; toast(`Saved a scan for ${s.name}.`); render(); }; }
+  wireHealthProfile(s, true);
+}
+
+/* ============================== Grade ============================== */
+// One place to enter results: one soldier or the whole team, each event's test screen, and (admin) weekend runs and rucks.
+function gradeTabs(){
+  const ev=testTabsOn().filter(t=>!['setup','rules','practice'].includes(t[0]));
+  return [['results','Enter results'], ...ev, ...(isAdmin()?[['times','Runs & rucks']]:[])];
+}
+function renderGrade(c){
+  const tabs=gradeTabs();
+  if(STATE.gView!=='guide' && !tabs.some(t=>t[0]===STATE.gView)) STATE.gView='results';
+  const v=STATE.gView;
+  c.innerHTML=`<div class="grade-nav no-print"><div class="subtabs seg" role="group" aria-label="What you're grading">${tabs.map(([k,l])=>`<button data-gview="${k}" aria-pressed="${k===v}">${esc(l)}</button>`).join('')}</div>
+    <button class="btn sm guide-btn" data-gview="guide" aria-pressed="${v==='guide'}" title="How to run the tryout and how it's scored">? Guide</button></div><div id="gBody"></div>`;
+  c.querySelectorAll('[data-gview]').forEach(b=>b.onclick=()=>{ STATE.gView=b.dataset.gview; render(); });
+  const body=$('gBody');
+  if(v==='results') return gradeResults(body);
+  if(v==='times') return renderWeekend(body);
+  if(v==='guide'){ body.innerHTML='<div id="gGuide1"></div><div id="gGuide2" style="margin-top:16px"></div>'; testSetup($('gGuide1')); testRules($('gGuide2')); return; }
+  STATE.testTab=v; renderTestBody(body, v);
+}
+function gradeResults(el){
+  const m=STATE.gMode==='team'?'team':'one';
+  el.innerHTML=`<div class="row" style="margin-bottom:12px">${segHtml('gmode', [['one','One soldier'],['team','Whole team']], m, 'Enter results for')}</div><div id="gResBody"></div>`;
+  el.querySelectorAll('[data-gmode]').forEach(b=>b.onclick=()=>{ STATE.gMode=b.dataset.gmode; render(); });
+  const body=$('gResBody');
+  if(m==='team') renderTeam(body); else renderOne(body);
 }
 
 load();
