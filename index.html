@@ -5339,6 +5339,7 @@ function syncGateBody(g){
   if(g.step==='pin'){
     const u=(SYNC.names||[]).find(x=>x.id===g.uid)||{}, rp=SYNC.rolePinsPublic||{};
     const needRole = (g.role==='admin'||g.role==='grader') && rp[g.role], first = !u.hasPin;
+    if(first && u.linked) return `<p class="sub"><b>${esc(u.name)}</b> uses the same PIN as their soldier sign-in, and hasn't chosen one yet. Go back, sign in as <b>Soldier</b> once to choose your PIN, then come back here.</p><div class="row"><button class="btn" id="syBack">Back</button></div>`;
     return `<p class="sub">${first?`${esc(u.name)} doesn't have a PIN yet. Choose one so only you can sign in as yourself.`:`Signing in as <b>${esc(u.name)}</b>.`}</p>
       <div class="stack" style="gap:10px">
         ${needRole?`<label class="field"><span>${ROLE_WORD[g.role]} PIN (shared)</span><input class="input" type="password" inputmode="numeric" id="syRole" autocomplete="off"></label>`:''}
@@ -5425,13 +5426,23 @@ function syncWireGate(){
 function syncAccessHtml(){
   const me=SYNC.cfg.user||{}, U=SYNC.users||[], st=STATE.ua||{};
   const staff=U.filter(u=>u.role!=='soldier'), sold=U.filter(u=>u.role==='soldier');
-  const row=u=>`<div class="ua-row"><div><b>${esc(u.name)}</b>${u.id===me.id?' <span class="soft">(you)</span>':''} <span class="badge ${u.role==='admin'?'b-brass':'b-none'}">${u.role}</span>${u.locked?' <span class="badge b-bad">paused: wrong PINs</span>':''}${!u.hasPin?' <span class="soft" style="font-size:12.5px">no PIN yet</span>':''}</div>
-    <div class="row" style="gap:6px">${st.pin===u.id?`<input class="input" style="width:120px" type="password" inputmode="numeric" id="uaPinIn" placeholder="new PIN"><button class="btn primary sm" data-uapinsave="${u.id}">Save</button><button class="btn sm" data-uacancel="1">Cancel</button>`
-      :`<button class="btn sm" data-uapin="${u.id}">${u.hasPin?'Reset PIN':'Set PIN'}</button>${u.locked?`<button class="btn sm" data-uaunlock="${u.id}">Unlock</button>`:''}${u.role!=='soldier'&&u.id!==me.id?(st.del===u.id?`<button class="btn danger sm" data-uadelyes="${u.id}">Remove</button><button class="btn sm" data-uacancel="1">Keep</button>`:`<button class="btn sm" data-uadel="${u.id}">Remove</button>`):''}`}</div></div>`;
+  const extras=sid=>staff.filter(x=>x.pinFrom===sid);   // grader/admin sign-ins tied to this soldier
+  const ROLE=r=>r==='admin'?'Admin':r==='grader'?'Grader':'Soldier';
+  const pinBtns=u=>st.pin===u.id?`<input class="input" style="width:120px" type="password" inputmode="numeric" id="uaPinIn" placeholder="new PIN"><button class="btn primary sm" data-uapinsave="${u.id}">Save</button><button class="btn sm" data-uacancel="1">Cancel</button>`
+    :`<button class="btn sm" data-uapin="${u.id}">${u.hasPin?'Reset PIN':'Set PIN'}</button>${u.locked?`<button class="btn sm" data-uaunlock="${u.id}">Unlock</button>`:''}`;
+  const staffRow=u=>{ const other=u.role==='admin'?'grader':'admin', self=u.id===me.id;
+    return `<div class="ua-row"><div><b>${esc(u.name)}</b>${self?' <span class="soft">(you)</span>':''} <span class="badge ${u.role==='admin'?'b-brass':'b-none'}">${u.role}</span>${u.locked?' <span class="badge b-bad">paused: wrong PINs</span>':''}
+      ${u.pinFrom?`<div class="soft" style="font-size:12.5px">Also on the team. Uses their soldier PIN${u.hasPin?'':' (not chosen yet)'}.</div>`:(!u.hasPin?' <span class="soft" style="font-size:12.5px">no PIN yet</span>':'')}</div>
+    <div class="row" style="gap:6px">${st.pin===u.id?pinBtns(u):(st.del===u.id?`<button class="btn danger sm" data-uadelyes="${u.id}">${u.pinFrom?'Remove '+u.role+' access':'Remove'}</button><button class="btn sm" data-uacancel="1">Keep</button>`
+      :`${u.pinFrom&&!u.hasPin?'':pinBtns(u)}${self?'':`<button class="btn sm" data-uaswap="${u.id}" data-role="${other}">Make ${other}</button><button class="btn sm" data-uadel="${u.id}">${u.pinFrom?'Remove access':'Remove'}</button>`}`)}</div></div>`; };
+  const soldRow=u=>{ const has=extras(u.id).map(x=>x.role), can=['grader','admin'].filter(r=>!has.length);
+    return `<div class="ua-row" data-uaname="${esc(String(u.name).toLowerCase())}"><div><b>${esc(u.name)}</b>${has.map(r=>` <span class="badge ${r==='admin'?'b-brass':'b-none'}">also ${r}</span>`).join('')}${u.locked?' <span class="badge b-bad">paused: wrong PINs</span>':''}${!u.hasPin?' <span class="soft" style="font-size:12.5px">no PIN yet</span>':''}</div>
+    <div class="row" style="gap:6px">${pinBtns(u)}${st.pin===u.id?'':can.map(r=>`<button class="btn sm" data-uapromote="${u.id}" data-role="${r}">Make ${r}</button>`).join('')}</div></div>`; };
   const rp=SYNC.rolePins||{};
   return `<div id="uaPanel">
     <p class="sub">Everything is stored in the Rusty Anvil Google Sheet. Admins and graders sign in with the shared PIN for their role plus their own PIN. Soldiers get a sign-in when they're added and choose their PIN the first time.</p>
-    <h3>Admins and graders</h3>${staff.map(row).join('')||'<p class="sub">No one yet.</p>'}
+    <h3>Admins and graders</h3>${staff.map(staffRow).join('')||'<p class="sub">No one yet.</p>'}
+    <p class="sub" style="margin:10px 0 0;font-size:13.5px">Someone on the team who also grades or runs things: open <b>Soldiers</b> below and tap <b>Make grader</b> or <b>Make admin</b>. They keep their soldier sign-in and use the same PIN for both. Use <b>Add person</b> only for cadre who aren't on the roster.</p>
     <div class="grid" style="margin-top:10px">
       <label class="field"><span>Name</span><input class="input" id="uaName" placeholder="Rank Last, First"></label>
       <label class="field"><span>Role</span><select class="input" id="uaRole"><option value="grader">Grader</option><option value="admin">Admin</option></select></label>
@@ -5444,7 +5455,11 @@ function syncAccessHtml(){
       <label class="field"><span>New grader PIN ${rp.grader?'(set)':'(none)'}</span><input class="input" type="password" inputmode="numeric" id="uaGrdPin" placeholder="4 to 8 digits"></label>
     </div>
     <div class="row" style="margin-top:10px"><button class="btn sm" id="uaRolePins">Update shared PINs</button>${rp.grader?'<button class="btn sm" id="uaGrdOff">Remove the grader PIN</button>':''}</div>
-    <details class="tbl" style="margin-top:14px"><summary>Soldiers (${sold.length})</summary>${sold.map(row).join('')}</details>
+    <details class="tbl" style="margin-top:14px" id="uaSoldDet" ${st.soldOpen?'open':''}><summary>Soldiers (${sold.length})</summary>
+      ${sold.length>8?`<input class="input" id="uaFind" placeholder="Search names" aria-label="Search soldiers" autocomplete="off" style="margin:8px 0 2px" value="${esc(st.find||'')}">`:''}
+      ${st.promote?(()=>{ const u=sold.find(x=>x.id===st.promote.id)||{}; return `<div class="note info" style="margin:8px 0">Give <b>${esc(u.name)}</b> ${st.promote.role} access? They'll see a ${st.promote.role} sign-in on the login screen, use their soldier PIN plus the shared ${st.promote.role} PIN, and stay on the team and in the rankings.${u.hasPin?'':' They haven\'t chosen a PIN yet, so they need to sign in as Soldier once first.'}
+        <div class="row" style="margin-top:8px"><button class="btn primary sm" id="uaPromYes">Make ${st.promote.role}</button><button class="btn sm" data-uacancel="1">Cancel</button></div></div>`; })():''}
+      <div id="uaSoldList">${sold.map(soldRow).join('')}</div></details>
     <div id="uaMsg" style="margin-top:10px"></div></div>`;
 }
 async function syncAdminOps(ops, okMsg){
@@ -5453,15 +5468,22 @@ async function syncAdminOps(ops, okMsg){
     if(r.auth===false) return syncSignedOutByServer(r.error);
     const bad=(r.results||[]).find(x=>!x.ok);
     if(!r.ok || bad){ toast((bad&&bad.error)||r.error||'That didn\'t work.'); return false; }
-    STATE.ua={}; toast(okMsg); await syncPull(false); render(); return true;
+    STATE.ua={soldOpen:(STATE.ua||{}).soldOpen, find:(STATE.ua||{}).find}; toast(okMsg); await syncPull(false); render(); return true;
   }catch(e){ toast('No connection. Try again when you have signal.'); return false; }
 }
 function syncWireAccess(){
   const P=$('uaPanel'); if(!P) return;
   STATE.ua=STATE.ua||{};
-  P.querySelectorAll('[data-uapin]').forEach(b=>b.onclick=()=>{ STATE.ua={pin:b.dataset.uapin}; render(); const i=$('uaPinIn'); if(i) i.focus(); });
-  P.querySelectorAll('[data-uadel]').forEach(b=>b.onclick=()=>{ STATE.ua={del:b.dataset.uadel}; render(); });
-  P.querySelectorAll('[data-uacancel]').forEach(b=>b.onclick=()=>{ STATE.ua={}; render(); });
+  const keep=o=>Object.assign({soldOpen:STATE.ua.soldOpen, find:STATE.ua.find}, o);
+  const det=$('uaSoldDet'); if(det) det.addEventListener('toggle',()=>{ STATE.ua.soldOpen=det.open; });
+  const fi=$('uaFind'), filt=()=>{ const q=(fi.value||'').trim().toLowerCase(); STATE.ua.find=fi.value; P.querySelectorAll('#uaSoldList .ua-row').forEach(r=>{ r.style.display=!q||r.dataset.uaname.includes(q)?'':'none'; }); };
+  if(fi){ fi.oninput=filt; filt(); }
+  P.querySelectorAll('[data-uapin]').forEach(b=>b.onclick=()=>{ STATE.ua=keep({pin:b.dataset.uapin}); render(); const i=$('uaPinIn'); if(i) i.focus(); });
+  P.querySelectorAll('[data-uapromote]').forEach(b=>b.onclick=()=>{ STATE.ua=keep({promote:{id:b.dataset.uapromote, role:b.dataset.role}}); render(); });
+  const py=$('uaPromYes'); if(py) py.onclick=()=>{ const pr=STATE.ua.promote, u=(SYNC.users||[]).find(x=>x.id===pr.id)||{}; syncAdminOps([{op:'promote', id:pr.id, role:pr.role}], `${u.name} can now sign in as ${pr.role==='admin'?'an admin':'a grader'} too.`); };
+  P.querySelectorAll('[data-uaswap]').forEach(b=>b.onclick=()=>{ const u=(SYNC.users||[]).find(x=>x.id===b.dataset.uaswap)||{}; syncAdminOps([{op:'user', id:u.id, patch:{role:b.dataset.role}}], `${u.name} is now ${b.dataset.role==='admin'?'an admin':'a grader'}.`); });
+  P.querySelectorAll('[data-uadel]').forEach(b=>b.onclick=()=>{ STATE.ua=keep({del:b.dataset.uadel}); render(); });
+  P.querySelectorAll('[data-uacancel]').forEach(b=>b.onclick=()=>{ STATE.ua=keep({}); render(); });
   P.querySelectorAll('[data-uapinsave]').forEach(b=>b.onclick=()=>{ const p=$('uaPinIn').value.trim(); if(!/^\d{4,8}$/.test(p)) return toast('PIN must be 4 to 8 digits.'); syncAdminOps([{op:'user', id:b.dataset.uapinsave, pin:p}], 'PIN saved.'); });
   P.querySelectorAll('[data-uaunlock]').forEach(b=>b.onclick=()=>syncAdminOps([{op:'user', id:b.dataset.uaunlock, unlock:true}], 'Unlocked.'));
   P.querySelectorAll('[data-uadelyes]').forEach(b=>b.onclick=()=>syncAdminOps([{op:'userDel', id:b.dataset.uadelyes}], 'Removed.'));
