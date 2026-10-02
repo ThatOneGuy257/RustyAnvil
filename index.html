@@ -319,6 +319,73 @@ body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inse
 }
 .sync-stat{font-size:12px;color:var(--good);margin-left:8px}.sync-stat.warn{color:var(--brass)}
 .ua-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
+ol.top5.prac-feed li{grid-template-columns:4.4rem minmax(0,1fr) auto}
+.pg-badge{font-size:12px;font-weight:600;border-radius:20px;padding:2px 8px;text-align:center}
+.pg-badge.ok{background:var(--goodBg);color:var(--good)}.pg-badge.bad{background:var(--alertBg);color:var(--alert)}
+.pg-badge.log{background:var(--brassBg);color:var(--brass)}
+.photo-sheet{max-width:640px}
+.nav-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--brass);margin-left:5px;vertical-align:top}
+.bb{position:relative}.bb .nav-dot{position:absolute;top:4px;left:calc(50% + 8px);margin:0}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:14px}
+.cal-dow{background:var(--panelAlt);text-align:center;font-size:12px;color:var(--inkSoft);padding:6px 0}.cal-dow .one{display:none}
+.cal-cell{background:var(--panel);min-height:96px;padding:5px;border:0;text-align:left;color:var(--ink);font:inherit;cursor:pointer;display:flex;flex-direction:column;gap:3px;min-width:0}
+.cal-cell:hover{background:var(--panelAlt)}
+.cal-cell.out{background:var(--bg)}.cal-cell.out .cal-n{color:var(--inkSoft);opacity:.6}
+.cal-n{font-size:13px;font-weight:600;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;border-radius:50%}
+.cal-cell.today .cal-n{background:var(--navy);color:var(--navyInk)}
+.cal-cell.sel{box-shadow:inset 0 0 0 2px var(--brass)}
+.cal-chips{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cal-chip{font-size:11.5px;line-height:1.3;padding:1px 5px;border-radius:4px;background:var(--goodBg);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cal-chip.multi{background:var(--brassBg)}.cal-chip.new{box-shadow:inset 3px 0 0 var(--brass)}
+.cal-chip b{font-weight:600;color:var(--good)}
+.cal-more{font-size:11px;color:var(--inkSoft)}
+.cal-dots{display:none}
+.cal-entry{border-top:1px solid var(--line);padding:12px 0}
+.cal-entry:first-of-type{border-top:0}
+.cal-ws{margin-top:8px}
+.cal-ws .kv span:first-child{min-width:5.5em}
+.cal-notes{margin:8px 0 0;font-size:14px;white-space:normal}
+.cal-nudge{margin:6px 0 0;font-size:13px;color:var(--brass)}
+.cal-rep{font-size:12.5px;margin:6px 0 0}
+.cal-up{list-style:none;margin:0;padding:0}
+.cal-uplink{display:grid;grid-template-columns:6.2rem minmax(0,1fr);gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:none;color:var(--ink);font:inherit;text-align:left;padding:9px 0;cursor:pointer}
+.cal-up li:first-child .cal-uplink{border-top:0}
+.cal-upd{font-size:13px;color:var(--inkSoft)}.cal-uplink small{display:block;color:var(--inkSoft);font-size:12.5px}
+.cal-form{max-width:560px;max-height:92vh}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cal-remind{display:flex;flex-direction:column;gap:6px;margin-bottom:14px}
+.cal-rm{display:flex;align-items:center;gap:6px;background:var(--brassBg);border:1px solid var(--line);border-radius:8px}
+.cal-rm-go{flex:1;border:0;background:none;color:var(--ink);font:inherit;font-size:14px;text-align:left;padding:10px 12px;cursor:pointer}
+.cal-rm-x{border:0;background:none;color:var(--inkSoft);font-size:20px;padding:6px 12px;cursor:pointer}
+@media (max-width:760px){
+  .cal-cell{min-height:58px;padding:4px 2px;align-items:center}
+  .cal-chips{display:none}.cal-dots{display:flex;gap:3px;flex-wrap:wrap;justify-content:center}
+  .cal-dots i{width:6px;height:6px;border-radius:50%;background:var(--good)}.cal-dots i.new{background:var(--brass)}
+  .cal-dow .full{display:none}.cal-dow .one{display:inline}
+  .cal-top{padding:14px 10px}.cal-top h2{font-size:16px;min-width:8em!important}
+}
+.set-sec summary{align-items:flex-start}.set-sec summary h2{margin:0}
+.set-body{margin-top:14px;border-top:1px solid var(--line);padding-top:6px}
+.ce-row{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line)}
+.ce-clip{display:inline-block;max-width:52ch;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+.ce-ed{background:var(--panelAlt);border:1px solid var(--line);border-radius:8px;padding:12px;margin:4px 0 12px}
+.ce-ta{min-height:180px;font-family:var(--mono);font-size:13px}
+.ce-h4{margin:16px 0 4px;font-size:15px}
+.md-h{font-family:var(--serif);font-size:16px;margin:14px 0 6px}.md-p{margin:6px 0}
+.md-ol{list-style:none;padding:0;margin:6px 0}.md-ol li{display:grid;grid-template-columns:2rem minmax(0,1fr);gap:8px;padding:6px 0;border-top:1px solid var(--line)}
+.md-n{font-weight:700;color:var(--navy)}.md-ul{margin:6px 0;padding-left:20px}.md-ul li{margin:3px 0}
+@media (max-width:560px){.ce-clip{max-width:26ch}}
+.sh-hello h2{font-family:var(--serif);font-size:22px;margin:0}
+.sh-log .tl-form{border:0;padding:0;background:none;margin:0}
+.sh-log .tl-form .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.sh-log .tl-photo{grid-column:1/-1}
+.sh-day{padding:8px 0;border-top:1px solid var(--line)}.sh-day:first-of-type{border-top:0}.sh-day h3{margin:0 0 4px}
+.sh-ev{display:flex;flex-direction:column;align-items:flex-start;width:100%;text-align:left;border:1px solid var(--line);background:var(--panelAlt);color:var(--ink);font:inherit;border-radius:8px;padding:8px 10px;margin-top:6px;cursor:pointer}
+.sh-ev span{font-size:13px;color:var(--inkSoft)}
+.sh-kind{padding:10px 0;border-top:1px solid var(--line)}.sh-kind:first-of-type{border-top:0}
+.sh-tiles{margin-top:8px}.sh-tiles b{font-size:20px}
+.sh-weak{list-style:none;margin:0;padding:0}.sh-weak li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--line)}.sh-weak li:first-child{border-top:0}.sh-weak li>div{flex:1;min-width:0}
+.sh-bar{height:6px;background:var(--panelAlt);border-radius:4px;margin:5px 0 3px;overflow:hidden}.sh-bar i{display:block;height:100%;background:var(--alert);border-radius:4px}
 .tl-form{border:1px solid var(--line);border-radius:8px;padding:14px;background:var(--panelAlt);margin-bottom:12px}
 figure.mini{margin:0}
 figure.mini figcaption{font-size:13px;color:var(--inkSoft);margin-bottom:4px}
@@ -405,6 +472,7 @@ tr.editing td{background:var(--panelAlt)}
 @media (prefers-reduced-motion:no-preference){.drill .answer:not([hidden]){animation:rev .22s ease-out}
 @keyframes rev{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}}
 .drill{min-height:calc(100vh - 70px)}
+.drill.embed{min-height:0}
 .drill *,.drill *::before,.drill *::after{box-sizing:border-box}
 
 .drill .study{margin-top:14px;border:1px solid var(--line);border-radius:8px;padding:10px 14px;background:var(--bg)}
@@ -546,6 +614,7 @@ function rebuildRegistry(){
         long:`${e.name}${ty.time?' (m:ss)':e.unit?` (${e.unit})`:''}`}); });
   });
   if(typeof MERGE_KEYS!=='undefined'){ MERGE_KEYS.length=0; MERGE_KEYS.push('name','age','sex', ...FIELDS.map(f=>f.k)); }
+  if(typeof applyContent==='function') applyContent();
 }
 // Points rows for one sex and age group, highest points first. Blank cells are skipped.
 function ctColumn(e, sex, age){
@@ -692,6 +761,7 @@ function load(){
     DATA.settings.weights = Object.assign({mdl:1,hrp:1,sdc:1,plk:1,run:1}, saved.weights||{});
     DATA.soldiers.forEach(fixSoldier);
     if(!Array.isArray(DATA.timeLogs)) DATA.timeLogs=[];
+    if(!Array.isArray(DATA.calendar)) DATA.calendar=[];
     migrateSettings(DATA.settings);
     if(PACKAGE_LOADED) save();
   }catch(e){}
@@ -1013,6 +1083,8 @@ function readImport(file){
       if(fields.length) plan.conflicts.push({id:mine.id, name:mine.name, fields});
     });
     plan.working = working;
+    const haveCal=new Set((DATA.calendar||[]).map(e=>e.id));
+    plan.cal=(Array.isArray(inc)||!Array.isArray(inc.calendar)?[]:inc.calendar).filter(e=>e && e.id && e.title && !haveCal.has(e.id));
     // Rope bridge, ruck, and run times: add the ones this device doesn't have yet, pointed at the matching soldier here.
     const have=new Set(timeLogs().map(e=>e.id));
     plan.times = (Array.isArray(inc)||!Array.isArray(inc.timeLogs) ? [] : inc.timeLogs)
@@ -1029,12 +1101,13 @@ function applyImport(plan){
   plan.added.forEach(s=>working.push(s));
   DATA.soldiers = working;
   (plan.times||[]).forEach(e=>timeLogs().push(e));
+  (plan.cal||[]).forEach(e=>calList().push(e));
   let settingsNote='';
   if(plan.settings && !DATA.settings.adminPinHash && plan.settings.adminPinHash){
     DATA.settings = migrateSettings(Object.assign(clone(DEFAULT_SETTINGS), {settingsVersion:0}, plan.settings)); rebuildRegistry(); settingsNote=' Scoring settings and PINs came with the file.';
   }
   save(); STATE.pendingImport=null; STATE.grid=null;
-  toast(`Imported: ${plan.added.length} new, ${plan.filled} blank field(s) filled, ${plan.conflicts.length} conflict(s) resolved${plan.scans?`, ${plan.scans} scan(s)`:''}${plan.practice?`, ${plan.practice} practice entr${plan.practice===1?'y':'ies'}`:''}${plan.times&&plan.times.length?`, ${plan.times.length} logged time${plan.times.length===1?'':'s'}`:''}.${settingsNote}`);
+  toast(`Imported: ${plan.added.length} new, ${plan.filled} blank field(s) filled, ${plan.conflicts.length} conflict(s) resolved${plan.scans?`, ${plan.scans} scan(s)`:''}${plan.practice?`, ${plan.practice} practice entr${plan.practice===1?'y':'ies'}`:''}${plan.times&&plan.times.length?`, ${plan.times.length} logged time${plan.times.length===1?'':'s'}`:''}${plan.cal&&plan.cal.length?`, ${plan.cal.length} calendar entr${plan.cal.length===1?'y':'ies'}`:''}.${settingsNote}`);
   render();
 }
 
@@ -2463,12 +2536,12 @@ $('copy').onclick=async()=>{
   try{await navigator.clipboard.writeText(cur.text);$('dToast').textContent='Scenario copied.';}
   catch(e){const r=document.createRange();r.selectNodeContents($('scenario'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('dToast').textContent='Scenario selected. Press Ctrl+C (or \u2318C) to copy.';}
 };
-generate();
+if(opts && opts.mode && root.querySelector(`.modes [data-mode="${opts.mode}"]`)) setMode(opts.mode); else generate();
 
   }
   // Read-only progress for the admin's view of a soldier.
   const progressView = log => '<div class="drill embed">'+progressHtml(log).replace(/^<h2>My progress<\/h2>/,'')+'</div>';
-  return {mount, WEAPONS, GRENADES, wStudyHtml, genMedevac, genSpot, genSalute, PTASKS, progressView};
+  return {mount, WEAPONS, GRENADES, OBSERVED, CONTACT, INJ, wStudyHtml, genMedevac, genSpot, genSalute, PTASKS, progressView};
 })();
 
 
@@ -2607,7 +2680,7 @@ function wireGate(){
   on('gSoldier',()=>{ STATE.gate={step:'soldierPick',error:''}; render(); });
   on('gsBack',()=>{ STATE.gate={step:'soldierPick',error:''}; render(); });
   on('gsNew',()=>{ STATE.gate={step:'soldierNew',error:''}; render(); });
-  const enterSoldier = x => { STATE.session={role:'soldier', soldierId:x.id}; STATE.tab = x.scans.length ? 'myhealth' : 'mylog'; render(); };
+  const enterSoldier = x => { STATE.session={role:'soldier', soldierId:x.id}; STATE.tab = 'mydash'; render(); };
   if(g.step==='soldierPick'){
     const draw=q=>{ q=normName(q); const L=DATA.soldiers.slice().sort((a,b)=>a.name.localeCompare(b.name)).filter(x=>normName(x.name).includes(q));
       $('gsList').innerHTML = L.map(x=>`<button data-sid="${x.id}"><span>${esc(x.name)}</span></button>`).join('') || '<p class="sub">No matches. Use "I\'m not on this list".</p>';
@@ -3797,9 +3870,16 @@ function renderSettings(c){
   if(STATE.ctDraft) return renderCtEditor(c);
   const S=DATA.settings, wsum=EVENTS.reduce((a,e)=>a+(+S.weights[e.k]||0),0);
   const evBox = e => `<label class="pick-item"><input type="checkbox" data-en="${e.k}" ${S.enabled[e.k]?'checked':''}><span>${esc(e.name)}</span></label>`;
+  const SO=STATE.setOpen=STATE.setOpen||{};
+  const sec=(id,title,sub,body)=>`<details class="panel ref-card set-sec" id="set-${id}" data-sec="${id}" ${SO[id]?'open':''}><summary><div><h2>${title}</h2><p class="sub" style="margin:2px 0 0">${sub}</p></div></summary><div class="set-body">${body}</div></details>`;
+  const saveRow=(id)=>`<div class="row" style="margin-top:14px"><button class="btn primary ${id?'':'saveAny'}" ${id?`id="${id}"`:''}>Save settings</button></div>`;
+  const SECS=[['events','Events'],['weights','Score weights'],['scoring','Scoring rules'],['times','Run & ruck averages'],['weapons','Weapon time limits'],['access',syncActive()?'Sign-in access':'PINs'],['content','App content']];
   c.innerHTML = `<div class="stack">
-    <div class="panel"><h2>Events that count</h2>
-      <p class="sub">Check the events that are part of this tryout. Only checked events show up in the rankings, entry screens, test screens, and Excel file. Unchecking an event keeps any results already saved; they just stop counting.</p>
+    <div class="panel ref-top"><h2>Settings</h2><p class="sub" style="margin-bottom:10px">Tap a section to open it. Changes count for everyone as soon as you save.</p>
+      <div class="ref-chips">${SECS.map(([id,l])=>`<button class="chip-btn" data-setgo="${id}">${l}</button>`).join('')}</div>
+      <div id="setMsg" style="margin-top:10px"></div></div>
+    ${sec('events','Events that count','Which PT tests and Go/No-Go events are part of this tryout, and your own PT tests.', `
+      <p class="sub">Only checked events show up in the rankings, entry screens, test screens, and Excel file. Unchecking an event keeps results already saved; they just stop counting.</p>
       <h3>Physical (points)</h3>
       <div class="ev-grid">${[...PHYS_EVENTS, ...TIME_EVENTS].map(evBox).join('')}</div>
       <p class="sub" style="margin:8px 0 0;font-size:13px">With every PT test off, the ranking is Go points only. A test's automatic cut only applies while that test is on.</p>
@@ -3809,21 +3889,17 @@ function renderSettings(c){
         <div class="row"><button class="btn sm" id="ctAdd">+ Add your own PT test</button><span class="soft" style="font-size:13px">For a new or replacement PT test: your events, your point tables by age and sex, and your minimums.</span></div>
         <div id="ctMsg"></div>
       </div>
+      <h3>Go / No-Go (${S.goPoints} points per Go)</h3>
+      <div class="ev-grid">${ALL_SKILLS.map(evBox).join('')}</div>
+      ${saveRow('saveSet2')}`)}
+    ${sec('weights','Score weights','How the PT tests blend into the physical score, and how much each AFT event counts.', `
       <h3>Physical score mix</h3>
       <p class="sub">When more than one PT test counts, each is put on a 500-point scale and blended by these weights. Only checked tests are used.</p>
       <div class="grid">${[...PHYS_EVENTS, ...TIME_EVENTS].map(e=>{ const on=physKeysOn(), ws=on.reduce((a,k)=>a+physWeight(k),0)||1; return `<label class="field"><span>${esc(e.short)} weight</span><input class="input" id="pw-${e.k}" inputmode="decimal" value="${physWeight(e.k)}"><span class="mono">${isOn(e.k)?fmt1(physWeight(e.k)/ws*100)+'% of physical':'not counted'}</span></label>`; }).join('')}</div>
-      <h3>Go / No-Go (${S.goPoints} points per Go)</h3>
-      <div class="ev-grid">${ALL_SKILLS.map(evBox).join('')}</div>
-      <h3>Weapon time limits</h3>
-      <p class="sub">From "Go" through clearing, disassembly, assembly, and the functions check. The standard is 2:30 for each weapon. Leave a box blank for no limit.</p>
-      <div class="grid">${WEAPON_KEYS.map(k=>`<label class="field"><span>${eventShort(k)} (m:ss)</span><input class="input" id="tl-${k}" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
-      <div class="row" style="margin-top:14px"><button class="btn primary" id="saveSet2">Save settings</button></div>
-    </div>
-    <div class="panel"><h2>AFT event weights</h2>
+      <h3>AFT event weights</h3>
       <p class="sub">A weight of 2 counts that event twice as much as a weight of 1. The weighted score is scaled back to 500, so weights change the balance, not the size of the score.</p>
-      <div class="grid">${EVENTS.map(e=>`<label class="field"><span>${e.name}</span><input class="input" id="w-${e.k}" inputmode="decimal" value="${S.weights[e.k]}"><span class="mono">${fmt1((+S.weights[e.k]||0)/(wsum||1)*100)}% of AFT</span></label>`).join('')}</div>
-    </div>
-    <div class="panel"><h2>Scoring</h2>
+      <div class="grid">${EVENTS.map(e=>`<label class="field"><span>${e.name}</span><input class="input" id="w-${e.k}" inputmode="decimal" value="${S.weights[e.k]}"><span class="mono">${fmt1((+S.weights[e.k]||0)/(wsum||1)*100)}% of AFT</span></label>`).join('')}</div>${saveRow()}`)}
+    ${sec('scoring','Scoring rules','Points per Go, the cut line, grenade ID, and CFT scoring.', `
       <div class="grid">
         <label class="field"><span>Points per Go</span><input class="input" id="s-go" inputmode="numeric" value="${S.goPoints}"></label>
         <label class="field"><span>Cut line (top N)</span><input class="input" id="s-cut" inputmode="numeric" value="${S.cutLine}"></label>
@@ -3838,17 +3914,22 @@ function renderSettings(c){
         <label class="field"><span>CFT time for 100 points</span><input class="input" id="s-best" value="${fmtTime(S.cftBest)}"></label>
         <label class="field"><span>CFT time for 0 points</span><input class="input" id="s-zero" value="${fmtTime(S.cftZero)}"></label>
       </div>
-      <h3>Average run and ruck times</h3>
-      <p class="sub">When "Average run time" or "Average ruck time" is checked under Events that count, each soldier's average at this distance is scored like the CFT and blended into the physical score by its weight. Only times at exactly this distance count. No times logged means 0 points.</p>
+      <div class="row" style="margin-top:14px"><button class="btn primary" id="saveSet">Save settings</button><button class="btn sm" id="resetSet">Restore defaults</button></div>`)}
+    ${sec('times','Run & ruck averages','Scoring for average run and ruck times, and whether self-logged times count.', `
+            <p class="sub">When "Average run time" or "Average ruck time" is checked under Events that count, each soldier's average at this distance is scored like the CFT and blended into the physical score by its weight. Only times at exactly this distance count. No times logged means 0 points.</p>
+      <label class="row" style="gap:8px;margin:0 0 12px"><input type="checkbox" id="av-self" ${S.countSelfTimes?'checked':''}> Count runs and rucks soldiers log themselves (off: only times leadership logs count)</label>
       ${['run','ruck'].map(k=>{ const a=avgCfg(k), L=TL_KINDS[k]; return `<div class="grid" style="margin-bottom:10px">
         <label class="field"><span>${L.label} distance (miles)</span><input class="input" inputmode="decimal" id="av-${k}-dist" value="${a.dist}"></label>
         <label class="field"><span>${L.label} average for 100 points (${L.fmt})</span><input class="input" id="av-${k}-best" value="${fmtLong(a.best)}"></label>
         <label class="field"><span>${L.label} average for 0 points (${L.fmt})</span><input class="input" id="av-${k}-zero" value="${fmtLong(a.zero)}"></label>
       </div>`; }).join('')}
-      <div class="row" style="margin-top:14px"><button class="btn primary" id="saveSet">Save settings</button><button class="btn sm" id="resetSet">Restore defaults</button></div>
-      <div id="setMsg" style="margin-top:10px"></div>
-    </div>
-    ${syncActive()?syncAccessHtml():`<div class="panel"><h2>PINs</h2>
+      ${saveRow()}`)}
+    ${sec('weapons','Weapon time limits','Time allowed to clear, disassemble, assemble, and functions check each weapon.', `
+      
+      <p class="sub">From "Go" through clearing, disassembly, assembly, and the functions check. The standard is 2:30 for each weapon. Leave a box blank for no limit.</p>
+      <div class="grid">${WEAPON_KEYS.map(k=>`<label class="field"><span>${eventShort(k)} (m:ss)</span><input class="input" id="tl-${k}" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
+      ${saveRow()}`)}
+    ${sec('access', syncActive()?'Sign-in access':'PINs', syncActive()?'Who can sign in, shared PINs, and resetting someone\'s PIN.':'The admin and grader PINs on this device.', `${syncActive()?syncAccessHtml():`<div>
       <p class="sub">Both PINs are saved in the .json, so they carry over to any device that imports your roster fresh. They keep casual users out of the admin view; they don't encrypt the data.</p>
       <div class="grid">
         <label class="field"><span>New admin PIN</span><input class="input" type="password" inputmode="numeric" id="pinA"></label>
@@ -3856,8 +3937,13 @@ function renderSettings(c){
       </div>
       ${S.testerPinHash?`<label class="row" style="gap:8px;margin-top:10px"><input type="checkbox" id="pinTOff"> Remove the grader PIN</label>`:''}
       <div class="row" style="margin-top:12px"><button class="btn sm" id="savePins">Update PINs</button></div>
-    </div>`}
+    </div>`}`)}
+    ${sec('content','App content','Edit Reference cards, grading steps, the grenade list, and practice scenarios, so the app stays current without an update.', contentSettingsHtml())}
   </div>`;
+  c.querySelectorAll('details.set-sec').forEach(d=>d.ontoggle=()=>{ SO[d.dataset.sec]=d.open; });
+  c.querySelectorAll('[data-setgo]').forEach(b=>b.onclick=()=>{ SO[b.dataset.setgo]=true; const d=$('set-'+b.dataset.setgo); d.open=true; d.scrollIntoView({behavior:'smooth', block:'start'}); });
+  c.querySelectorAll('.saveAny').forEach(b=>b.onclick=()=>$('saveSet').click());
+  wireContentSettings(c);
   $('saveSet').onclick=()=>{
     const msgs=[], n=id=>+$(id).value;
     const w={}; EVENTS.forEach(e=>{ const v=+$('w-'+e.k).value; if(!(v>=0)||$('w-'+e.k).value.trim()==='') msgs.push(`${e.name} weight must be 0 or more.`); w[e.k]=v; });
@@ -3879,7 +3965,7 @@ function renderSettings(c){
     if(!Object.values(en).some(Boolean)) msgs.push('Turn on at least one event.');
     const tl={}; WEAPON_KEYS.forEach(k=>{ const raw=$('tl-'+k).value.trim(); if(!raw){ tl[k]=null; return; } const v=parseTime(raw); if(!(v>0)) msgs.push(`${eventShort(k)} time limit must be m:ss, or blank for none.`); tl[k]=v; });
     if(msgs.length){ $('setMsg').innerHTML=`<div class="note warn"><ul class="plain">${msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`; $('setMsg').scrollIntoView({block:'center'}); return; }
-    Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, cftBest:best, cftZero:zero, avgTimes:avgT, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
+    Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, cftBest:best, cftZero:zero, avgTimes:avgT, countSelfTimes:$('av-self').checked, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
     rebuildRegistry(); STATE.grid=null; save(); toast('Settings saved. Rankings updated.'); render();
   };
   $('saveSet2').onclick=()=>$('saveSet').click();
@@ -3889,7 +3975,7 @@ function renderSettings(c){
     $('ctMsg').innerHTML=`<div class="note warn" style="margin-top:8px">Delete ${esc(t.name)}? Its point tables are removed and it stops counting. Results already entered stay in the .json. <div class="row" style="margin-top:8px"><button class="btn danger sm" id="ctDelYes">Delete test</button><button class="btn sm" id="ctDelNo">Keep</button></div></div>`;
     $('ctDelYes').onclick=()=>{ S.customTests=S.customTests.filter(x=>x.id!==t.id); delete S.enabled[ctKey(t)]; delete S.physWeights[ctKey(t)]; rebuildRegistry(); STATE.grid=null; save(); toast(`Deleted ${t.name}.`); render(); };
     $('ctDelNo').onclick=()=>{ $('ctMsg').innerHTML=''; }; });
-  $('resetSet').onclick=()=>{ const keep={adminPinHash:S.adminPinHash, testerPinHash:S.testerPinHash, grenadeList:S.grenadeList, enabled:S.enabled, timeLimits:S.timeLimits, customTests:S.customTests}; DATA.settings=Object.assign(clone(DEFAULT_SETTINGS),keep); save(); toast('Settings restored to defaults.'); render(); };
+  $('resetSet').onclick=()=>{ const keep={adminPinHash:S.adminPinHash, testerPinHash:S.testerPinHash, grenadeList:S.grenadeList, enabled:S.enabled, timeLimits:S.timeLimits, customTests:S.customTests}; Object.keys(S).forEach(k=>{ if(k.startsWith('c:')) keep[k]=S[k]; }); DATA.settings=Object.assign(clone(DEFAULT_SETTINGS),keep); rebuildRegistry(); save(); toast('Settings restored to defaults.'); render(); };
   if(syncActive()) syncWireAccess();
   if($('savePins')) $('savePins').onclick=()=>{
     const a=$('pinA').value, t=$('pinT').value;
@@ -4319,11 +4405,12 @@ function soldierExport(){ const s=meSoldier(); if(!s) return;
 function renderSoldierApp(app){
   const s=meSoldier(); if(!s){ STATE.session=null; forgetSession(); render(); return; }
   const c=shell(app, 'soldier', s.name); if(!c) return;
-  if(STATE.tab==='myhealth'){ c.innerHTML=healthProfileHtml(s,false); wireHealthProfile(s,false); }
+  if(STATE.tab==='mydash') renderSoldierHome(c,s);
+  else if(STATE.tab==='myhealth'){ c.innerHTML=healthProfileHtml(s,false); wireHealthProfile(s,false); }
   else if(STATE.tab==='mylog') renderMyLog(c,s);
   else if(STATE.tab==='myresults') renderMyResults(c,s);
   else if(STATE.tab==='mytimes') renderMyTimes(c,s);
-  else { c.innerHTML='<div id="drillRoot"></div>'; Drill.mount($('drillRoot'), {store:{load:()=>({log:s.practice}), save:d=>{ s.practice=d.log; save(); }}, who:s.name}); }
+  else { c.innerHTML='<div id="drillRoot"></div>'; const pm=STATE.practiceMode; STATE.practiceMode=null; Drill.mount($('drillRoot'), {mode:pm, store:{load:()=>({log:s.practice}), save:d=>{ s.practice=d.log; save(); }}, who:s.name}); }
 }
 function renderMyLog(c,s){
   const st={};
@@ -4412,10 +4499,11 @@ function tlFormHtml(kind, who){
     ${kind==='rope'?'':`<label class="field"><span>Distance (miles)</span><input class="input" inputmode="decimal" id="tl_dist" value="${esc(mine.dist || (kind==='ruck'?12:2))}"></label>`}
     <label class="field"><span>Time (${K.fmt})</span><input class="input" id="tl_time" inputmode="numeric" placeholder="${K.ex}"></label>
     <label class="field"><span>Note (optional)</span><input class="input" id="tl_note" placeholder="${kind==='rope'?'e.g. wet rope':'e.g. hills, hot day'}"></label>
+    ${who!=='team' && syncActive()?`<label class="field tl-photo"><span>Photo (optional)</span><input type="file" accept="image/*" id="tl_photo"><span class="soft" style="font-size:12px">A watch or app screenshot works well.</span></label>`:''}
   </div>
   <div class="row" style="margin-top:12px"><button class="btn primary" id="tl_save">Save time</button><button class="btn" id="tl_cancel">Done</button><span id="tl_msg" class="sub" style="margin:0"></span></div></div>`;
 }
-function tlSave(kind, who){
+async function tlSave(kind, who){
   const v=id=>{ const el=$(id); return el?el.value.trim():''; }, msg=$('tl_msg');
   document.querySelectorAll('.tl-form .input.bad').forEach(el=>el.classList.remove('bad'));
   const bad=(id,t)=>{ const el=$(id); if(el){ el.classList.add('bad'); el.focus(); } msg.innerHTML=`<span style="color:var(--alert)">${t}</span>`; };
@@ -4425,9 +4513,14 @@ function tlSave(kind, who){
   if(kind!=='rope'){ const d=+v('tl_dist'); if(!(d>0&&d<100)) return bad('tl_dist','Enter the distance in miles, like 12 or 2.'); e.dist=Math.round(d*100)/100; }
   const sec=parseLong(v('tl_time'));
   if(sec==null||isNaN(sec)||sec<=0) return bad('tl_time',`Enter the time as ${TL_KINDS[kind].fmt}, like ${TL_KINDS[kind].ex}. Digits only works too.`);
-  e.sec=sec;
+  e.sec=sec; e.at=Date.now();
+  if(STATE.session && STATE.session.role==='soldier') e.self=true;
+  const pf=$('tl_photo'), file=pf && pf.files && pf.files[0];
+  let photo=null;
+  if(file){ msg.textContent='Preparing photo\u2026'; try{ photo=await shrinkPhoto(file); }catch(err){ return bad('tl_photo','That picture couldn\'t be read. Try a different one.'); } }
   timeLogs().push(e); save();
-  STATE.tl.flash=`Saved ${who==='team'?e.team+' ':''}${TL_KINDS[kind].label.toLowerCase()}: ${fmtLong(sec)}${e.dist?` for ${tlDist(e.dist)} mi`:''}.`;
+  if(photo) syncQueuePhoto(e.id, photo);
+  STATE.tl.flash=`Saved ${who==='team'?e.team+' ':''}${TL_KINDS[kind].label.toLowerCase()}: ${fmtLong(sec)}${e.dist?` for ${tlDist(e.dist)} mi`:''}${photo?', with photo':''}.`;
   if(e.dist) STATE.tl.dist[tlKey(kind,who)]=tlDist(e.dist);
   render();
   const t=$('tl_time'); if(t) t.focus();
@@ -4441,9 +4534,9 @@ function tlAllTable(kind, who, list, ro){
   if(!list.length) return '';
   const rows=[...list].sort(tlNewest), k=tlKey(kind,who), conf=STATE.tl.del, team=who==='team', dist=kind!=='rope';
   return `<details class="tbl" ${STATE.tl.showAll===k?'open':''} data-tlall="${k}"><summary>All ${team?'team ':''}${TL_KINDS[kind].label.toLowerCase()} times (${rows.length})</summary>
-    <div class="scroll"><table><thead><tr><th>Date</th>${team?'<th>Team</th>':''}${dist?'<th class="num">Miles</th>':''}<th class="num">Time</th>${dist?'<th class="num">Pace</th>':''}<th>Note</th>${ro?'':'<th></th>'}</tr></thead>
-    <tbody>${rows.map(e=>`<tr><td>${esc(tlDate(e.date))}</td>${team?`<td>${esc(e.team)}</td>`:''}${dist?`<td class="num">${tlDist(e.dist)}</td>`:''}<td class="num">${fmtLong(e.sec)}</td>${dist?`<td class="num">${tlPace(e)}</td>`:''}<td>${esc(e.note||'')}</td>
-      ${ro?'':`<td style="white-space:nowrap">${conf===e.id?`<button class="btn danger sm" data-tldelyes="${e.id}">Delete</button> <button class="btn sm" data-tldelno="1">Keep</button>`:`<button class="btn sm" data-tldel="${e.id}" aria-label="Delete this time">Delete</button>`}</td>`}</tr>`).join('')}</tbody></table></div></details>`;
+    <div class="scroll"><table><thead><tr><th>Date</th>${team?'<th>Team</th>':''}${dist?'<th class="num">Miles</th>':''}<th class="num">Time</th>${dist?'<th class="num">Pace</th>':''}<th>Note</th><th></th></tr></thead>
+    <tbody>${rows.map(e=>`<tr><td>${esc(tlDate(e.date))}</td>${team?`<td>${esc(e.team)}</td>`:''}${dist?`<td class="num">${tlDist(e.dist)}</td>`:''}<td class="num">${fmtLong(e.sec)}</td>${dist?`<td class="num">${tlPace(e)}</td>`:''}<td>${e.self?'<span class="badge b-brass" title="Logged by the soldier">self-logged</span> ':''}${esc(e.note||'')}${e.photo?` <button class="btn sm" data-tlphoto="${esc(e.photo)}">Photo</button>`:syncPhotoPending(e.id)?' <span class="soft" style="font-size:12.5px">photo sending\u2026</span>':''}</td>
+      ${ro&&!e.self?'<td></td>':`<td style="white-space:nowrap">${conf===e.id?`<button class="btn danger sm" data-tldelyes="${e.id}">Delete</button> <button class="btn sm" data-tldelno="1">Keep</button>`:`<button class="btn sm" data-tldel="${e.id}" aria-label="Delete this time">Delete</button>`}</td>`}</tr>`).join('')}</tbody></table></div></details>`;
 }
 function tlLogButton(kind, who){
   const k=tlKey(kind,who);
@@ -4460,6 +4553,7 @@ function tlWire(c){
   c.querySelectorAll('details[data-tlall]').forEach(d=>d.ontoggle=()=>{ if(d.open) STATE.tl.showAll=d.dataset.tlall; else if(STATE.tl.showAll===d.dataset.tlall) STATE.tl.showAll=null; });
   c.querySelectorAll('[data-tldel]').forEach(b=>b.onclick=()=>{ STATE.tl.del=b.dataset.tldel; render(); });
   c.querySelectorAll('[data-tldelno]').forEach(b=>b.onclick=()=>{ STATE.tl.del=null; render(); });
+  c.querySelectorAll('[data-tlphoto]').forEach(b=>b.onclick=()=>showPhoto(b.dataset.tlphoto));
   c.querySelectorAll('[data-tldelyes]').forEach(b=>b.onclick=()=>{ DATA.timeLogs=timeLogs().filter(e=>e.id!==b.dataset.tldelyes); STATE.tl.del=null; save(); toast('Time deleted.'); render(); });
   const sv=c.querySelector('#tl_save');
   if(sv){
@@ -4513,9 +4607,12 @@ function renderDash(c){
       ${tlTeamPanel('rope')}
     </div>
     <div class="two">${tlTeamPanel('ruck')}${tlTeamPanel('run')}</div>
+    ${recentPracticeHtml()}
     <div class="row"><button class="btn" id="dashWk">Log a weekend run or ruck (individual times)</button><span class="sub" style="margin:0;font-size:12.5px">Individual times show on each soldier's page in Individual, not here.</span></div>
   </div>`;
   $('dashRank').onclick=()=>{ STATE.tab='rank'; render(); };
+  c.querySelectorAll('[data-tlphoto]').forEach(b=>b.onclick=()=>showPhoto(b.dataset.tlphoto));
+  const ap=$('dashPrac'); if(ap) ap.onclick=()=>{ STATE.tab='tests'; STATE.testTab='practice'; render(); window.scrollTo(0,0); };
   wireBackupBanner();
   $('dashWk').onclick=()=>{ STATE.weekend=true; STATE.tab='one'; render(); window.scrollTo(0,0); };
   const gt=$('goTeam'); if(gt) gt.onclick=()=>{ STATE.tab='team'; render(); };
@@ -4533,11 +4630,11 @@ function indivTimesHtml(s, ro){
   const counts={ruck:tlOf('ruck',s.id).length, run:tlOf('run',s.id).length};
   return `<div class="panel tl-panel" id="indTimes">
     <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:10px">
-      <div><h2>${ro?'My ruck and run times':'Ruck and run times'}</h2><p class="sub" style="margin:0">${ro?'Your times from weekend runs and rucks. Leadership logs these.':esc(s.name)+"'s own times, like weekend runs."}</p></div>
-      ${ro?'':tlLogButton(kind,s.id)}
+      <div><h2>${ro?'My ruck and run times':'Ruck and run times'}</h2><p class="sub" style="margin:0">${ro?'Log your own runs and rucks. Leadership sees them too, along with times they log for you.':esc(s.name)+"'s times, from weekend runs and the ones they log themselves."}</p></div>
+      ${tlLogButton(kind,s.id)}
     </div>
     <div class="seg" style="margin-bottom:10px" role="group" aria-label="Event">${['run','ruck'].map(k=>`<button data-tlind="${k}" aria-pressed="${k===kind}">${TL_KINDS[k].label}s${counts[k]?` (${counts[k]})`:''}</button>`).join('')}</div>
-    ${ro?'':tlFormBlock(kind,s.id)}
+    ${tlFormBlock(kind,s.id)}
     ${avgLine(s,kind)}
     ${tlDistSeg(kind,s.id,p.ds,p.d)}
     ${best?`<div class="tiles tiles3">
@@ -4562,7 +4659,7 @@ const TIME_EVENTS=[{k:'avgrun', kind:'run', short:'Run avg', name:'Average run t
 const AVG_DEFAULTS={run:{dist:2, best:720, zero:1080}, ruck:{dist:12, best:9000, zero:12600}};
 function avgCfg(kind){ return Object.assign({}, AVG_DEFAULTS[kind], ((DATA.settings.avgTimes||{})[kind])||{}); }
 function avgTime(s, kind){
-  const c=avgCfg(kind), d=tlDist(c.dist), L=tlOf(kind,s.id).filter(e=>tlDist(e.dist)===d);
+  const c=avgCfg(kind), d=tlDist(c.dist), L=tlOf(kind,s.id).filter(e=>tlDist(e.dist)===d && (!e.self || DATA.settings.countSelfTimes));
   if(!L.length) return {n:0, avg:null, pts:null, dist:d};
   const avg=L.reduce((a,e)=>a+e.sec,0)/L.length;
   const pts= avg<=c.best ? 100 : avg>=c.zero ? 0 : (c.zero-avg)/(c.zero-c.best)*100;
@@ -4574,7 +4671,7 @@ function avgLine(s, kind){
   const a=avgTime(s,kind), unit=kind==='run'?'run':'ruck';
   return `<div class="note info" style="margin:0 0 10px">${a.n
     ? `Average ${a.dist} mi ${unit}: <b class="mono">${fmtLong(a.avg)}</b> over ${a.n} ${unit}${a.n===1?'':'s'} = <b class="mono">${fmt1(a.pts)}</b> points toward the rankings.`
-    : `The average ${a.dist} mi ${unit} time counts toward the rankings. No ${a.dist} mi ${unit}s logged yet, so it's 0 points for now.`}</div>`;
+    : `The average ${a.dist} mi ${unit} time counts toward the rankings. No ${a.dist} mi ${unit}s logged yet, so it's 0 points for now.`}${!DATA.settings.countSelfTimes && tlOf(kind,s.id).some(e=>e.self)?' Self-logged times don\'t count toward the rankings.':''}</div>`;
 }
 
 /* ---------- weekend quick entry: one run or ruck, everyone's times at once ---------- */
@@ -4641,6 +4738,26 @@ function renderMyTimes(c, s){
   wireIndivTimes(s);
 }
 
+/* ---------- Dashboard: who's been practicing ---------- */
+function agoText(t){ const m=Math.round((Date.now()-t)/60000); if(m<1) return 'just now'; if(m<60) return m+' min ago'; const h=Math.round(m/60); if(h<24) return h+' hr ago'; const d=Math.round(h/24); return d===1?'yesterday':d<7?d+' days ago':new Date(t).toLocaleDateString([], {month:'short', day:'numeric'}); }
+function recentPracticeHtml(){
+  const all=[]; DATA.soldiers.forEach(s=>(s.practice||[]).forEach(e=>all.push({s,e})));
+  timeLogs().forEach(e=>{ const s=e.self && soldierById(e.sid); if(s){ const [y,m,d]=String(e.date).split('-'); all.push({s, e:{t:e.at||new Date(+y,+m-1,+d,12).getTime(), time:e}}); } });
+  all.sort((a,b)=>b.e.t-a.e.t);
+  const label=k=>(Drill.PTASKS.find(p=>p[0]===k)||[0,k])[1], weekAgo=Date.now()-7*864e5;
+  const pr=all.filter(x=>!x.e.time), people=new Set(pr.filter(x=>x.e.t>=weekAgo).map(x=>x.s.id)).size, wk=pr.filter(x=>x.e.t>=weekAgo), right=wk.filter(x=>x.e.ok).length;
+  return `<div class="panel">
+    <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+      <div><h2>Recent activity</h2><p class="sub" style="margin:0">${wk.length?`Practice, last 7 days: ${people} ${people===1?'person':'people'}, ${wk.length} attempt${wk.length===1?'':'s'}, ${Math.round(right/wk.length*100)}% right.`:'Practice, and runs and rucks soldiers log themselves, show up here.'}</p></div>
+      <button class="btn sm" id="dashPrac">Everyone's practice</button>
+    </div>
+    ${all.length?`<ol class="top5 prac-feed">${all.slice(0,8).map(({s,e})=>e.time
+      ? `<li><span class="pg-badge log">${e.time.kind==='ruck'?'Ruck':'Run'}</span><span class="t5who"><button class="linkish" data-open="${s.id}">${esc(s.name)}</button><small>${tlDist(e.time.dist)} mi in ${fmtLong(e.time.sec)} \u00B7 ${tlPace(e.time)} \u00B7 self-logged${e.time.photo?' \u00B7 <button class="linkish" style="font-weight:500" data-tlphoto="'+esc(e.time.photo)+'">photo</button>':''}</small></span><span class="soft" style="font-size:13px;white-space:nowrap">${agoText(e.t)}</span></li>`
+      : `<li><span class="pg-badge ${e.ok?'ok':'bad'}">${e.ok?'Right':'Missed'}</span><span class="t5who"><button class="linkish" data-open="${s.id}">${esc(s.name)}</button><small>${esc(label(e.task))}${e.detail?' \u00B7 '+esc(e.detail):''}</small></span><span class="soft" style="font-size:13px;white-space:nowrap">${agoText(e.t)}</span></li>`).join('')}</ol>`
+      :'<p class="sub" style="margin:6px 0 0">Nothing yet.</p>'}
+  </div>`;
+}
+
 /* ============================== app frame: header, phone tab bar, More menu ============================== */
 // Desktop: tabs across the top. Phones: up to 5 buttons along the bottom, the rest under More.
 const SHARE_URL = 'https://thatoneguy257.github.io/RustyAnvil/';
@@ -4656,6 +4773,7 @@ const ICON_PATHS = {
   ref:'<path d="M5 4h9a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3zM5 17a3 3 0 0 1 3-3h9"/>',
   data:'<path d="M8 4v12M4 12l4 4 4-4M16 20V8M12 12l4-4 4 4"/>',
   settings:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+  cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
   more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
   share:'<path d="M12 4v11M8 8l4-4 4 4M5 13v6h14v-6"/>',
   signout:'<path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/>',
@@ -4673,19 +4791,20 @@ const icon = k => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" s
 function navFor(role){
   const shareA={id:'share', label:'Share Rusty Anvil', icon:'share'}, outA={id:'signout', label:'Sign out', icon:'signout'};
   const news = whatsNewReady() ? [{id:'news', label:'What\'s new', icon:'news'}] : [];
+  if(syncActive()) news.unshift({id:'mypin', label:'Change my PIN', icon:'settings'});
   if(role==='admin') return {
-    tabs:[['dash','Dashboard'],['rank','Rankings'],['team','Team entry'],['one','Individual'],['health','Health'],['tests','Tests & rules'],['ref','Reference'],['data','Export / import'],['settings','Settings']],
-    bar:['dash','rank','one','tests'], actions:[shareA, ...news, outA]};
+    tabs:[['dash','Dashboard'],['cal','Calendar'],['rank','Rankings'],['team','Team entry'],['one','Individual'],['health','Health'],['tests','Tests & rules'],['ref','Reference'],['data','Export / import'],['settings','Settings']],
+    bar:['dash','cal','rank','one'], actions:[shareA, ...news, outA]};
   if(role==='soldier') return {
-    tabs:[['myhealth','My health'],['mylog','Log my scan'],...(meSoldier() && meSoldier().tryout!==false?[['myresults','My tryout results']]:[]),['mytimes','My times'],['mypractice','Practice'],['ref','Reference']],
-    bar:['myhealth','mytimes','mypractice','ref'], actions:[{id:'myexport', label:'Export my data', icon:'export'}, shareA, ...news, outA]};
+    tabs:[['mydash','Home'],['myhealth','My health'],['mylog','Log my scan'],...(meSoldier() && meSoldier().tryout!==false?[['myresults','My tryout results']]:[]),['cal','Calendar'],['mytimes','My times'],['mypractice','Practice'],['ref','Reference']],
+    bar:['mydash','cal','mytimes','mypractice'], actions:[{id:'myexport', label:'Export my data', icon:'export'}, shareA, ...news, outA]};
   if(role==='practice') return {
     tabs:[['practice','Practice'],['ref','Reference']], bar:['practice','ref'], barActions:[shareA, {id:'signout', label:'Exit', icon:'signout'}], actions:[...news]};
   return { // grader
-    tabs:[['team','Team entry'],['one','Individual'],['tests','Tests & rules'],['ref','Reference'],['data','Export / import']],
-    bar:['team','one','tests','ref'], actions:[{id:'events', label:'Change events', icon:'events'}, shareA, ...news, outA]};
+    tabs:[['team','Team entry'],['one','Individual'],['tests','Tests & rules'],['cal','Calendar'],['ref','Reference'],['data','Export / import']],
+    bar:['team','one','tests','cal'], actions:[{id:'events', label:'Change events', icon:'events'}, shareA, ...news, outA]};
 }
-const TAB_ICON = {dash:'dash',rank:'rank',team:'team',one:'one',health:'health',tests:'tests',ref:'ref',data:'data',settings:'settings',myhealth:'health',mylog:'mylog',myresults:'myresults',mytimes:'mytimes',mypractice:'practice',practice:'practice'};
+const TAB_ICON = {mydash:'dash',cal:'cal',dash:'dash',rank:'rank',team:'team',one:'one',health:'health',tests:'tests',ref:'ref',data:'data',settings:'settings',myhealth:'health',mylog:'mylog',myresults:'myresults',mytimes:'mytimes',mypractice:'practice',practice:'practice'};
 
 // Draws the frame and returns the content element, or null when the frame handled the screen itself (Reference, Share).
 function shell(app, role, who){
@@ -4700,12 +4819,12 @@ function shell(app, role, who){
   app.innerHTML = `
   <header class="app-header">
     <div class="app-title">${logoImg()}<span>Rusty Anvil</span><span class="app-sub">ROTC UCM Skills Trainer</span></div>
-    <nav class="tabs" aria-label="Sections">${N.tabs.map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${esc(l)}</button>`).join('')}</nav>
+    <nav class="tabs" aria-label="Sections">${N.tabs.map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${esc(l)}${k==='cal'&&calUnseen()?'<i class="nav-dot" aria-label="updated"></i>':''}</button>`).join('')}</nav>
     <div class="who"><span>${esc(who)}${syncActive()?'<span id="syncStat" class="sync-stat"></span>':''}</span><span class="who-btns">${deskBtns}</span></div>
   </header>
-  <main class="main" id="content"></main>
+  <main class="main"><div id="calRemind">${calReminderHtml()}</div><div id="content"></div></main>
   <nav class="bbar" aria-label="Sections">
-    ${N.bar.map(k=>barBtn(k,label(k),TAB_ICON[k],STATE.tab===k,`data-nav="${k}"`)).join('')}
+    ${N.bar.map(k=>barBtn(k,label(k),TAB_ICON[k],STATE.tab===k,`data-nav="${k}"`).replace('</svg>', k==='cal'&&calUnseen()?'</svg><i class="nav-dot"></i>':'</svg>')).join('')}
     ${(N.barActions||[]).map(a=>barBtn(a.id,a.label,a.icon,STATE.tab===a.id,`data-navact="${a.id}"`)).join('')}
     ${hasMore && role!=='practice' ? barBtn('more','More','more',inMore,'id="bbMore" aria-haspopup="true"') : ''}
   </nav>
@@ -4716,7 +4835,7 @@ function shell(app, role, who){
     <button class="sheet-item sheet-close" id="sheetClose">Close</button>
   </div></div>`;
   const sheet=$('moreSheet');
-  const go=k=>{ STATE.tab=k; STATE.weekend=false; sheet.hidden=true; render(); window.scrollTo(0,0); };
+  const go=k=>{ if(STATE.cal && k!=='cal') delete STATE.cal.seenAtOpen; STATE.tab=k; STATE.weekend=false; sheet.hidden=true; render(); window.scrollTo(0,0); };
   app.querySelectorAll('[data-tab],[data-nav]').forEach(b=>b.onclick=()=>go(b.dataset.tab||b.dataset.nav));
   app.querySelectorAll('[data-act],[data-navact]').forEach(b=>b.onclick=()=>{ sheet.hidden=true; shellAction(b.dataset.act||b.dataset.navact, role); });
   const mb=$('bbMore'); if(mb) mb.onclick=()=>{ sheet.hidden=false; const f=sheet.querySelector('.sheet-item'); if(f) f.focus(); };
@@ -4724,7 +4843,9 @@ function shell(app, role, who){
   sheet.onclick=e=>{ if(e.target===sheet) sheet.hidden=true; };
   sheet.onkeydown=e=>{ if(e.key==='Escape') sheet.hidden=true; };
   if(syncActive()) syncStatus();
+  wireCalReminder($('calRemind'));
   const c=$('content');
+  if(STATE.tab==='cal'){ renderCalendar(c); return null; }
   if(STATE.tab==='ref'){ renderReference(c); return null; }
   if(STATE.tab==='share'){ c.innerHTML=shareHtml(); wireShare(c); return null; }
   return c;
@@ -4733,6 +4854,7 @@ function shellAction(id, role){
   if(id==='signout') return signOut();
   if(id==='share'){ STATE.tab='share'; render(); window.scrollTo(0,0); return; }
   if(id==='news') return showWhatsNew(true);
+  if(id==='mypin') return showMyPin();
   if(id==='events'){ STATE.graderEvents=null; render(); return; }
   if(id==='myexport') return soldierExport();
 }
@@ -4830,6 +4952,42 @@ function wireBackupBanner(){
   const l=$('bkLater'); if(l) l.onclick=()=>{ DATA.backupSnooze=new Date(Date.now()+3*864e5).toISOString(); save(); render(); };
 }
 
+/* ---------- change my own PIN (signed in to the sheet) ---------- */
+function showMyPin(){
+  if(document.getElementById('pinSheet')) return;
+  const w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='pinSheet';
+  w.innerHTML=`<div class="sheet news" role="dialog" aria-modal="true" aria-labelledby="pinH"><h2 id="pinH">Change my PIN</h2>
+    <p class="sub">Pick a PIN only you know, 4 to 8 digits. ${SYNC.cfg.user&&SYNC.cfg.user.role!=='soldier'?'The shared '+SYNC.cfg.user.role+' PIN stays the same.':''}</p>
+    <div class="stack" style="gap:10px">
+      <label class="field"><span>Current PIN</span><input class="input" type="password" inputmode="numeric" id="mpOld" autocomplete="off"></label>
+      <label class="field"><span>New PIN</span><input class="input" type="password" inputmode="numeric" id="mpNew" autocomplete="off"></label>
+      <label class="field"><span>Confirm new PIN</span><input class="input" type="password" inputmode="numeric" id="mpNew2" autocomplete="off"></label>
+      <div id="mpMsg" class="flag"></div>
+      <div class="row"><button class="btn primary" id="mpSave">Save new PIN</button><button class="btn" id="mpCancel">Cancel</button></div>
+    </div></div>`;
+  document.body.appendChild(w);
+  const close=()=>w.remove(), msg=t=>{ w.querySelector('#mpMsg').textContent=t; };
+  w.querySelector('#mpCancel').onclick=close; w.onclick=e=>{ if(e.target===w) close(); };
+  const save=async()=>{
+    const o=w.querySelector('#mpOld').value.trim(), n=w.querySelector('#mpNew').value.trim();
+    if(!o) return msg('Enter your current PIN.');
+    if(!/^\d{4,8}$/.test(n)) return msg('Your new PIN must be 4 to 8 digits.');
+    if(n!==w.querySelector('#mpNew2').value.trim()) return msg('The new PINs don\'t match.');
+    if(n===o) return msg('That\'s the same as your current PIN.');
+    const b=w.querySelector('#mpSave'); b.disabled=true; b.textContent='Saving\u2026';
+    try{
+      const r=await syncApi('push',{token:SYNC.cfg.token, ops:[{op:'myPin', oldPin:o, pin:n}]});
+      if(r.auth===false){ close(); return syncSignedOutByServer(r.error); }
+      const res=(r.results||[])[0]||{};
+      if(!r.ok || !res.ok){ b.disabled=false; b.textContent='Save new PIN'; return msg(res.error||r.error||'That didn\'t work.'); }
+      close(); toast('PIN changed. Use your new PIN next time you sign in.');
+    }catch(e){ b.disabled=false; b.textContent='Save new PIN'; msg('No connection. Try again when you have signal.'); }
+  };
+  w.querySelector('#mpSave').onclick=save;
+  w.querySelectorAll('input').forEach(i=>i.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); save(); } });
+  w.querySelector('#mpOld').focus();
+}
+
 /* ============================== Reference: quick cards, searchable ============================== */
 // Built from the same content the Practice and grading screens use, so they always match.
 function refCards(){
@@ -4879,8 +5037,8 @@ function refCards(){
       <p><b>Example:</b> a 72-inch soldier is 6 mils tall. (72 \u00D7 25.4) \u00F7 6 = 1,828.8 \u00F7 6 = <b>304.8, about 305 meters</b>.</p>
       <p>Close enough counts: within about 2% is correct in Rusty Anvil.</p></div>`},
     {id:'tccc', title:'TCCC', tags:'tccc tactical combat casualty care tourniquet march airway respiration circulation hypothermia napila buddy drag', html: guide(TCCC_GUIDE)},
-    {id:'fracture', title:'Fractures (081-831-1034)', tags:'fracture broken bone splint sling swathe cravat first aid', html: guide(FX_GUIDE)},
-    {id:'burn', title:'Burns (081-831-1007)', tags:'burn burns thermal electrical chemical laser field dressing first aid', html: guide(BN_GUIDE)},
+    {id:'fracture', title:'Fractures', tags:'fracture broken bone splint sling swathe cravat first aid', html: guide(FX_GUIDE)},
+    {id:'burn', title:'Burns', tags:'burn burns thermal electrical chemical laser field dressing first aid', html: guide(BN_GUIDE)},
     {id:'grenade', title:'Grenades', tags:'grenade grenades m67 mk3a2 m84 m18 an-m14 th3 m7a3 m7a2 smoke frag flash bang incendiary cs', html:
       `<div class="ref-gren">${Drill.GRENADES.map(g=>{ const ph=GRENADE_PHOTOS.find(p=>p.name===g.name); return `<div class="rg">${ph?`<img src="${ph.src}" alt="${esc(g.name)}" loading="lazy">`:''}<div><b>${esc(g.name)}</b><p>${esc(g.d)}</p></div></div>`; }).join('')}</div>
       <div class="script"><h3>Steps in grenade deployment</h3>${GRENADE_STEPS.map((s,i)=>`<p>${i+1}. ${esc(s)}</p>`).join('')}</div>`},
@@ -4889,7 +5047,7 @@ function refCards(){
 }
 const REF_TEXT={};
 function renderReference(c){
-  const cards=refCards(), q=normName(STATE.refQ||'');
+  const cards=refCardsEffective(), q=normName(STATE.refQ||''), admin=isAdmin();
   cards.forEach(k=>{ if(!REF_TEXT[k.id]){ const d=document.createElement('div'); d.innerHTML=k.html; REF_TEXT[k.id]=normName(k.title+' '+k.tags+' '+d.textContent); } });
   const words=q.split(' ').filter(Boolean), hit=k=>words.every(w=>REF_TEXT[k.id].includes(w));
   const shown=cards.filter(hit), open=STATE.refOpen||{};
@@ -4897,12 +5055,13 @@ function renderReference(c){
     <div class="panel ref-top"><h2>Reference</h2><p class="sub" style="margin-bottom:10px">Formats, steps, and standards. Tap a card to open it.</p>
       <input class="input" id="refQ" type="search" placeholder="Search the reference" value="${esc(STATE.refQ||'')}" aria-label="Search the reference" autocomplete="off">
       <div class="ref-chips">${cards.map(k=>`<button class="chip-btn" data-refgo="${k.id}">${esc(k.title.replace(/:.*| \(.*/,''))}</button>`).join('')}</div></div>
-    ${shown.length?shown.map(k=>`<details class="panel ref-card" id="ref-${k.id}" ${words.length||open[k.id]?'open':''}><summary><h2>${esc(k.title)}</h2></summary><div class="drill embed ref-body">${k.html}</div></details>`).join('')
+    ${shown.length?shown.map(k=>`<details class="panel ref-card" id="ref-${k.id}" ${words.length||open[k.id]?'open':''}><summary><h2>${esc(k.title)}</h2></summary><div class="drill embed ref-body">${k.html}</div>${admin?`<div class="row" style="margin-top:10px"><button class="btn sm" data-refedit="${k.custom?'refadd:'+k.addId:'ref:'+k.id}">Edit this card</button></div>`:''}</details>`).join('')
       :`<div class="panel"><p class="sub" style="margin:0">Nothing matches "${esc(STATE.refQ)}". Try a shorter word.</p></div>`}
   </div>`;
   const inp=$('refQ');
   inp.oninput=()=>{ STATE.refQ=inp.value; const pos=inp.selectionStart; renderReference(c); const n=$('refQ'); n.focus(); try{ n.setSelectionRange(pos,pos); }catch(e){} };
   c.querySelectorAll('details.ref-card').forEach(d=>d.ontoggle=()=>{ STATE.refOpen=STATE.refOpen||{}; STATE.refOpen[d.id.slice(4)]=d.open; });
+  c.querySelectorAll('[data-refedit]').forEach(b=>b.onclick=()=>{ STATE.ce={ed:b.dataset.refedit}; STATE.setOpen={content:true}; STATE.tab='settings'; render(); const el=document.querySelector('.ce-ed'); if(el) el.scrollIntoView({block:'center'}); });
   c.querySelectorAll('[data-refgo]').forEach(b=>b.onclick=()=>{ STATE.refQ=''; STATE.refOpen=STATE.refOpen||{}; STATE.refOpen[b.dataset.refgo]=true; renderReference(c);
     const d=$('ref-'+b.dataset.refgo); if(d) d.scrollIntoView({block:'start', behavior:'smooth'}); });
 }
@@ -4945,7 +5104,7 @@ async function syncApi(action, body){
 /* ---------- turning the app's data into rows, and back ---------- */
 const PRIVATE_SETTINGS = ['adminPinHash','testerPinHash'];
 function syncFlatten(D){
-  const F={soldiers:{}, scans:{}, practice:{}, times:{}, settings:{}};
+  const F={soldiers:{}, scans:{}, practice:{}, times:{}, calendar:{}, settings:{}};
   (D.soldiers||[]).forEach(s=>{
     const rec={}; Object.keys(s).forEach(k=>{ if(k!=='scans' && k!=='practice' && k!=='pinHash' && k.charAt(0)!=='_') rec[k]=s[k]; });
     F.soldiers[s.id]=rec;
@@ -4953,6 +5112,7 @@ function syncFlatten(D){
     (s.practice||[]).forEach(x=>{ if(x && x.t!=null) F.practice[s.id+'|'+x.t+'|'+x.task]=Object.assign({}, x, {sid:s.id}); });
   });
   (D.timeLogs||[]).forEach(e=>{ if(e && e.id) F.times[e.id]=Object.assign({}, e); });
+  (D.calendar||[]).forEach(e=>{ if(e && e.id) F.calendar[e.id]=Object.assign({}, e); });
   Object.keys(D.settings||{}).forEach(k=>{ if(!PRIVATE_SETTINGS.includes(k)) F.settings[k]=D.settings[k]; });
   return JSON.parse(JSON.stringify(F));
 }
@@ -4960,9 +5120,10 @@ const same = (a,b) => JSON.stringify(a===undefined?null:a)===JSON.stringify(b===
 // What changed since the last time this phone and the sheet agreed, as requests the script understands.
 function syncDiff(A, B, role){
   const ops=[];
-  ['soldiers','scans','practice','times'].forEach(tab=>{
+  ['soldiers','scans','practice','times','calendar'].forEach(tab=>{
+    if(tab==='calendar' && role!=='admin') return;
     if(role==='grader' && tab!=='soldiers') return;
-    if(role==='soldier' && tab!=='scans' && tab!=='practice') return;
+    if(role==='soldier' && tab!=='scans' && tab!=='practice' && tab!=='times') return;
     const a=A[tab]||{}, b=B[tab]||{};
     Object.keys(b).forEach(id=>{
       if(!a[id]){ ops.push({op:'put', tab, id, patch:b[id]}); return; }
@@ -4996,7 +5157,7 @@ function syncApply(res, full){
   if(full){
     try{ if(!localStorage.getItem(PRESYNC_KEY) && DATA.soldiers.length) localStorage.setItem(PRESYNC_KEY, JSON.stringify(DATA)); }catch(e){}
     const keepPins={adminPinHash:DATA.settings.adminPinHash, testerPinHash:DATA.settings.testerPinHash};
-    DATA = {app:'team-tryout-scorebook', version:1, settings:Object.assign(clone(DEFAULT_SETTINGS), {settingsVersion:0}, keepPins), soldiers:[], timeLogs:[]};
+    DATA = {app:'team-tryout-scorebook', version:1, settings:Object.assign(clone(DEFAULT_SETTINGS), {settingsVersion:0}, keepPins), soldiers:[], timeLogs:[], calendar:[]};
   }
   const byId={}; DATA.soldiers.forEach(s=>byId[s.id]=s);
   (d.soldiers||[]).forEach(r=>{
@@ -5015,6 +5176,8 @@ function syncApply(res, full){
     s.practice=s.practice.filter(x=>!(x.t===rec.t && x.task===rec.task)); if(!r._deleted) s.practice.push(rec); s.practice.sort((a,b)=>a.t-b.t); });
   if(!Array.isArray(DATA.timeLogs)) DATA.timeLogs=[];
   (d.times||[]).forEach(r=>{ DATA.timeLogs=DATA.timeLogs.filter(e=>e.id!==r.id); if(!r._deleted) DATA.timeLogs.push(stripMeta(r)); });
+  if(!Array.isArray(DATA.calendar)) DATA.calendar=[];
+  (d.calendar||[]).forEach(r=>{ DATA.calendar=DATA.calendar.filter(e=>e.id!==r.id); if(!r._deleted) DATA.calendar.push(stripMeta(r)); });
   const st=d.settings||{};
   if(Object.keys(st).length){ Object.keys(st).forEach(k=>{ if(!PRIVATE_SETTINGS.includes(k)) DATA.settings[k]=st[k]; }); migrateSettings(DATA.settings); rebuildRegistry(); }
   else if(full){ migrateSettings(DATA.settings); rebuildRegistry(); }
@@ -5030,7 +5193,9 @@ function syncApply(res, full){
 async function syncFlush(){
   if(!syncActive() || SYNC.busy || !SYNC.queue.length) return;
   SYNC.busy=true; syncStatus();
-  const batch=SYNC.queue.slice(0,200);
+  // photos are big, so send them a few at a time
+  let size=0, n=0; while(n<SYNC.queue.length && n<200){ size+=(SYNC.queue[n].data||'').length; if(n && size>2.5e6) break; n++; }
+  const batch=SYNC.queue.slice(0,n);
   try{
     const res=await syncApi('push', {token:SYNC.cfg.token, ops:batch});
     if(res.auth===false) return syncSignedOutByServer(res.error);
@@ -5064,10 +5229,10 @@ async function syncPull(full){
   finally{ SYNC.pulling=false; syncStatus(); }
 }
 // Redraw with fresh data, but never while someone is typing or in the middle of entering something.
-const SAFE_TABS=['dash','rank','health','data','myhealth','mytimes','myresults'];
+const SAFE_TABS=['mydash','dash','rank','health','data','myhealth','mytimes','myresults','cal'];
 function syncRerender(){
   const a=document.activeElement, typing = a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest('#app');
-  const busy = document.querySelector('.tl-form, #moreSheet:not([hidden]), #newsSheet') || STATE.weekend || STATE.pendingImport;
+  const busy = document.querySelector('.tl-form, #moreSheet:not([hidden]), #newsSheet, #calSheet, #pinSheet, #photoSheet') || STATE.weekend || STATE.pendingImport;
   if(typing || busy || !SAFE_TABS.includes(STATE.tab)){ SYNC.pendingRender=true; return; }
   SYNC.pendingRender=false; const y=window.scrollY; render(); window.scrollTo(0,y);
 }
@@ -5100,12 +5265,12 @@ async function syncSignedIn(res, keep){
   await syncPull(true);
   if(u.role==='admin') STATE.tab='dash';
   else if(u.role==='grader'){ STATE.graderEvents=null; STATE.tab='team'; }
-  else { const s=soldierById(u.sid); STATE.tab = s && s.scans.length ? 'myhealth' : 'mylog'; }
+  else STATE.tab='mydash';
   syncStart(); render(); window.scrollTo(0,0);
 }
 function syncClearLocal(){
   SYNC.cfg={}; SYNC.queue=[]; SYNC.base=null; SYNC.users=[];
-  DATA={app:'team-tryout-scorebook', version:1, settings:clone(DEFAULT_SETTINGS), soldiers:[], timeLogs:[]}; rebuildRegistry();
+  DATA={app:'team-tryout-scorebook', version:1, settings:clone(DEFAULT_SETTINGS), soldiers:[], timeLogs:[], calendar:[]}; rebuildRegistry();
   rawSave(); syncPersist();
 }
 function syncSignOut(force){
@@ -5130,7 +5295,7 @@ function syncRestore(){
   STATE.session = u.role==='soldier' ? {role:'soldier', soldierId:u.sid} : {role:ROLE_FROM_SERVER[u.role]};
   let v=null; try{ v=JSON.parse(localStorage.getItem(SESSION_KEY)||'null'); }catch(e){}
   if(v && v.role===STATE.session.role){ if(v.tab) STATE.tab=v.tab; if(Array.isArray(v.graderEvents)) STATE.graderEvents=v.graderEvents; }
-  else STATE.tab = u.role==='admin'?'dash':u.role==='grader'?'team':'myhealth';
+  else STATE.tab = u.role==='admin'?'dash':u.role==='grader'?'team':'mydash';
   syncStart(); setTimeout(()=>{ if(SYNC.queue.length) syncFlush(); else syncPull(false); }, 50);
   return true;
 }
@@ -5252,7 +5417,7 @@ function syncWireGate(){
     if(!/^\d{6,8}$/.test(adminPin)){ g.error='The admin PIN must be 6 to 8 digits.'; keepVals(); render(); return; }
     if(graderPin && !/^\d{4,8}$/.test(graderPin)){ g.error='The grader PIN must be 4 to 8 digits.'; keepVals(); render(); return; }
     const bring=$('syBring') && $('syBring').checked;
-    const data = bring ? {soldiers:DATA.soldiers.filter(s=>!s.sample), timeLogs:DATA.timeLogs||[], settings:DATA.settings} : null;
+    const data = bring ? {soldiers:DATA.soldiers.filter(s=>!s.sample), timeLogs:DATA.timeLogs||[], calendar:DATA.calendar||[], settings:DATA.settings} : null;
     busy(async()=>{ const r=await syncApi('bootstrap',{code, name, pin, adminPin, graderPin:graderPin||null, data, keep:k}); if(!r.ok){ g.error=r.error; return; } SYNC.ready=true; SYNC.names=null; await syncSignedIn(r,k); }); });
 }
 
@@ -5264,7 +5429,7 @@ function syncAccessHtml(){
     <div class="row" style="gap:6px">${st.pin===u.id?`<input class="input" style="width:120px" type="password" inputmode="numeric" id="uaPinIn" placeholder="new PIN"><button class="btn primary sm" data-uapinsave="${u.id}">Save</button><button class="btn sm" data-uacancel="1">Cancel</button>`
       :`<button class="btn sm" data-uapin="${u.id}">${u.hasPin?'Reset PIN':'Set PIN'}</button>${u.locked?`<button class="btn sm" data-uaunlock="${u.id}">Unlock</button>`:''}${u.role!=='soldier'&&u.id!==me.id?(st.del===u.id?`<button class="btn danger sm" data-uadelyes="${u.id}">Remove</button><button class="btn sm" data-uacancel="1">Keep</button>`:`<button class="btn sm" data-uadel="${u.id}">Remove</button>`):''}`}</div></div>`;
   const rp=SYNC.rolePins||{};
-  return `<div class="panel" id="uaPanel"><h2>Sign-in access</h2>
+  return `<div id="uaPanel">
     <p class="sub">Everything is stored in the Rusty Anvil Google Sheet. Admins and graders sign in with the shared PIN for their role plus their own PIN. Soldiers get a sign-in when they're added and choose their PIN the first time.</p>
     <h3>Admins and graders</h3>${staff.map(row).join('')||'<p class="sub">No one yet.</p>'}
     <div class="grid" style="margin-top:10px">
@@ -5309,6 +5474,571 @@ function syncWireAccess(){
     if(!ops.length) return toast('Type a new PIN first.');
     syncAdminOps(ops, 'Shared PINs updated. Tell your admins and graders.'); };
   const off=$('uaGrdOff'); if(off) off.onclick=()=>syncAdminOps([{op:'rolePin', role:'grader', pin:null}], 'Graders now sign in with just their own PIN.');
+}
+
+/* ---------- photos for logged runs and rucks ---------- */
+// Shrinks a phone photo to at most 1280px on its long side as a JPEG, so it sends quickly on weak signal.
+function shrinkPhoto(file){
+  return new Promise((resolve, reject)=>{
+    const url=URL.createObjectURL(file), img=new Image();
+    img.onload=()=>{ try{
+      let w=img.naturalWidth, h=img.naturalHeight, max=1280, q=0.72, out='';
+      for(let tries=0; tries<4; tries++){
+        const k=Math.min(1, max/Math.max(w,h)), cw=Math.max(1,Math.round(w*k)), ch=Math.max(1,Math.round(h*k));
+        const cv=document.createElement('canvas'); cv.width=cw; cv.height=ch; cv.getContext('2d').drawImage(img,0,0,cw,ch);
+        out=cv.toDataURL('image/jpeg', q).split(',')[1];
+        if(out.length<900000) break; max=Math.round(max*0.75); q=Math.max(0.5,q-0.08);
+      }
+      URL.revokeObjectURL(url); resolve(out);
+    }catch(e){ URL.revokeObjectURL(url); reject(e); } };
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('bad image')); };
+    img.src=url;
+  });
+}
+function syncQueuePhoto(id, data){
+  if(!syncActive()) return;
+  SYNC.queue.push({op:'photo', id, data}); syncPersist(); syncStatus();
+  clearTimeout(SYNC.flushT); SYNC.flushT=setTimeout(()=>syncFlush(), 400);
+}
+function syncPhotoPending(id){ return SYNC.on && SYNC.queue.some(o=>o.op==='photo' && o.id===id); }
+const PHOTO_CACHE={};
+async function showPhoto(id){
+  if(document.getElementById('photoSheet')) return;
+  const w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='photoSheet';
+  w.innerHTML=`<div class="sheet news photo-sheet" role="dialog" aria-modal="true" aria-label="Photo"><div id="phBody" class="sub" style="text-align:center;margin:20px 0">Loading photo\u2026</div><button class="btn" id="phClose" style="width:100%">Close</button></div>`;
+  document.body.appendChild(w);
+  const close=()=>w.remove(); w.querySelector('#phClose').onclick=close; w.onclick=e=>{ if(e.target===w) close(); };
+  const body=w.querySelector('#phBody');
+  try{
+    if(!PHOTO_CACHE[id]){
+      const r=await syncApi('photo',{token:SYNC.cfg.token, id});
+      if(!r.ok){ body.textContent=r.error||'That photo couldn\'t be loaded.'; return; }
+      PHOTO_CACHE[id]=`data:${r.mime||'image/jpeg'};base64,${r.data}`;
+    }
+    body.innerHTML=`<img src="${PHOTO_CACHE[id]}" alt="Photo for this time" style="max-width:100%;max-height:70vh;border-radius:8px;display:block;margin:0 auto">`;
+  }catch(e){ body.textContent='No connection. Photos need signal to open.'; }
+}
+
+/* ============================== training calendar ============================== */
+// DATA.calendar: {id, title, start, end?, from?, to?, who?, what?, where?, uniform?, notes?, repeat?:{days:[0-6], until}, skip?:[dates], of?, on?, updated, by}
+// A repeating entry shows on each chosen weekday until "until". Changing one day of a series makes a separate entry (of = series id, on = that day)
+// and adds the day to the series' skip list.
+const CAL_W = [['who','Who'],['what','What'],['when','When'],['where','Where'],['uniform','Uniform']];
+const DAYS_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], DAYS_LETTER=['S','M','T','W','T','F','S'];
+const CAL_SEEN_KEY='rustyAnvil_calSeen', CAL_DISMISS_KEY='rustyAnvil_calDismiss';
+function calList(){ if(!Array.isArray(DATA.calendar)) DATA.calendar=[]; return DATA.calendar; }
+const isoOf = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const dateOf = s => { const [y,m,d]=String(s).split('-').map(Number); return new Date(y,m-1,d); };
+const addDays = (s,n) => { const d=dateOf(s); d.setDate(d.getDate()+n); return isoOf(d); };
+const calDayLabel = (s, o) => dateOf(s).toLocaleDateString([], o||{weekday:'short', month:'short', day:'numeric'});
+function fmtClock(t){ if(!t) return ''; const [h,m]=t.split(':').map(Number); return String(h).padStart(2,'0')+String(m).padStart(2,'0'); }
+function calWhen(e){
+  const t = e.from ? fmtClock(e.from)+(e.to?'\u2013'+fmtClock(e.to):'') : 'All day';
+  return e.end && e.end!==e.start ? `${calDayLabel(e.start,{month:'short',day:'numeric'})} \u2013 ${calDayLabel(e.end,{month:'short',day:'numeric'})}${e.from?', '+t:''}` : t;
+}
+function calBlank(e){ return CAL_W.filter(([k])=> k==='when' ? !e.from && !(e.end && e.end>e.start) : !String(e[k]||'').trim()).map(([,l])=>l); }
+// Every entry that falls on each day from a to b (inclusive), in time order.
+function calExpand(a, b){
+  const out={};
+  const add=(day, e)=>{ if(day<a || day>b) return; (out[day]=out[day]||[]).push(e); };
+  calList().forEach(e=>{
+    if(!e.start) return;
+    if(e.repeat && Array.isArray(e.repeat.days) && e.repeat.days.length){
+      const until = e.repeat.until && e.repeat.until<b ? e.repeat.until : b, skip=e.skip||[];
+      for(let d = e.start<a ? a : e.start; d<=until; d=addDays(d,1)) if(e.repeat.days.includes(dateOf(d).getDay()) && !skip.includes(d)) add(d, e);
+      return;
+    }
+    const end = e.end && e.end>e.start ? e.end : e.start;
+    for(let d = e.start<a ? a : e.start; d<=end && d<=b; d=addDays(d,1)) add(d, e);
+  });
+  Object.values(out).forEach(L=>L.sort((x,y)=>(x.from?1:0)-(y.from?1:0) || String(x.from||'').localeCompare(String(y.from||'')) || String(x.title).localeCompare(String(y.title))));
+  return out;
+}
+function calSeen(){ try{ return localStorage.getItem(CAL_SEEN_KEY)||''; }catch(e){ return ''; } }
+function calUnseen(){ const s=calSeen(); return !!s && calList().some(e=>e.updated && e.updated>s && e.by!==calMe()); }
+function calMe(){ return (typeof SYNC!=='undefined' && SYNC.cfg && SYNC.cfg.user && SYNC.cfg.user.name) || (isAdmin()?'Admin':''); }
+
+function renderCalendar(c){
+  const admin=isAdmin(), today=isoOf(new Date());
+  STATE.cal = STATE.cal || {month: today.slice(0,7), day: today};
+  const C=STATE.cal, [Y,M]=C.month.split('-').map(Number), first=new Date(Y,M-1,1);
+  const gridStart=isoOf(new Date(Y,M-1,1-first.getDay())), gridEnd=addDays(gridStart,41);
+  const seenBefore = C.seenAtOpen!=null ? C.seenAtOpen : (C.seenAtOpen=calSeen());
+  const occ=calExpand(gridStart, gridEnd), sel=C.day, selList=calExpand(sel, sel)[sel]||[];
+  const upTo=addDays(today,13), upcoming=calExpand(today, upTo);
+  const isNew = e => seenBefore && e.updated && e.updated>seenBefore && e.by!==calMe();
+  const chip = (e,d) => { const multi=e.end && e.end>e.start; return `<span class="cal-chip ${multi?'multi':''} ${isNew(e)?'new':''}" title="${esc(e.title)}">${e.from&&!multi?`<b>${fmtClock(e.from)}</b> `:''}${esc(e.title)}</span>`; };
+  let cells='';
+  for(let i=0;i<42;i++){
+    const d=addDays(gridStart,i), L=occ[d]||[], out=d.slice(0,7)!==C.month;
+    cells+=`<button class="cal-cell ${out?'out':''} ${d===today?'today':''} ${d===sel?'sel':''}" data-calday="${d}" aria-label="${calDayLabel(d,{weekday:'long',month:'long',day:'numeric'})}${L.length?`, ${L.length} event${L.length===1?'':'s'}`:''}">
+      <span class="cal-n">${dateOf(d).getDate()}</span>
+      <span class="cal-chips">${L.slice(0,3).map(e=>chip(e,d)).join('')}${L.length>3?`<span class="cal-more">+${L.length-3} more</span>`:''}</span>
+      ${L.length?`<span class="cal-dots">${L.slice(0,4).map(e=>`<i class="${isNew(e)?'new':''}"></i>`).join('')}</span>`:''}
+    </button>`;
+  }
+  const detail = e => {
+    const blanks=calBlank(e);
+    const allBlank = blanks.length===CAL_W.length;
+    const rows = allBlank ? '' : CAL_W.map(([k,l])=>{ const v = k==='when' ? (e.from||(e.end&&e.end>e.start)?calWhen(e):'') : String(e[k]||'').trim();
+      if(!v && !admin) return ''; return `<div class="kv"><span>${l}</span><span>${v?esc(v):'<span class="soft">not set</span>'}</span></div>`; }).join('');
+    const rep = e.repeat&&e.repeat.days&&e.repeat.days.length ? `<p class="soft cal-rep">Repeats every ${e.repeat.days.map(d=>DAYS_SHORT[d]).join(', ')}${e.repeat.until?` until ${calDayLabel(e.repeat.until,{month:'short',day:'numeric'})}`:''}</p>` : '';
+    return `<div class="cal-entry">
+      <div class="row" style="justify-content:space-between;align-items:flex-start"><div><h3 style="margin:0">${esc(e.title)} ${isNew(e)?'<span class="badge b-brass">updated</span>':''}</h3>
+        <div class="soft" style="font-size:13px">${calWhen(e)}</div></div>
+        ${admin?`<div class="row" style="gap:6px"><button class="btn sm" data-caledit="${e.id}">Edit</button><button class="btn sm" data-caldel="${e.id}">Delete</button></div>`:''}</div>
+      ${admin && blanks.length?`<p class="cal-nudge">${allBlank?'No details yet. Edit to add Who, What, When, Where, and Uniform if they apply.':`Still blank: ${blanks.join(', ')}.`}</p>`:''}
+      ${rows?`<div class="cal-ws">${rows}</div>`:''}
+      ${e.notes?`<p class="cal-notes">${esc(e.notes).replace(/\n/g,'<br>')}</p>`:''}${rep}
+      ${admin && e.by?`<p class="soft" style="font-size:12px;margin:6px 0 0">Last changed by ${esc(e.by)}${e.updated?', '+new Date(e.updated).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''}</p>`:''}
+      <div id="calAsk-${e.id}"></div>
+    </div>`;
+  };
+  // Coming up: a multi-day entry is listed once, on its first day in range.
+  const upSeen=new Set(); Object.keys(upcoming).sort().forEach(d=>{ upcoming[d]=upcoming[d].filter(e=>{ if(!(e.end&&e.end>e.start)) return true; if(upSeen.has(e.id)) return false; upSeen.add(e.id); return true; }); if(!upcoming[d].length) delete upcoming[d]; });
+  const upDays=Object.keys(upcoming).sort();
+  c.innerHTML=`<div class="stack cal">
+    <div class="panel cal-top">
+      <div class="row" style="justify-content:space-between">
+        <div class="row" style="gap:6px"><button class="btn sm" id="calPrev" aria-label="Previous month">\u2039</button><h2 style="margin:0;min-width:9.5em;text-align:center">${first.toLocaleDateString([], {month:'long', year:'numeric'})}</h2><button class="btn sm" id="calNext" aria-label="Next month">\u203A</button></div>
+        <div class="row" style="gap:6px"><button class="btn sm" id="calToday">Today</button>${admin?'<button class="btn primary sm" id="calAdd">+ Add</button>':''}</div>
+      </div>
+      <div class="cal-grid" role="grid">${DAYS_SHORT.map((d,i)=>`<div class="cal-dow"><span class="full">${d}</span><span class="one">${DAYS_LETTER[i]}</span></div>`).join('')}${cells}</div>
+    </div>
+    <div class="two cal-lower">
+      <div class="panel" id="calDay">
+        <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:6px"><h2 style="margin:0">${calDayLabel(sel,{weekday:'long',month:'long',day:'numeric'})}</h2>${admin?'<button class="btn sm" id="calAddDay">+ Add to this day</button>':''}</div>
+        ${selList.length?selList.map(detail).join(''):`<p class="sub" style="margin:6px 0 0">Nothing scheduled.</p>`}
+      </div>
+      <div class="panel"><h2>Coming up</h2><p class="sub" style="margin-bottom:6px">Next two weeks.</p>
+        ${upDays.length?`<ol class="cal-up">${upDays.map(d=>upcoming[d].map(e=>`<li><button class="cal-uplink" data-calgo="${d}"><span class="cal-upd">${d===today?'Today':d===addDays(today,1)?'Tomorrow':calDayLabel(d)}</span><span><b>${esc(e.title)}</b>${isNew(e)?' <span class="badge b-brass">updated</span>':''}<small>${e.end&&e.end>e.start?calWhen(e):e.from?fmtClock(e.from)+(e.to?'\u2013'+fmtClock(e.to):''):'All day'}${e.where?' \u00B7 '+esc(e.where):''}</small></span></button></li>`).join('')).join('')}</ol>`:'<p class="sub" style="margin:0">Nothing in the next two weeks.</p>'}
+      </div>
+    </div>
+  </div>`;
+  const go=(m)=>{ C.month=m; render(); };
+  $('calPrev').onclick=()=>{ const d=new Date(Y,M-2,1); go(isoOf(d).slice(0,7)); };
+  $('calNext').onclick=()=>{ const d=new Date(Y,M,1); go(isoOf(d).slice(0,7)); };
+  $('calToday').onclick=()=>{ C.month=today.slice(0,7); C.day=today; render(); };
+  c.querySelectorAll('[data-calday]').forEach(b=>b.onclick=()=>{ C.day=b.dataset.calday; if(C.day.slice(0,7)!==C.month) C.month=C.day.slice(0,7); render(); const p=$('calDay'); if(p && window.innerWidth<760) p.scrollIntoView({behavior:'smooth', block:'start'}); });
+  c.querySelectorAll('[data-calgo]').forEach(b=>b.onclick=()=>{ C.day=b.dataset.calgo; C.month=C.day.slice(0,7); render(); const p=$('calDay'); if(p) p.scrollIntoView({behavior:'smooth', block:'start'}); });
+  if(admin){
+    $('calAdd').onclick=()=>calEdit(null, C.day);
+    $('calAddDay').onclick=()=>calEdit(null, C.day);
+    c.querySelectorAll('[data-caledit]').forEach(b=>b.onclick=()=>calPickScope(b.dataset.caledit, sel, 'edit'));
+    c.querySelectorAll('[data-caldel]').forEach(b=>b.onclick=()=>calPickScope(b.dataset.caldel, sel, 'del'));
+  }
+  // Seen: badges stay until they leave the calendar; next visit starts fresh.
+  try{ localStorage.setItem(CAL_SEEN_KEY, new Date().toISOString()); }catch(e){}
+}
+// Repeating entries ask whether the change is for one day or the whole series.
+function calPickScope(id, day, action){
+  const e=calList().find(x=>x.id===id); if(!e) return;
+  const box=$('calAsk-'+id);
+  const series = e.repeat && e.repeat.days && e.repeat.days.length;
+  if(!series){
+    if(action==='edit') return calEdit(e);
+    box.innerHTML=`<div class="note warn" style="margin-top:10px">Delete "${esc(e.title)}"? <div class="row" style="margin-top:8px"><button class="btn danger sm" id="cdYes">Delete</button><button class="btn sm" id="cdNo">Keep</button></div></div>`;
+    $('cdYes').onclick=()=>{ DATA.calendar=calList().filter(x=>x.id!==id && x.of!==id); save(); toast('Deleted.'); render(); };
+    $('cdNo').onclick=()=>{ box.innerHTML=''; }; return;
+  }
+  box.innerHTML=`<div class="note info" style="margin-top:10px">${action==='edit'?'Change':'Delete'} which? <div class="row" style="margin-top:8px"><button class="btn sm" id="csOne">Just ${calDayLabel(day,{month:'short',day:'numeric'})}</button><button class="btn sm" id="csAll">Every ${e.repeat.days.map(d=>DAYS_SHORT[d]).join('/')}</button><button class="btn sm" id="csNo">Cancel</button></div></div>`;
+  $('csNo').onclick=()=>{ box.innerHTML=''; };
+  $('csAll').onclick=()=>{ if(action==='edit') return calEdit(e);
+    box.innerHTML=`<div class="note warn" style="margin-top:10px">Delete every "${esc(e.title)}"? <div class="row" style="margin-top:8px"><button class="btn danger sm" id="cdYes">Delete the series</button><button class="btn sm" id="cdNo">Keep</button></div></div>`;
+    $('cdYes').onclick=()=>{ DATA.calendar=calList().filter(x=>x.id!==id && x.of!==id); save(); toast('Series deleted.'); render(); };
+    $('cdNo').onclick=()=>{ box.innerHTML=''; }; };
+  $('csOne').onclick=()=>{
+    e.skip=[...new Set([...(e.skip||[]), day])]; e.updated=new Date().toISOString(); e.by=calMe();
+    if(action==='del'){ save(); toast(`Removed from ${calDayLabel(day,{month:'short',day:'numeric'})}.`); render(); return; }
+    const copy=Object.assign(clone(e), {id:uid(), start:day, end:null, repeat:null, skip:[], of:e.id, on:day});
+    calEdit(copy, null, true, ()=>{ e.skip=(e.skip||[]).filter(d=>d!==day); });
+  };
+}
+function calEdit(e, day, isNewCopy, onCancel){
+  if(document.getElementById('calSheet')) return;
+  const isNew = !e || isNewCopy, x = e ? clone(e) : {id:uid(), title:'', start:day||isoOf(new Date())};
+  const rep = x.repeat && x.repeat.days && x.repeat.days.length;
+  const w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='calSheet';
+  const f=(id,label,val,extra='')=>`<label class="field"><span>${label}</span><input class="input" id="${id}" value="${esc(val||'')}" ${extra}></label>`;
+  w.innerHTML=`<div class="sheet news cal-form" role="dialog" aria-modal="true" aria-labelledby="calH">
+    <h2 id="calH">${isNewCopy?`Change ${calDayLabel(x.start,{month:'short',day:'numeric'})} only`:isNew?'Add to the calendar':'Edit entry'}</h2>
+    <p class="sub">Only the name and date are required. Fill in the W's when you know them.</p>
+    <div class="stack" style="gap:10px">
+      ${f('ceTitle','Name (required)',x.title,'placeholder="e.g. PT, Lab, Spring Break"')}
+      <div class="grid2">${f('ceStart','Date',x.start,'type="date"')}${isNewCopy?'':f('ceEnd','Through (for multi-day)',x.end,'type="date"')}</div>
+      <label class="row" style="gap:8px;font-size:14px"><input type="checkbox" id="ceAll" ${x.from?'':'checked'}> All day (no set time)</label>
+      <div class="grid2" id="ceTimes" ${x.from?'':'hidden'}>${f('ceFrom','From',x.from,'type="time"')}${f('ceTo','To (optional)',x.to,'type="time"')}</div>
+      ${f('ceWho','Who',x.who,'placeholder="e.g. All MSIIIs, Ranger Challenge team"')}
+      ${f('ceWhat','What',x.what,'placeholder="e.g. Ruck march, 6 mi, 35 lb"')}
+      ${f('ceWhere','Where',x.where,'placeholder="e.g. Rec Center, south lot"')}
+      ${f('ceUni','Uniform',x.uniform,'placeholder="e.g. OCPs, APFU"')}
+      <label class="field"><span>Notes</span><textarea class="input" id="ceNotes" style="font-family:var(--sans);font-size:15px;min-height:80px">${esc(x.notes||'')}</textarea></label>
+      ${isNewCopy?'':`<label class="row" style="gap:8px;font-size:14px"><input type="checkbox" id="ceRep" ${rep?'checked':''}> Repeat every week</label>
+      <div id="ceRepBox" ${rep?'':'hidden'}>
+        <div class="seg" role="group" aria-label="Days">${DAYS_SHORT.map((d,i)=>`<button type="button" data-ceday="${i}" aria-pressed="${rep && x.repeat.days.includes(i)?'true':'false'}">${d}</button>`).join('')}</div>
+        <div style="margin-top:10px">${f('ceUntil','Until',x.repeat&&x.repeat.until,'type="date"')}</div>
+      </div>`}
+      <div id="ceMsg" class="flag"></div>
+      <div class="row"><button class="btn primary" id="ceSave">Save</button><button class="btn" id="ceCancel">Cancel</button></div>
+    </div></div>`;
+  document.body.appendChild(w);
+  const v=id=>{ const el=w.querySelector('#'+id); return el?el.value.trim():''; };
+  const close=()=>w.remove();
+  w.querySelector('#ceCancel').onclick=()=>{ if(onCancel) onCancel(); close(); };
+  w.onclick=ev=>{ if(ev.target===w){ if(onCancel) onCancel(); close(); } };
+  w.querySelector('#ceAll').onchange=ev=>{ w.querySelector('#ceTimes').hidden=ev.target.checked; };
+  const rb=w.querySelector('#ceRep'); if(rb) rb.onchange=()=>{ w.querySelector('#ceRepBox').hidden=!rb.checked; if(rb.checked && !w.querySelector('[data-ceday][aria-pressed=true]')){ const b=w.querySelector(`[data-ceday="${dateOf(v('ceStart')||x.start).getDay()}"]`); if(b) b.setAttribute('aria-pressed','true'); } };
+  w.querySelectorAll('[data-ceday]').forEach(b=>b.onclick=()=>b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')==='true'?'false':'true'));
+  w.querySelector('#ceSave').onclick=()=>{
+    const msg=t=>{ w.querySelector('#ceMsg').textContent=t; };
+    const title=v('ceTitle'), start=v('ceStart'), end=v('ceEnd');
+    if(!title) return msg('Give it a name, like "PT" or "Spring Break".');
+    if(!start) return msg('Pick a date.');
+    if(end && end<start) return msg('"Through" can\'t be before the start date.');
+    const all=w.querySelector('#ceAll').checked, from=all?'':v('ceFrom'), to=all?'':v('ceTo');
+    if(!all && !from) return msg('Pick a start time, or check "All day".');
+    let repeat=null;
+    if(rb && rb.checked){
+      const days=[...w.querySelectorAll('[data-ceday][aria-pressed=true]')].map(b=>+b.dataset.ceday);
+      if(!days.length) return msg('Pick the days it repeats on.');
+      if(end && end>start) return msg('A repeating entry has to be a single day. Clear "Through", or turn off repeat.');
+      const until=v('ceUntil'); if(until && until<start) return msg('"Until" can\'t be before the start date.');
+      repeat={days, until:until||null};
+    }
+    Object.assign(x, {title, start, end: end && end>start ? end : null, from:from||null, to:to||null, who:v('ceWho'), what:v('ceWhat'), where:v('ceWhere'), uniform:v('ceUni'), notes:w.querySelector('#ceNotes').value.trim(), repeat: isNewCopy ? null : repeat, updated:new Date().toISOString(), by:calMe()});
+    if(!x.repeat) x.skip=x.skip&&x.skip.length?x.skip:null;
+    const L=calList(), i=L.findIndex(y=>y.id===x.id);
+    if(i>=0) L[i]=x; else L.push(x);
+    save(); close();
+    STATE.cal=STATE.cal||{}; STATE.cal.day=start; STATE.cal.month=start.slice(0,7);
+    const blanks=calBlank(x);
+    toast(blanks.length ? `Saved. Still blank: ${blanks.join(', ')}. Add them any time.` : 'Saved to the calendar.');
+    render();
+  };
+  w.querySelector('#ceTitle').focus();
+}
+// Reminder strip for today and tomorrow, shown at the top of every screen until dismissed.
+function calReminderHtml(){
+  if(!STATE.session || STATE.session.role==='practice' || STATE.tab==='cal' || STATE.tab==='mydash') return '';
+  const today=isoOf(new Date()), tom=addDays(today,1), occ=calExpand(today, tom);
+  let gone={}; try{ gone=JSON.parse(localStorage.getItem(CAL_DISMISS_KEY)||'{}'); }catch(e){}
+  const items=[], shown=new Set(); [today,tom].forEach(d=>(occ[d]||[]).forEach(e=>{ const k=e.id+'|'+d; if(shown.has(e.id)) return; shown.add(e.id); if(!gone[k]) items.push({d,e,k}); }));
+  if(!items.length) return '';
+  return `<div class="cal-remind" role="status">${items.slice(0,3).map(({d,e,k})=>`<div class="cal-rm"><button class="cal-rm-go" data-calgo="${d}"><b>${d===today?'Today':'Tomorrow'}:</b> ${esc(e.title)}${e.end&&e.end>d?` (through ${calDayLabel(e.end,{month:'short',day:'numeric'})})`:''}${e.from?' '+fmtClock(e.from):''}${e.where?' \u00B7 '+esc(e.where):''}${e.uniform?' \u00B7 '+esc(e.uniform):''}</button><button class="cal-rm-x" data-calx="${esc(k)}" aria-label="Dismiss">\u00D7</button></div>`).join('')}${items.length>3?`<button class="cal-rm-go soft" data-calgo="${today}" style="font-size:13px">+${items.length-3} more in the calendar</button>`:''}</div>`;
+}
+function wireCalReminder(el){
+  if(!el) return;
+  el.querySelectorAll('[data-calgo]').forEach(b=>b.onclick=()=>{ STATE.cal=STATE.cal||{}; STATE.cal.day=b.dataset.calgo; STATE.cal.month=b.dataset.calgo.slice(0,7); STATE.tab='cal'; render(); window.scrollTo(0,0); });
+  el.querySelectorAll('[data-calx]').forEach(b=>b.onclick=()=>{ let g={}; try{ g=JSON.parse(localStorage.getItem(CAL_DISMISS_KEY)||'{}'); }catch(e){} g[b.dataset.calx]=1;
+    const cut=addDays(isoOf(new Date()),-3); Object.keys(g).forEach(k=>{ if(k.split('|')[1]<cut) delete g[k]; });
+    try{ localStorage.setItem(CAL_DISMISS_KEY, JSON.stringify(g)); }catch(e){} b.closest('.cal-rm').remove(); });
+}
+
+/* ============================== editable content (admin) ============================== */
+// Changes are stored in DATA.settings under keys starting with "c:", so they sync to every phone.
+// A value of null means "use the original".
+const CONTENT_ORIG = {};
+function contentGet(k){ const v=(DATA.settings||{})['c:'+k]; return v==null ? null : v; }
+function contentSet(k, v){ DATA.settings['c:'+k] = v==null ? null : v; save(); applyContent(); }
+function contentKeys(prefix){ return Object.keys(DATA.settings||{}).filter(k=>k.startsWith('c:'+prefix) && DATA.settings[k]!=null).map(k=>k.slice(2)); }
+const STEP_LISTS = [
+  {k:'tccc', label:'TCCC', help:'One step per line as "key | step". Lines with the key M are the massive bleeding sweep, in order (just the body part, like "M | Neck").'},
+  {k:'fx', label:'Fractures', help:'One step per line. Add [only: open] for open fractures only, or [only: arm] for arm fractures only.'},
+  {k:'bn', label:'Burns', help:'One step per line. Add [only: dress] for steps that only apply when the burn gets a field dressing.'},
+  {k:'grenade', label:'Grenade deployment', help:'One step per line, in order.'},
+  {k:'m249', label:'M249', weapon:true}, {k:'m240b', label:'M240B', weapon:true}, {k:'m4', label:'M4', weapon:true},
+];
+const WEAPON_HELP='Start each part with "## Title (in order)", "## Title (any order)", or "## Title (note)". The steps go on the lines under it. A line starting with ">" is a note shown under the title.';
+function applyContent(){
+  if(typeof Drill==='undefined' || typeof TCCC_STEPS==='undefined') return;
+  if(!CONTENT_ORIG.ready){
+    Object.assign(CONTENT_ORIG, {tccc:clone(TCCC_STEPS), fx:clone(FX_STEPS), bn:clone(BN_STEPS), grenade:GRENADE_STEPS.slice(),
+      spot:clone(Drill.OBSERVED), salute:clone(Drill.CONTACT), inj:clone(Drill.INJ), ready:true});
+    ['m249','m240b','m4'].forEach(k=>CONTENT_ORIG[k]=clone(Drill.WEAPONS[k].phases));
+  }
+  const put=(arr,src)=>{ arr.length=0; clone(src).forEach(x=>arr.push(x)); };
+  put(TCCC_STEPS, contentGet('steps:tccc')||CONTENT_ORIG.tccc);
+  put(FX_STEPS, contentGet('steps:fx')||CONTENT_ORIG.fx);
+  put(BN_STEPS, contentGet('steps:bn')||CONTENT_ORIG.bn);
+  put(GRENADE_STEPS, contentGet('steps:grenade')||CONTENT_ORIG.grenade);
+  ['m249','m240b','m4'].forEach(k=>{ Drill.WEAPONS[k].phases=clone(contentGet('steps:'+k)||CONTENT_ORIG[k]); });
+  put(Drill.OBSERVED, contentGet('scen:spot')||CONTENT_ORIG.spot);
+  put(Drill.CONTACT, contentGet('scen:salute')||CONTENT_ORIG.salute);
+  const injOv=contentGet('scen:inj')||{};
+  Object.keys(CONTENT_ORIG.inj).forEach(k=>{ Drill.INJ[k]=Object.assign(clone(CONTENT_ORIG.inj[k]), injOv[k]||{}); });
+  Object.keys(REF_TEXT).forEach(k=>delete REF_TEXT[k]);
+}
+
+/* ---------- step lists <-> text ---------- */
+function stepsToText(k, list){
+  if(k==='tccc') return list.map(s=>s.grp ? `M | ${s.s}` : `${s.k} | ${s.t}`).join('\n');
+  if(k==='fx'||k==='bn') return list.map(s=>s.t+(s.only?` [only: ${s.only}]`:'')).join('\n');
+  if(k==='grenade') return list.join('\n');
+  return list.map(ph=>`## ${ph.t} (${ph.type==='seq'?'in order':ph.type==='set'?'any order':'note'})`+(ph.note?`\n> ${ph.note}`:'')+'\n'+ph.steps.join('\n')).join('\n\n');
+}
+function textToSteps(k, text){
+  const lines=String(text).split('\n').map(l=>l.trim()).filter(Boolean);
+  if(!lines.length) throw new Error('Add at least one step.');
+  if(k==='tccc'){ let n=0; return lines.map(l=>{ const m=l.match(/^([^|]{1,4})\|\s*(.+)$/); const key=m?m[1].trim():String(++n), t=m?m[2].trim():l;
+      if(/^m$/i.test(key)) return {k:'M', grp:'M', s:t, t:'Massive bleeding sweep: '+t}; if(/^\d+$/.test(key)) n=+key; return {k:key, t}; }); }
+  if(k==='fx'||k==='bn') return lines.map((l,i)=>{ const m=l.match(/\[only:\s*(\w+)\]\s*$/i); const o={k:String(i+1), t:l.replace(/\s*\[only:[^\]]*\]\s*$/i,'').trim()}; if(m) o.only=m[1].toLowerCase(); return o; });
+  if(k==='grenade') return lines;
+  const phases=[]; let cur=null;
+  lines.forEach(l=>{
+    const h=l.match(/^##\s*(.+?)\s*(?:\((in order|any order|note)\))?$/i);
+    if(h){ cur={t:h[1], type:!h[2]||/in order/i.test(h[2])?'seq':/any/i.test(h[2])?'set':'note', steps:[]}; phases.push(cur); return; }
+    if(!cur) throw new Error('Start with a "## Title (in order)" line.');
+    if(l.startsWith('>')){ cur.note=l.slice(1).trim(); return; }
+    cur.steps.push(l);
+  });
+  if(phases.some(p=>!p.steps.length)) throw new Error('Every part needs at least one step under it.');
+  return phases;
+}
+
+/* ---------- simple formatting for Reference cards ---------- */
+// "## Heading", "1. numbered", "- bullet", **bold**, blank line between paragraphs.
+function mdInline(s){ return esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>'); }
+function mdToHtml(md){
+  const out=[]; let list=null;
+  const close=()=>{ if(list){ out.push(`</${list}>`); list=null; } };
+  String(md||'').split('\n').forEach(raw=>{
+    const l=raw.trim();
+    if(!l){ close(); return; }
+    let m;
+    if((m=l.match(/^#{1,3}\s+(.+)/))){ close(); out.push(`<h3 class="md-h">${mdInline(m[1])}</h3>`); return; }
+    if((m=l.match(/^(\d+|[A-Z])[.)]\s+(.+)/))){ if(list!=='ol'){ close(); out.push('<ol class="md-ol">'); list='ol'; } out.push(`<li><span class="md-n">${esc(m[1])}</span><span>${mdInline(m[2])}</span></li>`); return; }
+    if((m=l.match(/^[-\u2022*]\s+(.+)/))){ if(list!=='ul'){ close(); out.push('<ul class="md-ul">'); list='ul'; } out.push(`<li>${mdInline(m[1])}</li>`); return; }
+    close(); out.push(`<p class="md-p">${mdInline(l)}</p>`);
+  });
+  close(); return `<div class="md">${out.join('')}</div>`;
+}
+// Turns a built-in card into editable text, as close to its layout as plain text allows.
+function htmlToMd(html){
+  const d=document.createElement('div'); d.innerHTML=html; const out=[];
+  const inline=n=>{ let s=''; n.childNodes.forEach(c=>{ if(c.nodeType===3) s+=c.textContent; else if(/^(B|STRONG)$/.test(c.tagName)) s+='**'+c.textContent.trim()+'** '; else if(c.tagName==='IMG') {} else if(/^(UL|OL)$/.test(c.tagName)) {} else s+=inline(c)+(/^(DIV|P)$/.test(c.tagName)?' \u2014 ':''); }); return s.replace(/\s+/g,' ').replace(/( \u2014 )+$/,'').trim(); };
+  const walk=n=>{
+    n.childNodes.forEach(c=>{
+      if(c.nodeType!==1) return;
+      const t=c.tagName;
+      if(/^H[1-4]$/.test(t)){ out.push('', '## '+c.textContent.trim()); return; }
+      if(t==='OL' || t==='UL'){
+        let i=0; [...c.children].forEach(li=>{ i++;
+          const key=li.querySelector(':scope > .num, :scope > .tg-k, :scope > .md-n'); const k=key?key.textContent.trim():String(i);
+          if(key) key.remove();
+          const sub=li.querySelector(':scope ul, :scope ol');
+          const text=inline(li);
+          out.push(t==='OL' ? `${/^[A-Z0-9]+$/.test(k)?k:i}. ${text}` : `- ${text}`);
+          if(sub) [...sub.children].forEach(s=>out.push('- '+inline(s)));
+        }); out.push(''); return;
+      }
+      if(t==='P'){ out.push(inline(c)); return; }
+      if(c.classList.contains('rg')){ const b=c.querySelector('b'), p=c.querySelector('p'); out.push(`- **${b?b.textContent.trim():''}** ${p?p.textContent.trim():''}`); return; }
+      walk(c);
+    });
+  };
+  walk(d);
+  return out.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+}
+// Reference cards with the admin's changes applied, plus any cards they added.
+function refCardsEffective(){
+  const out=[];
+  refCards().forEach(c=>{
+    const o=contentGet('ref:'+c.id);
+    if(o && o.hidden) return;
+    out.push(o && o.text!=null ? Object.assign({}, c, {title:o.title||c.title, html:mdToHtml(o.text), edited:true}) : c);
+  });
+  contentKeys('refadd:').map(k=>Object.assign({id:k.slice(7)}, contentGet(k))).sort((a,b)=>(a.at||0)-(b.at||0))
+    .forEach(a=>out.push({id:'add-'+a.id, addId:a.id, title:a.title, tags:'', html:mdToHtml(a.text), custom:true}));
+  return out;
+}
+
+/* ---------- Settings: Content section ---------- */
+const SCEN = {
+  spot:{label:'SPOT report', fields:[['see','What the soldier sees','Finishes "...when you spot ___." Example: three enemy soldiers standing in the open next to a well...',3],['S','Line 3: Size'],['A','Line 4: Activity'],['U','Line 6: Uniform'],['E','Line 8: Equipment'],['assess','Line 9: Assessment'],['rec','Line 10: Recommendation'],['alt','Also reasonable for line 10']], title:x=>x.S+': '+x.A},
+  salute:{label:'SALUTE report', fields:[['what','What happened','Finishes "At [time], ___." Example: about five enemy fighters opened fire on your patrol...',3],['S','Size'],['A','Activity'],['U','Uniform'],['E','Equipment']], title:x=>x.S+': '+x.A},
+};
+function contentSettingsHtml(){
+  const st=STATE.ce||{}, cards=refCards(), eff=refCardsEffective();
+  const editing = st.ed;
+  const refRow=c=>{ const o=contentGet('ref:'+c.id), on=editing==='ref:'+c.id;
+    return `<div class="ce-row"><div><b>${esc((o&&o.title)||c.title)}</b>${o&&o.hidden?' <span class="badge b-none">hidden</span>':o?' <span class="badge b-brass">edited</span>':''}</div>
+      <div class="row" style="gap:6px">${on?'':`<button class="btn sm" data-ceref="${c.id}">Edit</button>`}${o?`<button class="btn sm" data-cerefreset="${c.id}">Restore original</button>`:`<button class="btn sm" data-cerefhide="${c.id}">Hide</button>`}</div></div>
+      ${on?refEditorHtml(o&&o.text!=null?o.text:htmlToMd(c.html), (o&&o.title)||c.title):''}`; };
+  const addRows=contentKeys('refadd:').map(k=>{ const a=contentGet(k), id=k.slice(7), on=editing==='refadd:'+id;
+    return `<div class="ce-row"><div><b>${esc(a.title)}</b> <span class="badge b-good">added</span></div><div class="row" style="gap:6px">${on?'':`<button class="btn sm" data-ceadd="${id}">Edit</button>`}<button class="btn sm" data-ceadddel="${id}">Delete</button></div></div>${on?refEditorHtml(a.text,a.title):''}`; }).join('');
+  const stepRow=L=>{ const o=contentGet('steps:'+L.k), on=editing==='steps:'+L.k;
+    const cur = L.k==='tccc'?TCCC_STEPS:L.k==='fx'?FX_STEPS:L.k==='bn'?BN_STEPS:L.k==='grenade'?GRENADE_STEPS:Drill.WEAPONS[L.k].phases;
+    return `<div class="ce-row"><div><b>${L.label}</b>${o?' <span class="badge b-brass">edited</span>':''}<span class="soft" style="font-size:12.5px"> \u00B7 ${L.weapon?cur.length+' parts':cur.length+' steps'}</span></div>
+      <div class="row" style="gap:6px">${on?'':`<button class="btn sm" data-cestep="${L.k}">Edit</button>`}${o?`<button class="btn sm" data-cestepreset="${L.k}">Restore original</button>`:''}</div></div>
+      ${on?`<div class="ce-ed"><p class="sub" style="margin:0 0 8px;font-size:13px">${L.weapon?WEAPON_HELP:L.help} Graders and Practice use this list right away.</p>
+        <textarea class="input ce-ta" id="ceStepTxt" rows="14">${esc(stepsToText(L.k, cur))}</textarea>
+        <div class="row" style="margin-top:8px"><button class="btn primary sm" id="ceStepSave" data-k="${L.k}">Save</button><button class="btn sm" data-cecancel="1">Cancel</button><span id="ceStepMsg" class="flag" style="font-size:13px"></span></div></div>`:''}`; };
+  const scenRows=k=>{ const D=SCEN[k], list=k==='spot'?Drill.OBSERVED:Drill.CONTACT, o=contentGet('scen:'+k);
+    return `<h4 class="ce-h4">${D.label} <span class="soft" style="font-weight:400;font-size:13px">\u00B7 ${list.length} scenario${list.length===1?'':'s'}${o?' \u00B7 edited':''}</span></h4>
+      ${list.map((x,i)=>{ const on=editing==='scen:'+k+':'+i; return `<div class="ce-row"><div style="min-width:0"><span class="ce-clip">${esc(D.title(x))}</span></div><div class="row" style="gap:6px">${on?'':`<button class="btn sm" data-cescen="${k}:${i}">Edit</button>`}<button class="btn sm" data-cescendel="${k}:${i}">Remove</button></div></div>${on?scenEditorHtml(k,x):''}`; }).join('')}
+      ${editing==='scen:'+k+':new'?scenEditorHtml(k,{}):''}
+      <div class="row" style="margin:8px 0 4px"><button class="btn sm" data-cescennew="${k}">+ Add a ${D.label} scenario</button>${o?`<button class="btn sm" data-cescenreset="${k}">Restore originals</button>`:''}</div>`; };
+  const injRows=()=>{ const ov=contentGet('scen:inj')||{};
+    return `<h4 class="ce-h4">9-line casualties <span class="soft" style="font-weight:400;font-size:13px">\u00B7 how each injury is described and graded</span></h4>
+      <details class="tbl" ${editing&&editing.startsWith('inj:')?'open':''}><summary>${Object.keys(Drill.INJ).length} injuries${Object.keys(ov).length?` \u00B7 ${Object.keys(ov).length} edited`:''}</summary>
+      ${Object.keys(Drill.INJ).map(k=>{ const x=Drill.INJ[k], on=editing==='inj:'+k; return `<div class="ce-row"><div style="min-width:0"><span class="ce-clip">${esc(x.t)}</span> <span class="soft" style="font-size:12.5px">${PREC[x.p]?PREC[x.p].split(' /')[0]:x.p} \u00B7 ${x.L?'litter':'walks'}</span>${ov[k]?' <span class="badge b-brass">edited</span>':''}</div><div class="row" style="gap:6px">${on?'':`<button class="btn sm" data-ceinj="${k}">Edit</button>`}${ov[k]?`<button class="btn sm" data-ceinjreset="${k}">Restore</button>`:''}</div></div>${on?injEditorHtml(x):''}`; }).join('')}</details>`; };
+  return `
+    <h3>Reference cards</h3>
+    <p class="sub">Change a card if a format or standard changes. Edited cards show for everyone right away; "Restore original" puts back the built-in version.</p>
+    ${cards.map(refRow).join('')}${addRows}
+    ${editing==='refnew'?refEditorHtml('', ''):''}
+    <div class="row" style="margin:10px 0 4px"><button class="btn sm" id="ceRefNew">+ Add a card</button></div>
+    <h3>Grading steps</h3>
+    <p class="sub">The checklists graders tap through and Practice uses. Change the wording, add, remove, or reorder steps.</p>
+    ${STEP_LISTS.map(stepRow).join('')}
+    <h3>Grenade list</h3>
+    <p class="sub">The grenades graders show for Grenade ID, one per line. Go needs ${DATA.settings.grenadeGo} of ${DATA.settings.grenadeTotal} correct (set in Scoring rules).</p>
+    <textarea class="input ce-ta" id="ceGren" rows="7">${esc(DATA.settings.grenadeList||'')}</textarea>
+    <div class="row" style="margin-top:8px"><button class="btn primary sm" id="ceGrenSave">Save grenade list</button></div>
+    <h3>Practice scenarios</h3>
+    <p class="sub">SPOT and SALUTE scenarios can be added or changed here, along with how 9-line casualties are described. Call for fire, TCCC, fractures, and burns are built from many pieces at once, so changing those still takes an app update.</p>
+    ${scenRows('spot')}${scenRows('salute')}${injRows()}`;
+}
+function refEditorHtml(text, title){
+  return `<div class="ce-ed"><label class="field"><span>Card title</span><input class="input" id="ceRefTitle" value="${esc(title)}"></label>
+    <label class="field" style="margin-top:8px"><span>Card text</span><textarea class="input ce-ta" id="ceRefTxt" rows="16">${esc(text)}</textarea></label>
+    <p class="sub" style="margin:6px 0 0;font-size:12.5px">Formatting: "## Heading", "1. numbered step", "- bullet", **bold**. Leave a blank line between paragraphs. Pictures on the original card aren't kept when it's edited.</p>
+    <details class="tbl"><summary>Preview</summary><div class="drill embed ref-body" id="ceRefPrev">${mdToHtml(text)}</div></details>
+    <div class="row" style="margin-top:8px"><button class="btn primary sm" id="ceRefSave">Save card</button><button class="btn sm" data-cecancel="1">Cancel</button><span id="ceRefMsg" class="flag" style="font-size:13px"></span></div></div>`;
+}
+function scenEditorHtml(k, x){
+  return `<div class="ce-ed">${SCEN[k].fields.map(([f,label,ph,rows])=>`<label class="field" style="margin-bottom:8px"><span>${label}</span>${rows?`<textarea class="input" data-scf="${f}" rows="${rows}" placeholder="${esc(ph||'')}" style="font-family:var(--sans);font-size:15px">${esc(x[f]||'')}</textarea>`:`<input class="input" data-scf="${f}" value="${esc(x[f]||'')}">`}</label>`).join('')}
+    <div class="row"><button class="btn primary sm" id="ceScenSave">Save scenario</button><button class="btn sm" data-cecancel="1">Cancel</button><span id="ceScenMsg" class="flag" style="font-size:13px"></span></div></div>`;
+}
+function injEditorHtml(x){
+  return `<div class="ce-ed"><label class="field" style="margin-bottom:8px"><span>Description (finishes "one soldier with ___")</span><textarea class="input" id="ceInjT" rows="2" style="font-family:var(--sans);font-size:15px">${esc(x.t)}</textarea></label>
+    <div class="grid"><label class="field"><span>Precedence (line 3)</span><select class="input" id="ceInjP">${Object.entries(PREC).map(([k,v])=>`<option value="${k}" ${x.p===k?'selected':''}>${k} = ${esc(v)}</option>`).join('')}</select></label>
+    <label class="field"><span>Type (line 5)</span><select class="input" id="ceInjL"><option value="1" ${x.L?'selected':''}>L = litter</option><option value="0" ${x.L?'':'selected'}>A = ambulatory</option></select></label></div>
+    <label class="field" style="margin-top:8px"><span>Why (shown in the answer)</span><input class="input" id="ceInjW" value="${esc(x.why||'')}"></label>
+    <div class="row" style="margin-top:8px"><button class="btn primary sm" id="ceInjSave">Save</button><button class="btn sm" data-cecancel="1">Cancel</button></div></div>`;
+}
+function wireContentSettings(c){
+  const st=STATE.ce=STATE.ce||{}, re=()=>{ render(); const el=document.querySelector('.ce-ed'); if(el) el.scrollIntoView({block:'center'}); };
+  const open=ed=>{ st.ed=ed; re(); };
+  c.querySelectorAll('[data-cecancel]').forEach(b=>b.onclick=()=>{ st.ed=null; render(); });
+  c.querySelectorAll('[data-ceref]').forEach(b=>b.onclick=()=>open('ref:'+b.dataset.ceref));
+  c.querySelectorAll('[data-ceadd]').forEach(b=>b.onclick=()=>open('refadd:'+b.dataset.ceadd));
+  c.querySelectorAll('[data-cerefreset]').forEach(b=>b.onclick=()=>{ contentSet('ref:'+b.dataset.cerefreset, null); toast('Original card restored.'); render(); });
+  c.querySelectorAll('[data-cerefhide]').forEach(b=>b.onclick=()=>{ contentSet('ref:'+b.dataset.cerefhide, {hidden:true}); toast('Card hidden from Reference. "Restore original" brings it back.'); render(); });
+  c.querySelectorAll('[data-ceadddel]').forEach(b=>b.onclick=()=>{ contentSet('refadd:'+b.dataset.ceadddel, null); toast('Card deleted.'); render(); });
+  const rn=$('ceRefNew'); if(rn) rn.onclick=()=>open('refnew');
+  const txt=$('ceRefTxt'); if(txt) txt.oninput=()=>{ $('ceRefPrev').innerHTML=mdToHtml(txt.value); };
+  const rs=$('ceRefSave'); if(rs) rs.onclick=()=>{
+    const title=$('ceRefTitle').value.trim(), text=$('ceRefTxt').value;
+    if(!title) return $('ceRefMsg').textContent='Give the card a title.';
+    if(!text.trim()) return $('ceRefMsg').textContent='The card needs some text.';
+    if(st.ed==='refnew'){ const id=uid().slice(0,8); contentSet('refadd:'+id, {title, text, at:Date.now()}); }
+    else if(st.ed.startsWith('refadd:')){ const k=st.ed, a=contentGet(k); contentSet(k, Object.assign({}, a, {title, text})); }
+    else contentSet(st.ed, {title, text});
+    st.ed=null; toast('Card saved. It shows in Reference for everyone.'); render();
+  };
+  c.querySelectorAll('[data-cestep]').forEach(b=>b.onclick=()=>open('steps:'+b.dataset.cestep));
+  c.querySelectorAll('[data-cestepreset]').forEach(b=>b.onclick=()=>{ contentSet('steps:'+b.dataset.cestepreset, null); toast('Original steps restored.'); render(); });
+  const ss=$('ceStepSave'); if(ss) ss.onclick=()=>{
+    const k=ss.dataset.k; let v;
+    try{ v=textToSteps(k, $('ceStepTxt').value); }catch(e){ $('ceStepMsg').textContent=e.message; return; }
+    contentSet('steps:'+k, v); STATE.tccc=null; st.ed=null; toast('Steps saved. Graders and Practice use them now.'); render();
+  };
+  const gs=$('ceGrenSave'); if(gs) gs.onclick=()=>{ const v=$('ceGren').value.split('\n').map(x=>x.trim()).filter(Boolean); if(!v.length) return toast('Add at least one grenade.'); DATA.settings.grenadeList=v.join('\n'); save(); toast('Grenade list saved.'); render(); };
+  const scenList=k=>clone(contentGet('scen:'+k)||(k==='spot'?Drill.OBSERVED:Drill.CONTACT));
+  c.querySelectorAll('[data-cescen]').forEach(b=>b.onclick=()=>open('scen:'+b.dataset.cescen));
+  c.querySelectorAll('[data-cescennew]').forEach(b=>b.onclick=()=>open('scen:'+b.dataset.cescennew+':new'));
+  c.querySelectorAll('[data-cescenreset]').forEach(b=>b.onclick=()=>{ contentSet('scen:'+b.dataset.cescenreset, null); toast('Original scenarios restored.'); render(); });
+  c.querySelectorAll('[data-cescendel]').forEach(b=>b.onclick=()=>{ const [k,i]=b.dataset.cescendel.split(':'), L=scenList(k); if(L.length<=1) return toast('Keep at least one scenario.'); L.splice(+i,1); contentSet('scen:'+k, L); toast('Scenario removed.'); render(); });
+  const sv=$('ceScenSave'); if(sv) sv.onclick=()=>{
+    const [,k,i]=st.ed.split(':'), x={}; c.querySelectorAll('[data-scf]').forEach(el=>x[el.dataset.scf]=el.value.trim());
+    const missing=SCEN[k].fields.filter(([f])=>f!=='alt' && !x[f]).map(([,l])=>l);
+    if(missing.length) return $('ceScenMsg').textContent='Fill in: '+missing.join(', ');
+    x[k==='spot'?'see':'what']=x[k==='spot'?'see':'what'].replace(/\.\s*$/,'');
+    const L=scenList(k); if(i==='new') L.push(x); else L[+i]=x;
+    contentSet('scen:'+k, L); st.ed=null; toast('Scenario saved. Practice and graders can get it now.'); render();
+  };
+  c.querySelectorAll('[data-ceinj]').forEach(b=>b.onclick=()=>open('inj:'+b.dataset.ceinj));
+  c.querySelectorAll('[data-ceinjreset]').forEach(b=>b.onclick=()=>{ const ov=clone(contentGet('scen:inj')||{}); delete ov[b.dataset.ceinjreset]; contentSet('scen:inj', Object.keys(ov).length?ov:null); toast('Restored.'); render(); });
+  const is=$('ceInjSave'); if(is) is.onclick=()=>{
+    const k=st.ed.slice(4), t=$('ceInjT').value.trim().replace(/\.\s*$/,''); if(!t) return toast('Add a description.');
+    const ov=clone(contentGet('scen:inj')||{}); ov[k]={t, p:$('ceInjP').value, L:$('ceInjL').value==='1'?1:0, why:$('ceInjW').value.trim()};
+    contentSet('scen:inj', ov); st.ed=null; toast('Casualty saved.'); render();
+  };
+}
+
+/* ============================== soldier Home ============================== */
+// Today and tomorrow on the calendar, run/ruck totals, and what to practice next.
+const PRACTICE_MODE = {medevac:'medevac', cff:'cff', mission:'cff', spot:'spot', salute:'salute', tccc:'tccc', fracture:'fracture', burn:'burn', grenade:'grenade', m249:'weapons', m240b:'weapons', m4:'weapons'};
+function weekStartIso(){ const d=new Date(); d.setHours(0,0,0,0); d.setDate(d.getDate()-((d.getDay()+6)%7)); return isoOf(d); }   // Monday
+function mileStats(list){
+  const mi=list.reduce((a,e)=>a+(+e.dist||0),0), sec=list.reduce((a,e)=>a+(+e.sec||0),0);
+  return {n:list.length, mi, pace: mi>0 ? sec/mi : null};
+}
+const fmtMi = m => (Math.round(m*10)/10).toLocaleString()+' mi';
+function soldierWeakest(s){
+  const L=s.practice||[], label=k=>(Drill.PTASKS.find(p=>p[0]===k)||[0,k])[1];
+  const by={}; L.forEach(e=>{ (by[e.task]=by[e.task]||[]).push(e); });
+  const weak=Object.keys(by).map(k=>{ const last=by[k].slice(-10), r=last.filter(e=>e.ok).length/last.length; return {k, label:label(k), r, n:last.length, total:by[k].length}; })
+    .filter(x=>x.n>=3 && x.r<0.8).sort((a,b)=>a.r-b.r || b.n-a.n).slice(0,3);
+  const tried=new Set(Object.keys(by));
+  const untried=Drill.PTASKS.filter(([k])=>!tried.has(k)).map(([k,l])=>({k,label:l}));
+  return {weak, untried, any:L.length>0};
+}
+function renderSoldierHome(c, s){
+  const today=isoOf(new Date()), tom=addDays(today,1), occ=calExpand(today, tom);
+  const first = s.name.split(',').length>1 ? s.name.split(',')[1].trim().split(' ')[0] : s.name.split(' ')[0];
+  const dayBlock=(d,label)=>{ const L=occ[d]||[];
+    return `<div class="sh-day"><h3>${label} <span class="soft" style="font-weight:400;font-size:13px">${calDayLabel(d,{weekday:'short',month:'short',day:'numeric'})}</span></h3>
+      ${L.length?L.map(e=>`<button class="sh-ev" data-calgo="${d}"><b>${esc(e.title)}</b><span>${[e.from?fmtClock(e.from)+(e.to?'\u2013'+fmtClock(e.to):''):(e.end&&e.end>e.start?calWhen(e):'All day'), e.where, e.uniform].filter(Boolean).map(esc).join(' \u00B7 ')}</span></button>`).join('')
+        :'<p class="sub" style="margin:4px 0 0">Nothing scheduled.</p>'}</div>`; };
+  const wk=weekStartIso(), mo=today.slice(0,7)+'-01';
+  const kindPanel=kind=>{
+    const all=timeLogs().filter(e=>e.kind===kind && e.sid===s.id && e.dist>0 && e.sec>0);
+    const W=mileStats(all.filter(e=>e.date>=wk && e.date<=today)), M=mileStats(all.filter(e=>e.date>=mo && e.date<=today)), A=mileStats(all);
+    const last=[...all].sort(tlNewest)[0];
+    return `<div class="sh-kind"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${kind==='run'?'Running':'Rucking'}</h3>${last?`<span class="soft" style="font-size:12.5px">Last: ${tlDist(last.dist)} mi, ${calDayLabel(last.date,{month:'short',day:'numeric'})}</span>`:''}</div>
+      ${A.n?`<div class="tiles sh-tiles">
+        <div><b>${A.pace?fmtTime(A.pace):'\u2013'}</b><span>average pace /mi</span></div>
+        <div><b>${fmtMi(W.mi)}</b><span>this week</span></div>
+        <div><b>${fmtMi(M.mi)}</b><span>this month</span></div>
+        <div><b>${fmtMi(A.mi)}</b><span>overall (${A.n} ${kind}${A.n===1?'':'s'})</span></div>
+      </div>`:`<p class="sub" style="margin:6px 0 0">No ${kind}s logged yet.</p>`}</div>`;
+  };
+  const P=soldierWeakest(s);
+  const pBtn=(k,label)=>`<button class="btn sm" data-shprac="${k}">Practice ${esc(label)}</button>`;
+  tlInit();
+  const qk = STATE.shKind = STATE.shKind || 'run';
+  const flash = STATE.tl.flash; STATE.tl.flash='';
+  c.innerHTML=`<div class="stack">
+    <div class="sh-hello"><h2>Hey ${esc(first)}</h2></div>
+    <div class="two">
+      <div class="panel"><div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:6px"><h2 style="margin:0">Calendar</h2><button class="btn sm" id="shCal">Full calendar</button></div>
+        ${dayBlock(today,'Today')}${dayBlock(tom,'Tomorrow')}</div>
+      <div class="panel sh-log" id="shLogBox"><div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:10px"><h2 style="margin:0">Log a run or ruck</h2>
+          <div class="seg" role="group" aria-label="Run or ruck">${['run','ruck'].map(k=>`<button data-shkind="${k}" aria-pressed="${k===qk}">${TL_KINDS[k].label}</button>`).join('')}</div></div>
+        ${flash?`<div class="note ok" style="margin-bottom:10px">${esc(flash)}</div>`:''}
+        ${tlFormHtml(qk, s.id)}</div>
+    </div>
+    <div class="panel"><div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div><h2 style="margin:0">Runs and rucks</h2><p class="sub" style="margin:2px 0 0">Weeks start Monday. Includes times you log and times leadership logs for you.</p></div><button class="btn sm" id="shAll">All my times</button></div>
+      ${kindPanel('run')}${kindPanel('ruck')}</div>
+    <div class="panel"><div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:6px"><h2 style="margin:0">Practice next</h2><button class="btn sm" id="shProg">My progress</button></div>
+      ${P.weak.length?`<p class="sub" style="margin:0 0 8px">Your weakest skills, from your last 10 tries at each.</p><ol class="sh-weak">${P.weak.map(w=>`<li><div><b>${esc(w.label)}</b><div class="sh-bar" role="img" aria-label="${Math.round(w.r*100)}% right"><i style="width:${Math.max(4,Math.round(w.r*100))}%"></i></div><span class="soft" style="font-size:12.5px">${Math.round(w.r*100)}% right in your last ${w.n}</span></div>${pBtn(w.k,'')}</li>`).join('')}</ol>`
+        : P.any ? `<p class="sub" style="margin:0 0 8px">Nothing below 80% right now. Nice work.</p>` : `<p class="sub" style="margin:0 0 8px">You haven't practiced yet. Start anywhere.</p>`}
+      ${P.untried.length?`<p class="sub" style="margin:10px 0 6px;font-size:13px">Not tried yet:</p><div class="row" style="gap:6px">${P.untried.slice(0,4).map(t=>`<button class="chip-btn" data-shprac="${t.k}">${esc(t.label)}</button>`).join('')}</div>`:''}
+    </div>
+  </div>`;
+  // quick log: same form and rules as My times
+  const box=$('shLogBox'), cancel=box.querySelector('#tl_cancel');
+  if(cancel) cancel.remove();
+  box.querySelector('#tl_save').onclick=()=>tlSave(qk, s.id);
+  box.querySelectorAll('.tl-form .input').forEach(el=>el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); tlSave(qk, s.id); } }));
+  box.querySelectorAll('[data-shkind]').forEach(b=>b.onclick=()=>{ STATE.shKind=b.dataset.shkind; render(); });
+  $('shAll').onclick=()=>{ STATE.tab='mytimes'; render(); window.scrollTo(0,0); };
+  c.querySelectorAll('[data-calgo]').forEach(b=>b.onclick=()=>{ STATE.cal=STATE.cal||{}; STATE.cal.day=b.dataset.calgo; STATE.cal.month=b.dataset.calgo.slice(0,7); STATE.tab='cal'; render(); window.scrollTo(0,0); });
+  $('shCal').onclick=()=>{ STATE.tab='cal'; render(); window.scrollTo(0,0); };
+  $('shProg').onclick=()=>{ STATE.practiceMode='progress'; STATE.tab='mypractice'; render(); window.scrollTo(0,0); };
+  c.querySelectorAll('[data-shprac]').forEach(b=>b.onclick=()=>{ STATE.practiceMode=PRACTICE_MODE[b.dataset.shprac]||'medevac'; STATE.tab='mypractice'; render(); window.scrollTo(0,0); });
 }
 
 load();
