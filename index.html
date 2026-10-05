@@ -634,6 +634,8 @@ h3.chart-h{font-size:14px;margin:14px 0 6px;color:var(--inkSoft);font-weight:600
 html .cal-tag{display:inline-block;font:600 10.5px/1 var(--sans);letter-spacing:.04em;padding:3px 5px;border-radius:4px;margin-right:6px;vertical-align:2px}
 .cal-tag.rc{background:var(--brassBg);color:var(--brass)}.cal-tag.bn{background:var(--goodBg);color:var(--good)}
 .cal-chip.k-bn{border-left:3px solid var(--good)}.cal-chip.k-rc{border-left:3px solid var(--brass)}
+.tl-pace{margin:10px 0 0;font-size:14.5px;min-height:1.4em;color:var(--inkSoft)}.tl-pace b{color:var(--ink);font-family:var(--mono)}
+.wk-pace{display:block;font-family:var(--mono);font-size:12px;margin-top:3px;min-height:1em}
 </style>
 
 <div id="app"></div>
@@ -904,6 +906,7 @@ const GROUP_NAME={all:'Everyone', rc:'Ranger Challenge', bn:'Battalion'};
 function fmtTime(sec){ if(sec==null||isNaN(sec)) return ''; sec=Math.round(sec); return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0'); }
 function parseTime(s){
   s = String(s==null?'':s).trim(); if(!s) return null;
+  if(/^\d{3,4}$/.test(s)) s=s.slice(0,-2)+':'+s.slice(-2);   // digits only: 1405 = 14:05
   let m = s.match(/^(\d{1,3}):([0-5]\d)$/); if(m) return (+m[1])*60 + (+m[2]);
   m = s.match(/^(\d{1,3})[.,]([0-5]\d)$/); if(m) return (+m[1])*60 + (+m[2]);
   return NaN;
@@ -3023,7 +3026,7 @@ function renderTeam(c){
               ? `<select class="input ${f.w} ${bad}" data-f="${f.k}" aria-label="${f.label}"><option value="">${ph?'recorded':'\u2014'}</option><option value="yes" ${r.vals[f.k]==='yes'?'selected':''}>Yes</option><option value="no" ${r.vals[f.k]==='no'?'selected':''}>No</option></select>`
               : f.type==='gonogo'
               ? `<select class="input ${f.w} ${bad}" data-f="${f.k}" aria-label="${f.label}"><option value="">${ph?'recorded':'\u2014'}</option><option value="go" ${r.vals[f.k]==='go'?'selected':''}>Go</option><option value="nogo" ${r.vals[f.k]==='nogo'?'selected':''}>No-Go</option></select>`
-              : `<input class="input ${f.w} ${bad}" data-f="${f.k}" value="${esc(r.vals[f.k])}" placeholder="${ph}" aria-label="${f.label}" ${f.type!=='time'?'inputmode="numeric"':''}>`}</td>`; }).join('')}
+              : `<input class="input ${f.w} ${bad}" data-f="${f.k}" value="${esc(r.vals[f.k])}" placeholder="${ph}" aria-label="${f.label}" inputmode="numeric" ${f.type==='time'?'data-time="short" autocomplete="off"':''}>`}</td>`; }).join('')}
           <td><button class="btn sm" data-del="${r.rid}" title="Remove this row from the table (does not delete the soldier)" aria-label="Remove row">\u2715</button></td>
         </tr>`).join('')}</tbody></table></div>
       <div class="row" style="padding:10px 4px 4px;justify-content:space-between">
@@ -3120,15 +3123,15 @@ function renderOne(c){
           <label class="field"><span>Sex</span><select class="input" id="i-sex"><option value=""></option><option ${s&&s.sex==='M'?'selected':''}>M</option><option ${s&&s.sex==='F'?'selected':''}>F</option></select></label>
         </div>
         ${VF.some(f=>f.ev==='aft')?`<h3>AFT</h3>
-        <div class="grid">${VF.filter(f=>f.ev==='aft').map(f=>`<label class="field"><span>${EVENTS.find(e=>e.k===f.k).name} (${f.hint})</span><input class="input" id="i-${f.k}" value="${esc(val(f.k))}" placeholder="${ph(f.k)}"></label>`).join('')}</div>`:''}
+        <div class="grid">${VF.filter(f=>f.ev==='aft').map(f=>`<label class="field"><span>${EVENTS.find(e=>e.k===f.k).name} (${f.hint})</span><input class="input" id="i-${f.k}" inputmode="numeric" ${f.type==='time'?'data-time="short" autocomplete="off"':''} value="${esc(val(f.k))}" placeholder="${ph(f.k)}"></label>`).join('')}</div>`:''}
         ${customTests().filter(t=>VF.some(f=>f.ev===ctKey(t))).map(t=>`<h3>${esc(t.name)}</h3>
-        <div class="grid">${VF.filter(f=>f.ev===ctKey(t)).map(f=>`<label class="field"><span>${esc(f.long)}</span><input class="input" id="i-${f.k}" ${f.type==='num'?'inputmode="decimal"':''} value="${esc(val(f.k))}" placeholder="${ph(f.k)}"></label>`).join('')}</div>`).join('')}
+        <div class="grid">${VF.filter(f=>f.ev===ctKey(t)).map(f=>`<label class="field"><span>${esc(f.long)}</span><input class="input" id="i-${f.k}" ${f.type==='num'?'inputmode="decimal"':f.type==='time'?'inputmode="numeric" data-time="short" autocomplete="off"':''} value="${esc(val(f.k))}" placeholder="${ph(f.k)}"></label>`).join('')}</div>`).join('')}
         ${VF.some(f=>f.ev!=='aft'&&!f.ev.startsWith('ct_'))?`<h3>${VF.some(f=>f.ev==='cft')?'CFT and skills':'Skills'}</h3>
         <div class="grid">${VF.filter(f=>f.ev!=='aft'&&!f.ev.startsWith('ct_')).map(f=>{
           const lbl = f.k==='grenade' ? `Grenade ID (# of ${DATA.settings.grenadeTotal} correct)` : f.k==='circle' ? `Grenade in the circle (+${DATA.settings.circleBonus})` : (f.long||f.label);
           const ctl = f.type==='gonogo' ? (admin||!s?gonogoSelect('i-'+f.k, s&&s[f.k]):recSelect('i-'+f.k, ph(f.k)))
             : f.type==='yesno' ? yesnoSelect('i-'+f.k, admin&&s?s[f.k]:null, '', '', ph(f.k)||'\u2014')
-            : `<input class="input" id="i-${f.k}" ${f.type!=='time'?'inputmode="numeric"':''} value="${esc(val(f.k))}" placeholder="${ph(f.k)}">`;
+            : `<input class="input" id="i-${f.k}" inputmode="numeric" ${f.type==='time'?'data-time="short" autocomplete="off"':''} value="${esc(val(f.k))}" placeholder="${ph(f.k)}">`;
           return `<label class="field"><span>${lbl}</span>${ctl}</label>`; }).join('')}</div>`:''}
         <div class="row" style="margin-top:16px;justify-content:space-between">
           <button class="btn primary" id="saveOne">${mode==='new'?'Add soldier':'Save changes'}</button>
@@ -4069,8 +4072,8 @@ function renderSettings(c){
       <label class="row" style="gap:8px;margin-top:12px"><input type="checkbox" id="s-aftCut" ${S.aftFailCut?'checked':''}> Failing the AFT general standard is an automatic cut</label>
       <h3>CFT</h3>
       <div class="grid">
-        <label class="field"><span>CFT time for 100 points</span><input class="input" id="s-best" value="${fmtTime(S.cftBest)}"></label>
-        <label class="field"><span>CFT time for 0 points</span><input class="input" id="s-zero" value="${fmtTime(S.cftZero)}"></label>
+        <label class="field"><span>CFT time for 100 points</span><input class="input" id="s-best" inputmode="numeric" data-time="short" value="${fmtTime(S.cftBest)}"></label>
+        <label class="field"><span>CFT time for 0 points</span><input class="input" id="s-zero" inputmode="numeric" data-time="short" value="${fmtTime(S.cftZero)}"></label>
       </div>
       <div class="row" style="margin-top:14px"><button class="btn primary" id="saveSet">Save settings</button><button class="btn sm" id="resetSet">Restore defaults</button></div>`)}
     ${sec('times','Run & ruck averages','Scoring for average run and ruck times, and whether self-logged times count.', `
@@ -4078,14 +4081,14 @@ function renderSettings(c){
       <label class="row" style="gap:8px;margin:0 0 12px"><input type="checkbox" id="av-self" ${S.countSelfTimes?'checked':''}> Count runs and rucks soldiers log themselves (off: only times leadership logs count)</label>
       ${['run','ruck'].map(k=>{ const a=avgCfg(k), L=TL_KINDS[k]; return `<div class="grid" style="margin-bottom:10px">
         <label class="field"><span>${L.label} distance (miles)</span><input class="input" inputmode="decimal" id="av-${k}-dist" value="${a.dist}"></label>
-        <label class="field"><span>${L.label} average for 100 points (${L.fmt})</span><input class="input" id="av-${k}-best" value="${fmtLong(a.best)}"></label>
-        <label class="field"><span>${L.label} average for 0 points (${L.fmt})</span><input class="input" id="av-${k}-zero" value="${fmtLong(a.zero)}"></label>
+        <label class="field"><span>${L.label} average for 100 points (${L.fmt})</span><input class="input" id="av-${k}-best" inputmode="numeric" data-time="long" value="${fmtLong(a.best)}"></label>
+        <label class="field"><span>${L.label} average for 0 points (${L.fmt})</span><input class="input" id="av-${k}-zero" inputmode="numeric" data-time="long" value="${fmtLong(a.zero)}"></label>
       </div>`; }).join('')}
       ${saveRow()}`)}
     ${sec('weapons','Weapon time limits','Time allowed to clear, disassemble, assemble, and functions check each weapon.', `
       
       <p class="sub">From "Go" through clearing, disassembly, assembly, and the functions check. The standard is 2:30 for each weapon. Leave a box blank for no limit.</p>
-      <div class="grid">${WEAPON_KEYS.map(k=>`<label class="field"><span>${eventShort(k)} (m:ss)</span><input class="input" id="tl-${k}" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
+      <div class="grid">${WEAPON_KEYS.map(k=>`<label class="field"><span>${eventShort(k)} (m:ss)</span><input class="input" id="tl-${k}" inputmode="numeric" data-time="short" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
       ${saveRow()}`)}
     ${!showAccess?'':sec('access', syncActive()?(isCaptain()?'Grader sign-ins':'Sign-in access'):'PINs', syncActive()?(isCaptain()?'Add graders, reset their PINs, and change the shared grader PIN.':'Who can sign in, what each person can do, and resetting someone\'s PIN.'):'The admin and grader PINs on this device.', `${syncActive()?syncAccessHtml():`<div>
       <p class="sub">Both PINs are saved in the .json, so they carry over to any device that imports your roster fresh. They keep casual users out of the admin view; they don't encrypt the data.</p>
@@ -4668,10 +4671,11 @@ function tlFormHtml(kind, who){
     <label class="field"><span>Date</span><input class="input" type="date" id="tl_date" value="${todayISO()}"></label>
     ${who==='team'?`<label class="field"><span>Team or squad</span><input class="input" id="tl_team" value="${esc(lastTeam)}" placeholder="e.g. Team 1"></label>`:''}
     ${kind==='rope'?'':`<label class="field"><span>Distance (miles)</span><input class="input" inputmode="decimal" id="tl_dist" value="${esc(mine.dist || (kind==='ruck'?12:2))}"></label>`}
-    <label class="field"><span>Time (${K.fmt})</span><input class="input" id="tl_time" inputmode="numeric" placeholder="${K.ex}"></label>
+    <label class="field"><span>Time (${K.fmt})</span><input class="input" id="tl_time" inputmode="numeric" data-time="long" autocomplete="off" placeholder="${K.ex}"></label>
     <label class="field"><span>Note (optional)</span><input class="input" id="tl_note" placeholder="${kind==='rope'?'e.g. wet rope':'e.g. hills, hot day'}"></label>
     ${who!=='team' && syncActive()?`<label class="field tl-photo"><span>Photo (optional)</span><input type="file" accept="image/*" id="tl_photo"><span class="soft" style="font-size:12px">A watch or app screenshot works well.</span></label>`:''}
   </div>
+  ${kind==='rope'?'':'<p class="tl-pace" id="tl_pace" aria-live="polite"></p>'}
   <div class="row" style="margin-top:12px"><button class="btn primary" id="tl_save">Save time</button><button class="btn" id="tl_cancel">Done</button><span id="tl_msg" class="sub" style="margin:0"></span></div></div>`;
 }
 async function tlSave(kind, who){
@@ -4691,11 +4695,22 @@ async function tlSave(kind, who){
   if(file){ msg.textContent='Preparing photo\u2026'; try{ photo=await shrinkPhoto(file); }catch(err){ return bad('tl_photo','That picture couldn\'t be read. Try a different one.'); } }
   timeLogs().push(e); save();
   if(photo) syncQueuePhoto(e.id, photo);
-  STATE.tl.flash=`Saved ${who==='team'?e.team+' ':''}${TL_KINDS[kind].label.toLowerCase()}: ${fmtLong(sec)}${e.dist?` for ${tlDist(e.dist)} mi`:''}${photo?', with photo':''}.`;
+  STATE.tl.flash=`Saved ${who==='team'?e.team+' ':''}${TL_KINDS[kind].label.toLowerCase()}: ${fmtLong(sec)}${e.dist?` for ${tlDist(e.dist)} mi (${tlPace(e)} pace)`:''}${photo?', with photo':''}.`;
   if(e.dist) STATE.tl.dist[tlKey(kind,who)]=tlDist(e.dist);
   render();
   const t=$('tl_time'); if(t) t.focus();
 }
+
+// Pace per mile, shown live as the distance and time are typed.
+function paceText(sec, dist){ return sec>0 && dist>0 ? fmtTime(sec/dist)+' /mi' : ''; }
+document.addEventListener('input', e=>setTimeout(()=>{   // after the colon is filled in
+  const id=e.target && e.target.id;
+  if(id==='tl_time' || id==='tl_dist'){ const out=document.getElementById('tl_pace'); if(!out) return;
+    const sec=parseLong((document.getElementById('tl_time')||{}).value), d=+((document.getElementById('tl_dist')||{}).value);
+    const p=paceText(sec, d); out.innerHTML = p ? `Pace: <b>${p}</b>` : ''; }
+  if(e.target && e.target.classList && e.target.classList.contains('wk-in')){ const cell=e.target.parentNode.querySelector('.wk-pace'), d=+((document.getElementById('wk_dist')||{}).value);
+    if(cell) cell.textContent = paceText(parseLong(e.target.value), d); }
+}, 0));
 
 /* ---------- pieces used by both screens ---------- */
 function tlDistSeg(kind, who, ds, d){
@@ -4833,7 +4848,7 @@ function renderWeekend(c){
     <div class="panel" style="padding:8px 14px">
       ${people.length?`<table class="wk-table"><thead><tr><th>Soldier</th><th>Time (${TL_KINDS[W.kind].fmt})</th></tr></thead><tbody>
         ${people.map(s=>{ const ex=existing(s.id); return `<tr><td><span class="wk-name">${esc(s.name)}</span>${ex?`<small class="soft">already logged ${fmtLong(ex.sec)}</small>`:''}</td>
-          <td><input class="input wk-in ${W.bad[s.id]?'bad':''}" data-wk="${s.id}" inputmode="numeric" autocomplete="off" value="${esc(W.vals[s.id]||'')}" placeholder="${ex?fmtLong(ex.sec):''}" aria-label="${esc(s.name)} time"></td></tr>`; }).join('')}
+          <td><input class="input wk-in ${W.bad[s.id]?'bad':''}" data-wk="${s.id}" inputmode="numeric" data-time="long" autocomplete="off" value="${esc(W.vals[s.id]||'')}" placeholder="${ex?fmtLong(ex.sec):''}" aria-label="${esc(s.name)} time"><small class="wk-pace soft">${paceText(parseLong(W.vals[s.id]), +W.dist)}</small></td></tr>`; }).join('')}
       </tbody></table>`:`<p class="sub" style="padding:10px 0">No one is on the roster yet.</p>`}
     </div>
     <div class="panel wk-bar">
@@ -6446,6 +6461,22 @@ document.addEventListener('click', e=>{
   const box = b.dataset.help!=null ? document.querySelector(`[data-helpbox="${b.dataset.help}"]`) : b.nextElementSibling;
   if(!box) return;
   box.hidden=!box.hidden; b.setAttribute('aria-expanded', String(!box.hidden));
+});
+
+/* ---------- times on a phone: the number pad has no colon, so it's filled in while typing ---------- */
+// 1405 -> 14:05; in long boxes (rucks) 24830 -> 2:48:30. Deleting and pasting are left alone.
+function fmtTyped(digits, long){
+  const d=digits.slice(0, long?6:4);
+  if(d.length<3) return d;
+  if(long && d.length>=5) return d.slice(0,-4)+':'+d.slice(-4,-2)+':'+d.slice(-2);
+  return d.slice(0,-2)+':'+d.slice(-2);
+}
+document.addEventListener('input', e=>{
+  const el=e.target; if(!el || !el.matches || !el.matches('input[data-time]')) return;
+  if(e.inputType && e.inputType!=='insertText') return;
+  const v=el.value; if(/[^\d:]/.test(v)) return;
+  const out=fmtTyped(v.replace(/\D/g,''), el.dataset.time==='long');
+  if(out!==v){ el.value=out; try{ el.setSelectionRange(out.length, out.length); }catch(_){} }
 });
 
 /* ---------- small shared bits ---------- */
