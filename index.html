@@ -742,6 +742,11 @@ function ctScore(t, s){
 }
 function physWeight(k){ const w=(DATA.settings.physWeights||{})[k]; return w!=null ? +w : k==='aft'?70 : k==='cft'?30 : /^avg/.test(k)?20 : 50; }
 function physKeysOn(){ return [...PHYS_EVENTS, ...TIME_EVENTS].map(e=>e.k).filter(isOn); }
+// Straight points: each PT test's own points are added up (AFT 0-500 + CFT 0-100 = 600). Otherwise tests are blended by weight on a 500 scale.
+function physPointsMode(){ return DATA.settings.physMode==='points'; }
+function physNativeMax(k){ if(k==='aft') return 500; if(k==='cft' || /^avg/.test(k)) return 100; const t=ctByKey(k); return t ? t.events.reduce((a,e)=>a+ctMax(e),0) : 0; }
+function physMax(){ return physPointsMode() ? physKeysOn().reduce((a,k)=>a+physNativeMax(k),0) : 500; }
+function physHow(){ const k=physKeysOn(); if(physPointsMode()) return `${k.map(x=>`${eventShort(x)} (${fmt1(physNativeMax(x))})`).join(' + ')} added as straight points, ${fmt1(physMax())} max.`; return k.length>1 ? `${k.map(eventShort).join(', ')} mixed by their weights, on a 500-point scale.` : `${eventShort(k[0])} score, on a 500-point scale.`; }
 
 const GRENADE_STEPS = ['Identify target','Proper grip','Thumb the clip','Twist, pull the pin','Re-identify target','Strike a pose','Frag out!','Hit the ground'];
 const TCCC_STEPS = [
@@ -962,7 +967,11 @@ function score(s){
   const avg={run:avgTime(s,'run'), ruck:avgTime(s,'ruck')}, TE=k=>TIME_EVENTS.find(e=>e.k===k);
   const parts=physKeysOn().map(k=>[k, k==='aft'?aftW : k==='cft'?(cftPts==null?null:cftPts*5) : TE(k)?(avg[TE(k).kind].pts==null?null:avg[TE(k).kind].pts*5) : ct[ctByKey(k).id].scaled]);
   let phys = null;
-  if(parts.some(p=>p[1]!=null)){ const W=parts.map(p=>physWeight(p[0])), ws=W.reduce((a,b)=>a+b,0)||1; phys=parts.reduce((a,p,i)=>a+W[i]*(p[1]||0),0)/ws; }
+  if(physPointsMode()){
+    // Straight points: AFT official total (0-500), CFT points (0-100), run/ruck average points (0-100), your own tests' totals.
+    const own=physKeysOn().map(k=>k==='aft'?aftTotal : k==='cft'?cftPts : TE(k)?avg[TE(k).kind].pts : ct[ctByKey(k).id].total);
+    if(own.some(v=>v!=null)) phys=own.reduce((a,v)=>a+(v||0),0);
+  } else if(parts.some(p=>p[1]!=null)){ const W=parts.map(p=>physWeight(p[0])), ws=W.reduce((a,b)=>a+b,0)||1; phys=parts.reduce((a,p,i)=>a+W[i]*(p[1]||0),0)/ws; }
   let gos=0, skillsDone=0;
   SKILLS_ON().forEach(sk=>{ const r=skillResult(s,sk.k); if(r) skillsDone++; if(r==='go') gos++; });
   const bonus = isOn('throw') && s.circle==='yes' ? (+S.circleBonus||0) : 0;
@@ -985,7 +994,7 @@ const VIEWS = {
   overall:{label:'Overall', sub:()=> physOn() ? 'Physical score plus Go points. Ties go to more Gos, then the faster 2-mile run.' : 'Go points only (AFT and CFT are turned off). Ties go to the faster 2-mile run.'},
   gos:{label:'Most Gos', sub:()=>`Number of Gos across ${SKILLS_ON().map(k=>k.short).join(', ')}. Ties go to the higher overall score.`},
   run:{label:'2-mile run', sub:()=>'2-mile run points from the official tables (age and sex adjusted). Ties go to the faster time.'},
-  phys:{label:'Physical', sub:()=>{ const k=physKeysOn(); return k.length>1 ? `${k.map(eventShort).join(', ')} mixed by their weights, on a 500-point scale.` : `${eventShort(k[0])} score, on a 500-point scale.`; }},
+  phys:{label:'Physical', sub:()=>physHow()},
 };
 function physOn(){ return physKeysOn().length>0; }
 function viewsOn(){ return Object.keys(VIEWS).filter(v=> v==='overall' || (v==='gos' && SKILLS_ON().length) || (v==='run' && isOn('aft')) || (v==='phys' && physOn())); }
@@ -1132,11 +1141,12 @@ function exportXlsx(){
   const wsum=EVENTS.reduce((a,e)=>a+(+S.weights[e.k]||0),0);
   const settingsRows=[['Setting','Value'],['Events that count',enabledKeys().map(eventName).join(', ')],['Points per Go',S.goPoints]];
   const pk=physKeysOn(), pws=pk.reduce((a,k)=>a+physWeight(k),0)||1;
-  if(pk.length>1) pk.forEach(k=>settingsRows.push([`${eventShort(k)} share of physical (%)`, +fmt1(physWeight(k)/pws*100)]));
+  if(pk.length) settingsRows.push(['Physical score', physHow()]);
+  if(pk.length>1 && !physPointsMode()) pk.forEach(k=>settingsRows.push([`${eventShort(k)} share of physical (%)`, +fmt1(physWeight(k)/pws*100)]));
   customTests().filter(t=>isOn(ctKey(t))).forEach(t=>settingsRows.push([`${t.name} minimums`, [t.totalMin!=null?`total ${t.totalMin}`:'', ...t.events.filter(e=>e.min!=null).map(e=>`${e.name} ${e.min}`)].filter(Boolean).join(', ')||'none'],[`${t.name} failure is an automatic cut`, t.failCut?'Yes':'No']));
   if(cftOn) settingsRows.push(['CFT time for 100 points',fmtTime(S.cftBest)],['CFT time for 0 points',fmtTime(S.cftZero)]);
   settingsRows.push(['Cut line (top N)',cut],['Minimum women above cut',S.minFemale]);
-  if(aftOn) settingsRows.push(['AFT failure is an automatic cut',S.aftFailCut?'Yes':'No'], ...EVENTS.map(e=>[`Weight: ${e.name}`, `${S.weights[e.k]} (${fmt1(S.weights[e.k]/wsum*100)}%)`]));
+  if(aftOn) settingsRows.push(['AFT failure is an automatic cut',S.aftFailCut?'Yes':'No'], ...(physPointsMode()?[]:EVENTS).map(e=>[`Weight: ${e.name}`, `${S.weights[e.k]} (${fmt1(S.weights[e.k]/wsum*100)}%)`]));
   if(isOn('grenade')) settingsRows.push(['Grenade ID Go standard',`${S.grenadeGo}/${S.grenadeTotal}`]);
   if(isOn('throw')) settingsRows.push(['Bonus for grenade in the circle',S.circleBonus]);
   WEAPON_KEYS.filter(isOn).forEach(k=>settingsRows.push([`${eventShort(k)} time limit`, S.timeLimits[k]?fmtTime(S.timeLimits[k]):'None set']));
@@ -2956,7 +2966,7 @@ function renderRank(c){
           </tr>`; }).join('')}</tbody></table></div>`
       : `<div class="stack" style="padding:30px 10px;align-items:center;text-align:center"><p class="sub">No one is on the roster yet.</p><div class="row"><button class="btn primary" id="goTeam">Add your team</button>${SYNC.on?'':'<button class="btn" id="sample">Load example team</button>'}</div></div>`}
     </div>
-    ${helpBox('rankhow', `${aftOn?'Event columns show AFT points (hover for the raw result). AFT is the official 0\u2013500 total. ':''}${physOn()?`Physical uses ${aftOn?'your event weights':''}${aftOn&&cftOn?' and ':''}${cftOn?'CFT':''}. `:''}Total adds ${S.goPoints} points per Go${isOn('throw')?` and ${S.circleBonus} for a grenade in the circle`:''}.${aftOn&&S.aftFailCut?' Anyone who fails the AFT general standard is cut automatically.':''} Counted events: ${enabledKeys().map(eventShort).join(', ')||'none'}.`)}
+    ${helpBox('rankhow', `${aftOn?'Event columns show AFT points (hover for the raw result). AFT is the official 0\u2013500 total. ':''}${physOn()?`Physical: ${esc(physHow())} `:''}Total adds ${S.goPoints} points per Go${isOn('throw')?` and ${S.circleBonus} for a grenade in the circle`:''}.${aftOn&&S.aftFailCut?' Anyone who fails the AFT general standard is cut automatically.':''} Counted events: ${enabledKeys().map(eventShort).join(', ')||'none'}.`)}
   </div>`;
   c.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{ STATE.view=b.dataset.v; render(); });
   c.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPerson(b.dataset.open));
@@ -3178,11 +3188,11 @@ function renderScoreCard(s,sc,noHead){
       <div>${!isOn('aft')?'<p class="sub">The AFT is not counted in this tryout.</p>':''}${EVENTS.map(e=>`<div class="kv"><span>${e.name}</span><span class="mono">${s[e.k]!=null?fieldDisplay({type:e.time?'time':'int'},s[e.k])+(e.time?'':' '+e.unit)+' \u2192 ':''}${sc.ev[e.k]??'\u2013'} pts</span></div>`).join('')}
         <div class="kv"><b>AFT total</b><b class="mono">${sc.aftTotal??'\u2013'} / 500 ${sc.cutBy.includes('AFT')?'<span class="badge b-bad">fails general standard: automatic cut</span>':sc.aftPass?'<span class="badge b-good">meets general standard</span>':''}</b></div></div>
       <div>
-        <div class="kv"><span>Weighted AFT</span><span class="mono">${sc.aftW==null?'\u2013':fmt1(sc.aftW)}</span></div>
+        ${physPointsMode()?'':`<div class="kv"><span>Weighted AFT</span><span class="mono">${sc.aftW==null?'\u2013':fmt1(sc.aftW)}</span></div>`}
         <div class="kv"><span>CFT ${s.cft!=null?'('+fmtTime(s.cft)+')':''}</span><span class="mono">${sc.cftPts==null?'\u2013':fmt1(sc.cftPts)+' pts'}${isOn('cft')?'':' (not counted)'}</span></div>
         ${customTests().filter(t=>isOn(ctKey(t))).map(t=>{ const c=sc.ct[t.id]; return `<div class="kv"><span>${esc(t.name)}</span><span class="mono">${c.total??'\u2013'} / ${c.max} pts${c.fail?' <span class="badge b-bad">fails minimum</span>':c.pass?' <span class="badge b-good">passes</span>':''}</span></div>`; }).join('')}
         ${timeEventsOn().map(e=>{ const a=sc.avg[e.kind]; return `<div class="kv"><span>${e.name} (${a.dist} mi${a.n?`, ${fmtLong(a.avg)} over ${a.n}`:''})</span><span class="mono">${a.pts==null?'\u2013':fmt1(a.pts)+' pts'}</span></div>`; }).join('')}
-        <div class="kv"><span>Physical score</span><span class="mono">${sc.phys==null?'\u2013':fmt1(sc.phys)}</span></div>
+        <div class="kv"><span>Physical score</span><span class="mono">${sc.phys==null?'\u2013':fmt1(sc.phys)+' / '+fmt1(physMax())}</span></div>
         <div class="kv"><span>Gos \u00D7 ${S.goPoints}</span><span class="mono">${sc.gos} \u00D7 ${S.goPoints} = ${sc.gos*S.goPoints}</span></div>
         ${isOn('throw')?`<div class="kv"><span>Grenade in the circle</span><span class="mono">${s.circle==='yes'?'+'+sc.bonus:s.circle==='no'?'0':'\u2013'}</span></div>`:''}
         <div class="kv"><b>Total</b><b class="mono">${fmt1(sc.total)}</b></div>
@@ -3364,10 +3374,14 @@ function testRules(el){
     ${admin?`<div class="panel"><h2>How the ranking is scored</h2>
       <ul class="plain">
         <li><b>Counted events:</b> ${enabledKeys().map(eventShort).join(', ')||'none'}. Events that are turned off keep their saved results but don't count.</li>
+        ${physPointsMode() && physOn() ? `<li><b>Physical score (straight points):</b> ${esc(physHow())}</li>
+        ${customTests().filter(t=>isOn(ctKey(t))).map(t=>`<li><b>${esc(t.name)}:</b> points from your tables by age and sex, added as is (${t.events.reduce((a,e)=>a+ctMax(e),0)} max).${t.failCut&&(t.totalMin!=null||t.events.some(e=>e.min!=null))?' Failing a minimum is an automatic cut.':''}</li>`).join('')}
+        ${isOn('aft')?`<li><b>AFT (0\u2013500):</b> the official AFT total. Event weights aren't used with straight points.</li>`:''}
+        ${isOn('cft')?`<li><b>CFT (0\u2013100):</b> CFT points as is.</li>`:''}` : `
         ${physKeysOn().length>1?`<li><b>Physical mix:</b> ${(()=>{ const pk=physKeysOn(), ws=pk.reduce((a,k)=>a+physWeight(k),0)||1; return pk.map(k=>`${esc(eventShort(k))} ${fmt1(physWeight(k)/ws*100)}%`).join(', '); })()}. Each test is put on a 500-point scale first.</li>`:''}
         ${customTests().filter(t=>isOn(ctKey(t))).map(t=>`<li><b>${esc(t.name)}:</b> points from your tables by age and sex, scaled to 500 (total \u00F7 ${t.events.reduce((a,e)=>a+ctMax(e),0)} max \u00D7 500).${t.failCut&&(t.totalMin!=null||t.events.some(e=>e.min!=null))?' Failing a minimum is an automatic cut.':''}</li>`).join('')}
         ${isOn('aft')?`<li><b>AFT score (0\u2013500):</b> each AFT event's points \u00D7 its weight, scaled back to 500. Weights now: ${EVENTS.map(e=>`${e.short} ${fmt1(S.weights[e.k]/wsum*100)}%`).join(', ')}.</li>` : ''}
-        ${isOn('cft')?`<li><b>CFT score (0\u2013500):</b> CFT points \u00D7 5.</li>`:''}
+        ${isOn('cft')?`<li><b>CFT score (0\u2013500):</b> CFT points \u00D7 5.</li>`:''}`}
         ${physOn()?'':`<li><b>Physical score:</b> no PT test is turned on, so there is none. The ranking is Go points only.</li>`}
         ${isOn('cft')?`<li><b>CFT points:</b> ${fmtTime(S.cftBest)} or faster = 100, ${fmtTime(S.cftZero)} or slower = 0, straight line in between.</li>`:''}
         <li><b>Go points:</b> ${S.goPoints} per Go (maximum ${S.goPoints*SKILLS_ON().length}).${isOn('throw')?` A grenade in the circle adds ${S.circleBonus}.`:''}</li>
@@ -4034,7 +4048,7 @@ function renderSettings(c){
   const sec=(id,title,sub,body)=>`<details class="panel ref-card set-sec" id="set-${id}" data-sec="${id}" ${SO[id]?'open':''}><summary><div><h2>${title}</h2><p class="sub" style="margin:2px 0 0">${sub}</p></div></summary><div class="set-body">${body}</div></details>`;
   const saveRow=(id)=>`<div class="row" style="margin-top:14px"><button class="btn primary ${id?'':'saveAny'}" ${id?`id="${id}"`:''}>Save settings</button></div>`;
   const showAccess=isSys()||(isCaptain()&&syncActive()), showContent=isSys();
-  const SECS=[['events','Events'],['weights','Score weights'],['scoring','Scoring rules'],['times','Run & ruck averages'],['weapons','Weapon time limits'],...(showAccess?[['access',syncActive()?(isCaptain()?'Grader sign-ins':'Sign-in access'):'PINs']]:[]),...(showContent?[['content','App content']]:[])];
+  const SECS=[['events','Events'],['weights','Physical score'],['scoring','Scoring rules'],['times','Run & ruck averages'],['weapons','Weapon time limits'],...(showAccess?[['access',syncActive()?(isCaptain()?'Grader sign-ins':'Sign-in access'):'PINs']]:[]),...(showContent?[['content','App content']]:[])];
   c.innerHTML = `<div class="stack">
     <div class="panel ref-top"><h2>Settings</h2><p class="sub" style="margin-bottom:10px">Tap a section to open it. Changes count for everyone as soon as you save.</p>
       <div class="ref-chips">${SECS.map(([id,l])=>`<button class="chip-btn" data-setgo="${id}">${l}</button>`).join('')}</div>
@@ -4053,13 +4067,21 @@ function renderSettings(c){
       <h3>Go / No-Go (${S.goPoints} points per Go)</h3>
       <div class="ev-grid">${ALL_SKILLS.map(evBox).join('')}</div>
       ${saveRow('saveSet2')}`)}
-    ${sec('weights','Score weights','How the PT tests blend into the physical score, and how much each AFT event counts.', `
+    ${sec('weights','Physical score','Straight points or a weighted blend, and how much each AFT event counts.', `
+      <h3>How the physical score adds up</h3>
+      <div class="stack" style="gap:8px">
+        <label style="display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;cursor:pointer"><input type="radio" name="physMode" value="points" style="margin-top:4px" ${physPointsMode()?'checked':''}> <span><b>Straight points.</b> Add each test's own points: AFT 0\u2013500 + CFT 0\u2013100 = 600 max.</span></label>
+        <label style="display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;cursor:pointer"><input type="radio" name="physMode" value="mix" style="margin-top:4px" ${physPointsMode()?'':'checked'}> <span><b>Weighted blend.</b> Put each test on a 500-point scale and mix them by weight.</span></label>
+      </div>
+      <div id="physMixBox" ${physPointsMode()?'hidden':''}>
       <h3>Physical score mix</h3>
       <p class="sub">When more than one PT test counts, each is put on a 500-point scale and blended by these weights. Only checked tests are used.</p>
       <div class="grid">${[...PHYS_EVENTS, ...TIME_EVENTS].map(e=>{ const on=physKeysOn(), ws=on.reduce((a,k)=>a+physWeight(k),0)||1; return `<label class="field"><span>${esc(e.short)} weight</span><input class="input" id="pw-${e.k}" inputmode="decimal" value="${physWeight(e.k)}"><span class="mono">${isOn(e.k)?fmt1(physWeight(e.k)/ws*100)+'% of physical':'not counted'}</span></label>`; }).join('')}</div>
       <h3>AFT event weights</h3>
       <p class="sub">A weight of 2 counts that event twice as much as a weight of 1. The weighted score is scaled back to 500, so weights change the balance, not the size of the score.</p>
-      <div class="grid">${EVENTS.map(e=>`<label class="field"><span>${e.name}</span><input class="input" id="w-${e.k}" inputmode="decimal" value="${S.weights[e.k]}"><span class="mono">${fmt1((+S.weights[e.k]||0)/(wsum||1)*100)}% of AFT</span></label>`).join('')}</div>${saveRow()}`)}
+      <div class="grid">${EVENTS.map(e=>`<label class="field"><span>${e.name}</span><input class="input" id="w-${e.k}" inputmode="decimal" value="${S.weights[e.k]}"><span class="mono">${fmt1((+S.weights[e.k]||0)/(wsum||1)*100)}% of AFT</span></label>`).join('')}</div>
+      </div>
+      <p class="sub" id="physPtsNote" ${physPointsMode()?'':'hidden'} style="margin-top:10px">The AFT counts as its official total, so event weights aren't used. Run and ruck averages (0\u2013100) and your own PT tests add their points too when they're turned on.</p>${saveRow()}`)}
     ${sec('scoring','Scoring rules','Points per Go, the cut line, grenade ID, and CFT scoring.', `
       <div class="grid">
         <label class="field"><span>Points per Go</span><input class="input" id="s-go" inputmode="numeric" value="${S.goPoints}"></label>
@@ -4126,10 +4148,11 @@ function renderSettings(c){
     if(!Object.values(en).some(Boolean)) msgs.push('Turn on at least one event.');
     const tl={}; WEAPON_KEYS.forEach(k=>{ const raw=$('tl-'+k).value.trim(); if(!raw){ tl[k]=null; return; } const v=parseTime(raw); if(!(v>0)) msgs.push(`${eventShort(k)} time limit must be m:ss, or blank for none.`); tl[k]=v; });
     if(msgs.length){ $('setMsg').innerHTML=`<div class="note warn"><ul class="plain">${msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`; $('setMsg').scrollIntoView({block:'center'}); return; }
-    Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, cftBest:best, cftZero:zero, avgTimes:avgT, countSelfTimes:$('av-self').checked, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
+    Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, physMode:(c.querySelector('input[name=physMode]:checked')||{}).value==='points'?'points':'mix', cftBest:best, cftZero:zero, avgTimes:avgT, countSelfTimes:$('av-self').checked, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
     rebuildRegistry(); STATE.grid=null; save(); toast('Settings saved. Rankings updated.'); render();
   };
   $('saveSet2').onclick=()=>$('saveSet').click();
+  c.querySelectorAll('input[name=physMode]').forEach(r=>r.onchange=()=>{ const pts=r.value==='points'&&r.checked; $('physMixBox').hidden=pts; $('physPtsNote').hidden=!pts; });
   $('ctAdd').onclick=()=>{ STATE.ctDraft=ctNewDraft(); STATE.ctEv=0; STATE.ctSex='M'; render(); window.scrollTo(0,0); };
   c.querySelectorAll('[data-cte]').forEach(b=>b.onclick=()=>{ STATE.ctDraft=ctToDraft(customTests().find(t=>t.id===b.dataset.cte)); STATE.ctEv=0; STATE.ctSex='M'; render(); window.scrollTo(0,0); });
   c.querySelectorAll('[data-ctd]').forEach(b=>b.onclick=()=>{ const t=customTests().find(x=>x.id===b.dataset.ctd);
@@ -4616,7 +4639,7 @@ function renderMyResults(c,s){
       <div class="kv"><b>Total</b><b class="mono">${x.total??'\u2013'}${x.fail?' <span class="badge b-bad">below a minimum</span>':x.pass?' <span class="badge b-good">passes</span>':''}</b></div></div>`; }).join('')}
     ${timeEventsOn().length?`<div class="panel"><h3 style="margin-top:0">Average ruck and run times</h3>${timeEventsOn().map(e=>{ const x=sc.avg[e.kind]; return `<div class="kv"><span>${e.name} (${x.dist} mi)</span><span class="mono">${x.n?`${fmtLong(x.avg)} over ${x.n} \u2192 ${fmt1(x.pts)} pts`:'none logged yet'}</span></div>`; }).join('')}</div>`:''}
     ${SKILLS_ON().length?`<div class="panel"><h3 style="margin-top:0">Go / No-Go events</h3>${SKILLS_ON().map(k=>`<div class="kv"><span>${esc(k.name)}${k.k==='grenade'&&s.grenade!=null?` <span class="soft">(${s.grenade} of ${S.grenadeTotal})</span>`:''}${k.k==='throw'&&s.circle==='yes'?' <span class="soft">(in the circle)</span>':''}</span>${gn(skillResult(s,k.k))}</div>`).join('')}</div>`:''}
-    <div class="panel"><div class="kv"><span>Gos</span><b class="mono">${sc.gos} of ${SKILLS_ON().length}</b></div>${physOn()?`<div class="kv"><span>Physical score</span><b class="mono">${sc.phys==null?'\u2013':fmt1(sc.phys)} / 500</b></div>`:''}<div class="kv"><b>Total score</b><b class="mono">${fmt1(sc.total)}</b></div>
+    <div class="panel"><div class="kv"><span>Gos</span><b class="mono">${sc.gos} of ${SKILLS_ON().length}</b></div>${physOn()?`<div class="kv"><span>Physical score</span><b class="mono">${sc.phys==null?'\u2013':fmt1(sc.phys)} / ${fmt1(physMax())}</b></div>`:''}<div class="kv"><b>Total score</b><b class="mono">${fmt1(sc.total)}</b></div>
       ${sc.missing.length?`<p class="sub" style="margin:8px 0 0">Not recorded yet: ${sc.missing.join(', ')}</p>`:''}</div>
   </div>`;
 }
@@ -5278,7 +5301,7 @@ const same = (a,b) => JSON.stringify(a===undefined?null:a)===JSON.stringify(b===
 function syncDiff(A, B, role){
   const ops=[];
   ['soldiers','scans','practice','times','calendar'].forEach(tab=>{
-    if(tab==='calendar' && role!=='admin') return;
+    if(tab==='calendar' && !['admin','leader','captain'].includes(role)) return;
     if(role==='grader' && tab!=='soldiers') return;
     if(role==='soldier' && tab!=='scans' && tab!=='practice' && tab!=='times') return;
     const a=A[tab]||{}, b=B[tab]||{};
@@ -5291,9 +5314,9 @@ function syncDiff(A, B, role){
     if(role==='grader' || tab==='practice') return;
     Object.keys(a).forEach(id=>{ if(!b[id]) ops.push({op:'del', tab, id}); });
   });
-  if(role==='admin'){
+  if(role==='admin' || role==='captain'){   // the Team Captain changes tryout settings, never app content (c: keys)
     const patch={}; let n=0;
-    new Set([...Object.keys(A.settings||{}), ...Object.keys(B.settings||{})]).forEach(k=>{ if(!same((A.settings||{})[k], (B.settings||{})[k])){ patch[k]=(B.settings||{})[k]; n++; } });
+    new Set([...Object.keys(A.settings||{}), ...Object.keys(B.settings||{})]).forEach(k=>{ if(role==='captain' && k.indexOf('c:')===0) return; if(!same((A.settings||{})[k], (B.settings||{})[k])){ patch[k]=(B.settings||{})[k]; n++; } });
     if(n) ops.push({op:'settings', patch});
   }
   return ops;
