@@ -5298,8 +5298,11 @@ function wireShare(c){
 
 /* ---------- updates: a pop-up once per new version, and the full list under More \u2192 Updates ---------- */
 // Newest first. Add an entry with each release; the pop-up shows it once on each device.
-const APP_VERSION='1.1';
+const APP_VERSION='1.2';
 const UPDATES = [
+  {v:'1.2', date:'2026-10-26', items:[
+    'Bataan: assign runs and rucks by time (like 30 minutes) as well as by distance.',
+  ]},
   {v:'1.1', date:'2026-10-26', items:[
     'Bataan: tap Results on any assignment to see who has done it, with their time, pace, pack weight, notes, and photos.',
     'Bataan: tap a name to see every assignment and workout for that person, done or missed.',
@@ -6021,7 +6024,9 @@ function calCanEdit(e){ const r=myRole(); return r==='admin' || r==='leader' || 
 function calCanAdd(){ return ['admin','leader','captain','btcap'].includes(myRole()); }
 const CAL_NAME={rc:'Ranger Challenge', bn:'Battalion', bataan:'Bataan'}, CAL_TAG={rc:'RC', bn:'BN', bataan:'BT'};
 // "Ruck \u00B7 6 mi \u00B7 35 lb"
-function wkText(wk){ if(!wk || !wk.kind) return ''; return [wk.kind==='ruck'?'Ruck':'Run', wk.dist?tlDist(wk.dist)+' mi':'', wk.kind==='ruck'&&wk.lb?wk.lb+' lb':''].filter(Boolean).join(' \u00B7 '); }
+// A workout is set by time (dur, seconds: "Run \u00B7 30 min") or by distance (dist, miles: "Run \u00B7 4 mi").
+function wkDur(sec){ sec=Math.round(+sec||0); const h=Math.floor(sec/3600), m=Math.round((sec%3600)/60); return h ? `${h} hr${m?` ${m} min`:''}` : `${m} min`; }
+function wkText(wk){ if(!wk || !wk.kind) return ''; return [wk.kind==='ruck'?'Ruck':'Run', wk.dur?wkDur(wk.dur):wk.dist?tlDist(wk.dist)+' mi':'', wk.kind==='ruck'&&wk.lb?wk.lb+' lb':''].filter(Boolean).join(' \u00B7 '); }
 const isoOf = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const dateOf = s => { const [y,m,d]=String(s).split('-').map(Number); return new Date(y,m-1,d); };
 const addDays = (s,n) => { const d=dateOf(s); d.setDate(d.getDate()+n); return isoOf(d); };
@@ -6161,6 +6166,7 @@ function calEdit(e, day, isNewCopy, onCancel, preset){
   const isNew = !e || isNewCopy, x = e ? clone(e) : Object.assign({id:uid(), title:'', start:day||isoOf(new Date()), cal: isCaptain() ? 'rc' : isBtCap() ? 'bataan' : ['rc','bn','bataan'].includes(shown) ? shown : myRole()==='leader' ? 'bn' : 'rc'}, preset||{});
   if(e && !x.cal) x.cal=calOf(e);
   const rep = x.repeat && x.repeat.days && x.repeat.days.length;
+  const wkMode0 = x.wk && x.wk.dist && !x.wk.dur ? 'dist' : 'time';   // most runs are set by time
   const w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='calSheet';
   const f=(id,label,val,extra='')=>`<label class="field"><span>${label}</span><input class="input" id="${id}" value="${esc(val||'')}" ${extra}></label>`;
   w.innerHTML=`<div class="sheet news cal-form" role="dialog" aria-modal="true" aria-labelledby="calH">
@@ -6171,7 +6177,10 @@ function calEdit(e, day, isNewCopy, onCancel, preset){
       <div id="ceWkBox" class="cal-wkbox" ${calOf(x)==='bataan'?'':'hidden'}>
         <div class="soft" style="font-size:13px;margin-bottom:6px">Assigned workout. People log their time against it on the Bataan screen.</div>
         <div class="seg" role="group" aria-label="Workout">${[['','None'],['run','Run'],['ruck','Ruck']].map(([k,l])=>`<button type="button" data-cewk="${k}" aria-pressed="${((x.wk&&x.wk.kind)||'')===k}">${l}</button>`).join('')}</div>
-        <div class="grid2" id="ceWkFields" style="margin-top:10px" ${x.wk&&x.wk.kind?'':'hidden'}>${f('ceDist','Distance (miles)',x.wk&&x.wk.dist,'inputmode="decimal" placeholder="e.g. 6"')}<span id="ceLbWrap" ${x.wk&&x.wk.kind==='ruck'?'':'hidden'}>${f('ceLb','Pack weight (lb)',x.wk&&x.wk.lb,'inputmode="numeric" placeholder="e.g. 35"')}</span></div>
+        <div id="ceWkFields" style="margin-top:10px" ${x.wk&&x.wk.kind?'':'hidden'}>
+          <div class="seg" role="group" aria-label="Set by">${[['time','By time'],['dist','By distance']].map(([k,l])=>`<button type="button" data-cewm="${k}" aria-pressed="${wkMode0===k}">${l}</button>`).join('')}</div>
+          <div class="grid2" style="margin-top:10px"><span id="ceDurWrap" ${wkMode0==='time'?'':'hidden'}>${f('ceDur','How long (h:mm or minutes)',x.wk&&x.wk.dur?fmtLong(x.wk.dur).replace(/:00$/,''):'','inputmode="numeric" placeholder="e.g. 30 or 1:15"')}</span><span id="ceDistWrap" ${wkMode0==='dist'?'':'hidden'}>${f('ceDist','Distance (miles)',x.wk&&x.wk.dist,'inputmode="decimal" placeholder="e.g. 6"')}</span><span id="ceLbWrap" ${x.wk&&x.wk.kind==='ruck'?'':'hidden'}>${f('ceLb','Pack weight (lb)',x.wk&&x.wk.lb,'inputmode="numeric" placeholder="e.g. 35"')}</span></div>
+        </div>
       </div>
       ${f('ceTitle','Name',x.title,'placeholder="e.g. PT, Lab, Spring Break"')}
       <div class="grid2">${f('ceStart','Date',x.start,'type="date"')}${isNewCopy?'':f('ceEnd','Through (for multi-day)',x.end,'type="date"')}</div>
@@ -6198,7 +6207,8 @@ function calEdit(e, day, isNewCopy, onCancel, preset){
   w.querySelector('#ceAll').onchange=ev=>{ w.querySelector('#ceTimes').hidden=ev.target.checked; };
   const rb=w.querySelector('#ceRep'); if(rb) rb.onchange=()=>{ w.querySelector('#ceRepBox').hidden=!rb.checked; if(rb.checked && !w.querySelector('[data-ceday][aria-pressed=true]')){ const b=w.querySelector(`[data-ceday="${dateOf(v('ceStart')||x.start).getDay()}"]`); if(b) b.setAttribute('aria-pressed','true'); } };
   w.querySelectorAll('[data-ceday]').forEach(b=>b.onclick=()=>b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')==='true'?'false':'true'));
-  let wkKind=(x.wk&&x.wk.kind)||'';
+  let wkKind=(x.wk&&x.wk.kind)||'', wkMode=wkMode0;
+  w.querySelectorAll('[data-cewm]').forEach(b=>b.onclick=()=>{ wkMode=b.dataset.cewm; w.querySelectorAll('[data-cewm]').forEach(y=>y.setAttribute('aria-pressed', String(y===b))); w.querySelector('#ceDurWrap').hidden=wkMode!=='time'; w.querySelector('#ceDistWrap').hidden=wkMode!=='dist'; });
   const cc=w.querySelector('#ceCal'); if(cc) cc.onchange=()=>{ w.querySelector('#ceWkBox').hidden=cc.value!=='bataan'; };
   w.querySelectorAll('[data-cewk]').forEach(b=>b.onclick=()=>{ wkKind=b.dataset.cewk; w.querySelectorAll('[data-cewk]').forEach(y=>y.setAttribute('aria-pressed', String(y===b)));
     w.querySelector('#ceWkFields').hidden=!wkKind; w.querySelector('#ceLbWrap').hidden=wkKind!=='ruck'; });
@@ -6207,10 +6217,18 @@ function calEdit(e, day, isNewCopy, onCancel, preset){
     const cs0=w.querySelector('#ceCal'), calNow=cs0?cs0.value:calOf(x);
     let wk=null;
     if(calNow==='bataan' && wkKind){
-      const d=+v('ceDist'), lb=v('ceLb');
-      if(!(d>0 && d<100)) return msg('Enter the distance in miles, like 6 or 12.');
+      const lb=v('ceLb');
       if(wkKind==='ruck' && lb && !(+lb>0 && +lb<200)) return msg('Pack weight is in pounds, like 35. Leave it blank for none.');
-      wk={kind:wkKind, dist:Math.round(d*100)/100}; if(wkKind==='ruck' && lb) wk.lb=+lb;
+      if(wkMode==='time'){
+        // "30" = 30 minutes, "1:15" = 1 hour 15 minutes, "1:15:00" too
+        const raw=v('ceDur'), m=raw.match(/^(\d{1,2}):([0-5]\d)(?::([0-5]\d))?$/), sec = /^\d{1,3}$/.test(raw) ? +raw*60 : m ? (m[3]!=null ? (+m[1])*3600+(+m[2])*60+(+m[3]) : (+m[1])*3600+(+m[2])*60) : NaN;
+        if(!(sec>=60 && sec<=8*3600)) return msg('Enter how long, like 30 (minutes) or 1:15 (1 hour 15 minutes).');
+        wk={kind:wkKind, dur:sec};
+      } else {
+        const d=+v('ceDist'); if(!(d>0 && d<100)) return msg('Enter the distance in miles, like 6 or 12.');
+        wk={kind:wkKind, dist:Math.round(d*100)/100};
+      }
+      if(wkKind==='ruck' && lb) wk.lb=+lb;
     }
     const title=v('ceTitle') || (wk ? wkText(wk) : ''), start=v('ceStart'), end=v('ceEnd');
     if(!title) return msg('Give it a name, like "PT" or "Spring Break".');
@@ -6729,7 +6747,7 @@ function btFormHtml(f){
     <div class="grid">
       <label class="field"><span>Date</span><input class="input" type="date" id="bt_date" value="${esc(f.date||todayISO())}"></label>
       <label class="field"><span>Distance (miles)</span><input class="input" inputmode="decimal" id="bt_dist" value="${esc(f.dist||'')}" placeholder="${ruck?'e.g. 8':'e.g. 4'}"></label>
-      <label class="field"><span>Time (${ruck?'h:mm:ss':'m:ss or h:mm:ss'})</span><input class="input" id="bt_time" inputmode="numeric" data-time="long" autocomplete="off" placeholder="${ruck?'2:05:30':'32:10'}"></label>
+      <label class="field"><span>Time (${ruck?'h:mm:ss':'m:ss or h:mm:ss'})</span><input class="input" id="bt_time" inputmode="numeric" data-time="long" autocomplete="off" value="${esc(f.time||'')}" placeholder="${ruck?'2:05:30':'32:10'}"></label>
       ${ruck?`<label class="field"><span>Pack weight (lb)</span><input class="input" inputmode="numeric" id="bt_lb" value="${esc(f.lb||'')}" placeholder="e.g. 35"></label>`:''}
       <label class="field"><span>Note (optional)</span><input class="input" id="bt_note" placeholder="e.g. hills, boots, hot spots"></label>
       ${btCanPhoto()?`<label class="field tl-photo"><span>Photo (optional)</span><input type="file" accept="image/*" id="bt_photo"><span class="soft" style="font-size:12px">A watch or app screenshot works well.</span></label>`:''}
@@ -6858,7 +6876,7 @@ function renderBataanMember(c, B){
   </div>`;
   wireBtWeek(c, B); wireBtUpcoming(c); wireBtLogTable(c);
   c.querySelectorAll('[data-btlog]').forEach(b=>b.onclick=()=>{ const [id,day]=b.dataset.btlog.split('|'), e=calList().find(x=>x.id===id); if(!e) return;
-    btOpenForm({sid:s.id, kind:e.wk.kind, asg:id, asgDay:day, wk:e.wk, date:day<=todayISO()?day:todayISO(), dist:e.wk.dist||'', lb:e.wk.lb||''}); });
+    btOpenForm({sid:s.id, kind:e.wk.kind, asg:id, asgDay:day, wk:e.wk, date:day<=todayISO()?day:todayISO(), dist:e.wk.dist||'', time:e.wk.dur?fmtLong(e.wk.dur):'', lb:e.wk.lb||''}); });
   const ex=c.querySelector('#btExtra'); if(ex) ex.onclick=()=>btOpenForm({sid:s.id, kind:'run'});
 }
 // All of someone's Bataan logs, newest first. Members can delete their own; leadership can delete any.
@@ -6982,13 +7000,13 @@ function exportBataanXlsx(){
   weeks.forEach(w=>{ const A=btAssignments(w, addDays(w,6)).filter(a=>a.day<=today);
     M.forEach(s=>{ const x=L.filter(t=>t.sid===s.id && btMon(t.date)===w), r=x.filter(t=>t.kind==='run'), k=x.filter(t=>t.kind==='ruck'), all=btLogsOf(s.id), d=A.filter(a=>btDoneLog(s.id,a,all)).length;
       wkRows.push([w, s.name, x.length, +fmt1(btMiles(x)), r.length, +fmt1(btMiles(r)), btAvgPace(r)?pace(btAvgPace(r),1):'', k.length, +fmt1(btMiles(k)), btAvgPace(k)?pace(btAvgPace(k),1):'', A.length, d, A.length?Math.round(d/A.length*100):'']); }); });
-  const asRows=[['Date','Workout','Type','Miles','Pack (lb)','Name on calendar','Done','Not done']];
+  const asRows=[['Date','Workout','Type','Time set','Miles set','Pack (lb)','Name on calendar','Done','Not done']];
   btAssignments(first, cfg.race && cfg.race>today ? cfg.race : today).forEach(a=>{ const done=M.filter(s=>btDoneLog(s.id,a)), not=M.filter(s=>!done.includes(s));
-    asRows.push([a.day, wkText(a.e.wk), BT_KINDS[a.e.wk.kind], +a.e.wk.dist||'', a.e.wk.lb||'', a.e.title||'', a.day>today?'(upcoming)':`${done.length} of ${M.length}`, a.day>today?'':not.map(s=>s.name).join(', ')]); });
+    asRows.push([a.day, wkText(a.e.wk), BT_KINDS[a.e.wk.kind], a.e.wk.dur?wkDur(a.e.wk.dur):'', +a.e.wk.dist||'', a.e.wk.lb||'', a.e.title||'', a.day>today?'(upcoming)':`${done.length} of ${M.length}`, a.day>today?'':not.map(s=>s.name).join(', ')]); });
   const pRows=[['Name','Workouts','Miles','Assignments due','Done','Done (%)','Runs','Avg run pace','Run change (first \u2192 latest week)','Rucks','Avg ruck pace','Ruck change (first \u2192 latest week)','Heaviest pack (lb)','Longest ruck (mi)','Last workout']];
   M.forEach(s=>{ const x=btPersonStats(s); pRows.push([s.name, x.L.length, +fmt1(x.miles), x.due, x.done, x.pct==null?'':Math.round(x.pct), x.runs.length, x.runPace?pace(x.runPace,1):'', btChangeTxt(x.runCh), x.rucks.length, x.rukPace?pace(x.rukPace,1):'', btChangeTxt(x.rukCh), x.maxLb||'', x.longRuck||'', x.last]); });
   const info=[['Setting','Value'],['Race',cfg.name],['Race day',cfg.race||'Not set'],['Training started',cfg.start||'Not set'],['Days to go',cfg.race?Math.max(0,btDays(today,cfg.race)):''],['On the team',M.length],['Counted from',first],['Exported',new Date().toLocaleString()]];
-  const bytes=buildXlsx([{name:'Workouts', rows:work, widths:[11,11,24,7,20,7,9,12,9,11,30]}, {name:'Weekly', rows:wkRows, widths:[11,24,10,8,6,9,12,7,10,13,13,7,9]}, {name:'Assignments', rows:asRows, widths:[11,22,7,7,9,24,12,40]}, {name:'People', rows:pRows, widths:[24,10,8,15,7,9,6,12,30,7,13,30,16,15,13]}, {name:'Race', rows:info, widths:[18,32]}]);
+  const bytes=buildXlsx([{name:'Workouts', rows:work, widths:[11,11,24,7,20,7,9,12,9,11,30]}, {name:'Weekly', rows:wkRows, widths:[11,24,10,8,6,9,12,7,10,13,13,7,9]}, {name:'Assignments', rows:asRows, widths:[11,22,7,10,9,9,24,12,40]}, {name:'People', rows:pRows, widths:[24,10,8,15,7,9,6,12,30,7,13,30,16,15,13]}, {name:'Race', rows:info, widths:[18,32]}]);
   offerFile(`Rusty_Anvil_Bataan_${stamp()}.xlsx`, bytes, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
 }
 
