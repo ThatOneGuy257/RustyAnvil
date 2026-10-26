@@ -22,7 +22,7 @@ if('serviceWorker' in navigator && (location.protocol==='https:'||location.hostn
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap">
-<script>try{var tp=localStorage.getItem('rustyAnvil_theme')||'auto';document.documentElement.setAttribute('data-theme',tp==='light'||tp==='dark'?tp:(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'))}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
+<script>try{var sc=localStorage.getItem('rustyAnvil_scheme');if(sc&&sc!=='anvil')document.documentElement.setAttribute('data-scheme',sc);var tp=localStorage.getItem('rustyAnvil_theme')||'auto';document.documentElement.setAttribute('data-theme',tp==='light'||tp==='dark'?tp:(window.matchMedia&&matchMedia('(prefers-color-scheme: light)').matches?'light':'dark'))}catch(e){document.documentElement.setAttribute('data-theme','dark')}</script>
 <script>/*!
  * Chart.js v4.4.1
  * https://www.chartjs.org
@@ -301,6 +301,12 @@ body{padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inse
 .news{border-radius:14px;padding:22px 20px}
 .news h2{font-family:var(--serif);margin:0 0 4px}
 .news-list{margin:10px 0 18px;padding-left:20px}.news-list li{margin:7px 0}
+.scheme-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;margin:0 12px 10px}
+.scheme-pick{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;border:1px solid var(--line);background:var(--panel);color:var(--ink);font:inherit;border-radius:12px;padding:10px;cursor:pointer}
+.scheme-pick[aria-pressed="true"]{border-color:var(--navy);box-shadow:0 0 0 2px var(--navy) inset}
+.scheme-pick b{font-size:14px}.scheme-pick small{font-size:12px;color:var(--inkSoft)}
+.scheme-sw{display:flex;gap:4px;margin-bottom:6px}.scheme-sw i{width:22px;height:22px;border-radius:50%;border:1px solid rgba(127,127,127,.35)}
+.news-scroll{max-height:60vh;overflow:auto;margin-bottom:6px}.news-v{margin:12px 0 0;font-size:14.5px}.news-v:first-child{margin-top:4px}
 .big-btn{padding:14px 16px;font-size:16px}
 .share-box{text-align:center}
 .share-box details{text-align:left}
@@ -620,7 +626,7 @@ html[data-theme="light"]{
 }
 html[data-theme="light"] .panel,html[data-theme="light"] details.manage,html[data-theme="light"] .tiles div{box-shadow:var(--shadow)}
 html[data-theme="light"] details.manage .panel{box-shadow:none}
-html[data-theme="light"] .app-header{background:#262B33;border-bottom-color:#262B33;color:#fff}
+html[data-theme="light"] .app-header{background:var(--hdr,#262B33);border-bottom-color:var(--hdr,#262B33);color:#fff}
 html[data-theme="light"] .app-header .app-sub,html[data-theme="light"] .app-header .who{color:#C9CFDA}
 html[data-theme="light"] .app-header .tabs{background:rgba(255,255,255,.08)}
 html[data-theme="light"] .app-header .tab{color:#DCE2EC}
@@ -641,6 +647,15 @@ h3.chart-h{font-size:14px;margin:14px 0 6px;color:var(--inkSoft);font-weight:600
 html .cal-tag{display:inline-block;font:600 10.5px/1 var(--sans);letter-spacing:.04em;padding:3px 5px;border-radius:4px;margin-right:6px;vertical-align:2px}
 .cal-tag.rc{background:var(--brassBg);color:var(--brass)}.cal-tag.bn{background:var(--goodBg);color:var(--good)}
 .cal-chip.k-bn{border-left:3px solid var(--good)}.cal-chip.k-rc{border-left:3px solid var(--brass)}
+/* Color schemes (More &#x2192; Appearance). Each has a dark and a light version. */
+html[data-scheme="woodland"]{--bg:#0F130F;--panel:#171C16;--panelAlt:#20271E;--field:#0B0E0A;--ink:#E4E8DF;--inkSoft:#9DA595;--line:#2D3629;--navy:#8DB255;--navyInk:#0E1309;--brass:#CDAE72;--brassBg:#2A2418;--good:#6FC08E;--goodBg:#16301F;--kA:#2E3B22;--kB:#4E6B2E;--kC:#7C6A40;--kD:#3D4A3A;--kInkC:#FFFFFF;--bt:#9CC3D9;--btBg:#17262C}
+html[data-scheme="woodland"][data-theme="light"]{--bg:#F2F3EE;--panel:#FFFFFF;--panelAlt:#EEF0E8;--field:#FFFFFF;--ink:#1E241A;--inkSoft:#5F6857;--line:#DDE1D3;--navy:#4F6B2A;--navyInk:#FFFFFF;--brass:#7A6131;--brassBg:#F1EBDA;--kA:#3A4A2C;--kB:#5C7A34;--kC:#CDB57E;--kD:#6B735F;--kInkC:#2A2210;--hdr:#2B3326;--bt:#2E5E7A;--btBg:#E2EDF3}
+html[data-scheme="desert"]{--bg:#16130F;--panel:#1E1A15;--panelAlt:#29241D;--field:#110F0C;--ink:#EDE6DA;--inkSoft:#A99E8C;--line:#3A3329;--navy:#D18A4A;--navyInk:#1A0F06;--brass:#D9B77A;--brassBg:#332818;--kA:#4A3D2A;--kB:#8A5424;--kC:#8C7445;--kD:#4C5646;--kInkC:#FFFFFF}
+html[data-scheme="desert"][data-theme="light"]{--bg:#F6F1E7;--panel:#FFFDF8;--panelAlt:#F1EADC;--field:#FFFFFF;--ink:#2B2419;--inkSoft:#6F6352;--line:#E4DAC6;--navy:#A8642A;--navyInk:#FFFFFF;--brass:#8C6A2F;--brassBg:#F3E7CF;--kA:#6B5638;--kB:#B5732F;--kC:#DCC291;--kD:#7D8A75;--kInkC:#3A2A12;--hdr:#3B3226}
+html[data-scheme="midnight"]{--bg:#0E0D18;--panel:#17152A;--panelAlt:#201D38;--field:#0B0A14;--ink:#ECEAF7;--inkSoft:#A19DC0;--line:#2E2A4D;--navy:#A879FF;--navyInk:#120A24;--brass:#5FD3E8;--brassBg:#13303A;--good:#5FD3A8;--goodBg:#123028;--kA:#3B2E6E;--kB:#6A3FB5;--kC:#1F5C70;--kD:#8A3A7A;--kInkC:#FFFFFF;--bt:#5FD3E8;--btBg:#13303A}
+html[data-scheme="midnight"][data-theme="light"]{--bg:#F3F2FA;--panel:#FFFFFF;--panelAlt:#EFEDF8;--field:#FFFFFF;--ink:#1C1A2E;--inkSoft:#625E80;--line:#E0DDF0;--navy:#6B3FD0;--navyInk:#FFFFFF;--brass:#0E7C93;--brassBg:#DDF2F7;--kA:#3B2E6E;--kB:#6B3FD0;--kC:#9ADBE9;--kD:#A0478F;--kInkC:#0E2E38;--hdr:#1E1A33;--bt:#0E7C93;--btBg:#DDF2F7}
+html[data-scheme="mules"]{--bg:#121112;--panel:#1B191A;--panelAlt:#252224;--field:#0D0C0D;--ink:#EEEAEA;--inkSoft:#A9A2A4;--line:#343033;--navy:#E0343F;--navyInk:#1A0405;--brass:#D1CACC;--brassBg:#2A2728;--kA:#2E2A2B;--kB:#A3141F;--kC:#5A5557;--kD:#7A1E26;--kInkC:#FFFFFF}
+html[data-scheme="mules"][data-theme="light"]{--bg:#F5F4F4;--panel:#FFFFFF;--panelAlt:#F0EEEE;--field:#FFFFFF;--ink:#1C1A1B;--inkSoft:#625C5E;--line:#E2DEDF;--navy:#C8102E;--navyInk:#FFFFFF;--brass:#5B5557;--brassBg:#EEEBEC;--kA:#1F1D1E;--kB:#C8102E;--kC:#DAD5D6;--kD:#6E1219;--kInkC:#1C1A1B;--hdr:#1A1819}
 /* Dashboards */
 :root{--kA:#27403C;--kB:#9C4424;--kC:#8C6326;--kD:#4A4775;--kInk:#FFFFFF;--kInkC:#FFFFFF}
 html[data-theme="light"]{--kA:#2F4B47;--kB:#C85A2E;--kC:#E8A762;--kD:#77729F;--kInkC:#3B2410}
@@ -704,6 +719,13 @@ html[data-theme="light"] .db-mini3 div{background:#F3F5F9}
   .db-card,.db-grid .panel{border-radius:14px;padding:13px 14px}
   .db-mini3 b{font-size:16px}
 }
+.cal-pick{flex-wrap:wrap}
+.cal-tog{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);background:var(--panel);color:var(--inkSoft);font:500 13.5px var(--sans);border-radius:999px;padding:6px 12px 6px 9px;cursor:pointer}
+.cal-tog i{width:14px;height:14px;border-radius:4px;border:2px solid currentColor;display:inline-block;position:relative}
+.cal-tog[aria-pressed="true"]{color:var(--ink);border-color:currentColor}
+.cal-tog[aria-pressed="true"] i{background:currentColor}
+.cal-tog[aria-pressed="true"] i::after{content:'';position:absolute;left:3px;top:0;width:4px;height:8px;border:solid var(--panel);border-width:0 2px 2px 0;transform:rotate(45deg)}
+.cal-tog.rc[aria-pressed="true"]{color:var(--brass)}.cal-tog.bn[aria-pressed="true"]{color:var(--good)}.cal-tog.bataan[aria-pressed="true"]{color:var(--bt)}
 /* Bataan */
 :root{--bt:#8DB3E2;--btBg:#1A2636}
 html[data-theme="light"]{--bt:#1F4E8A;--btBg:#E2EAF5}
@@ -740,6 +762,10 @@ table.bt-board td,table.bt-board th{white-space:nowrap}
 .bt-up{color:var(--good)}.bt-down{color:var(--alert)}
 .bt-pick{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
 .bt-set summary{cursor:pointer}
+.bt-team summary{cursor:pointer}
+.bt-tlist{list-style:none;margin:10px 0 0;padding:0}
+.bt-tm{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--line)}
+.bt-tm:first-child{border-top:0}
 .tl-pace{margin:10px 0 0;font-size:14.5px;min-height:1.4em;color:var(--inkSoft)}.tl-pace b{color:var(--ink);font-family:var(--mono)}
 .wk-pace{display:block;font-family:var(--mono);font-size:12px;margin-top:3px;min-height:1em}
 </style>
@@ -1015,10 +1041,13 @@ function isAdmin(){ return ['admin','leader','captain'].includes(myRole()); }   
 function isSys(){ return myRole()==='admin'; }                                   // sign-ins, deleting and merging people, app content
 function isCaptain(){ return myRole()==='captain'; }
 function canSettings(){ return isSys() || isCaptain(); }                         // tryout settings
-function canMoveRC(){ return isSys() || myRole()==='leader'; }                   // move someone between Ranger Challenge and the battalion
+function canMoveRC(){ return isSys() || myRole()==='leader'; }
+function isBtCap(){ return myRole()==='btcap'; }
+function canBtManage(){ return isSys() || isBtCap(); }                          // Bataan members and race day
+function canBtStaff(){ return ['admin','leader','btcap'].includes(myRole()); }   // the Bataan leadership view                   // move someone between Ranger Challenge and the battalion
 const isBataan = s => !!s && s.bataan===true;                                    // the system admin puts people on the Bataan team
 const isRCs = s => !!s && s.rc!==false;                                          // everyone from before the split is Ranger Challenge
-const ROLE_LABEL={admin:'System admin', leader:'Battalion leadership', captain:'Team Captain', grader:'Grader', soldier:'Soldier'};
+const ROLE_LABEL={admin:'System admin', leader:'Battalion leadership', captain:'RC Team Captain', btcap:'Bataan Team Captain', grader:'Grader', soldier:'Soldier'};
 // The roster this person may see: the Team Captain and graders see Ranger Challenge only.
 function rosterAll(){ return ['captain','grader','tester'].includes(myRole()) ? DATA.soldiers.filter(isRCs) : DATA.soldiers; }
 // People / Home: leadership and the admin can narrow to Ranger Challenge or the battalion.
@@ -2870,7 +2899,7 @@ function renderScreen(){
   if(STATE.session.role==='soldier'){ renderSoldierApp(app); return; }
   const r=myRole()==='tester'?'grader':myRole();
   if(r==='grader' && !STATE.graderEvents){ renderPick(app); return; }
-  const c=shell(app, r, `${ROLE_LABEL[r]||r}${STATE.session.preview?' (preview)':''} \u00B7 ${tryoutSoldiers().length} in tryout`);
+  const c=shell(app, r, `${ROLE_LABEL[r]||r}${STATE.session.preview?' (preview)':''} \u00B7 ${r==='btcap'?bataanMembers().length+' on Bataan':tryoutSoldiers().length+' in tryout'}`);
   if(!c) return;
   ({home:renderHome, people:renderPeople, grade:renderGrade, data:renderData, settings:renderSettings, bataan:renderBataan})[STATE.tab](c);
   tuckText(c);
@@ -2923,7 +2952,7 @@ function renderGate(){
         <button class="btn" id="gTester">Grader</button>
         <button class="btn" id="gAdmin">Admin</button>
         <p class="sub" style="margin:6px 0 0;font-size:13px">Preview the other roles on this device with the admin PIN:</p>
-        <div class="row" style="gap:8px"><button class="btn sm" id="gCaptain">Team Captain</button><button class="btn sm" id="gLeader">Battalion leadership</button></div>
+        <div class="row" style="gap:8px"><button class="btn sm" id="gCaptain">RC Team Captain</button><button class="btn sm" id="gBtcap">Bataan Team Captain</button><button class="btn sm" id="gLeader">Battalion leadership</button></div>
         ${keepBoxHtml()}
         <div class="row" style="margin-top:4px"><button class="btn" id="gHome">Back</button></div>
       </div>`;
@@ -2939,7 +2968,7 @@ function renderGate(){
         <div class="row"><button class="btn primary" id="gCreate">Set PIN and continue</button><button class="btn" id="gBack">Back</button></div>
       </div>`;
   } else if(g.step==='adminLogin' || g.step==='testerLogin'){
-    body=`<p class="sub">Enter the ${g.step==='adminLogin'?'admin':'grader'} PIN${g.as?` to preview ${g.as==='captain'?'the Team Captain':'battalion leadership'}`:''}.</p>
+    body=`<p class="sub">Enter the ${g.step==='adminLogin'?'admin':'grader'} PIN${g.as?` to preview ${g.as==='captain'?'the RC Team Captain':g.as==='btcap'?'the Bataan Team Captain':'battalion leadership'}`:''}.</p>
       <div class="stack" style="gap:10px" id="gForm">
         <label class="field"><span>PIN</span><input class="input" type="password" inputmode="numeric" id="pin" autofocus></label>
         ${g.error?`<div class="flag">${esc(g.error)}</div>`:''}
@@ -2986,6 +3015,7 @@ function wireGate(){
   on('gAdmin',()=>{ STATE.gate={step:S.adminPinHash?'adminLogin':'adminCreate',error:''}; render(); });
   on('gCaptain',()=>{ STATE.gate={step:S.adminPinHash?'adminLogin':'adminCreate',error:'',as:'captain'}; render(); });
   on('gLeader',()=>{ STATE.gate={step:S.adminPinHash?'adminLogin':'adminCreate',error:'',as:'leader'}; render(); });
+  on('gBtcap',()=>{ STATE.gate={step:S.adminPinHash?'adminLogin':'adminCreate',error:'',as:'btcap'}; render(); });
   on('gTester',()=>{ if(S.testerPinHash){ STATE.gate={step:'testerLogin',error:''}; render(); } else enter('tester'); });
   on('gBack',()=>{ STATE.gate={step:'login',error:''}; render(); });
   on('gLogin',()=>{ STATE.gate={step:'login',error:''}; render(); });
@@ -5131,12 +5161,15 @@ const icon = k => `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" s
 // Which screens each kind of user gets. tabs = every screen in desktop order; bar = the phone bottom bar; the rest go under More.
 function navFor(role){
   const shareA={id:'share', label:'Share Rusty Anvil', icon:'share'}, outA={id:'signout', label:'Sign out', icon:'signout'}, themeA={id:'theme', label:'Appearance', icon:'settings'};
-  const news = whatsNewReady() ? [{id:'news', label:'What\'s new', icon:'news'}] : [];
+  const news = whatsNewReady() ? [{id:'news', label:'Updates', icon:'news'}] : [];
   if(syncActive()) news.unshift({id:'mypin', label:'Change my PIN', icon:'settings'});
   news.push(themeA);
   if(role==='admin' || role==='leader' || role==='captain') return {
     tabs:[['home','Home'],['people','People'],['grade','Grade'],['cal','Calendar'],...(role==='captain'?[]:[['bataan','Bataan']]),['ref','Reference'],['data','Export / import'],...(role==='leader'?[]:[['settings','Settings']])],
     primary:['home','people','grade','cal','bataan'], bar:['home','people','grade','cal',...(role==='captain'?[]:['bataan'])], actions:[shareA, ...news, outA]};
+  if(role==='btcap') return {
+    tabs:[['bataan','Bataan'],['cal','Calendar'],['ref','Reference']],
+    primary:['bataan','cal','ref'], bar:['bataan','cal','ref'], actions:[shareA, ...news, outA]};
   if(role==='soldier'){ const bt=isBataan(meSoldier()); return {
     tabs:[['mydash','Home'],['myhealth','My health'],['mylog','Log my scan'],...(meSoldier() && isRCs(meSoldier()) && meSoldier().tryout!==false?[['myresults','My tryout results']]:[]),['cal','Calendar'],...(bt?[['bataan','Bataan']]:[]),['mytimes','My times'],['mypractice','Practice'],['ref','Reference']],
     bar:['mydash','cal',...(bt?['bataan']:[]),'mytimes','mypractice'], actions:[{id:'myexport', label:'Export my data', icon:'export'}, shareA, ...news, outA]}; }
@@ -5261,22 +5294,41 @@ function wireShare(c){
     catch(e){ const r=document.createRange(); r.selectNodeContents(c.querySelector('.share-url')); const s=getSelection(); s.removeAllRanges(); s.addRange(r); m.textContent='Link selected. Copy it from here.'; } };
 }
 
-/* ---------- what's new (shown once per update) ---------- */
-// Fill in WHATS_NEW.items to show it. Leave items empty and nothing appears.
-const WHATS_NEW = {id:'2026-09-29', title:'What\'s new in Rusty Anvil', items:[]};
+/* ---------- updates: a pop-up once per new version, and the full list under More \u2192 Updates ---------- */
+// Newest first. Add an entry with each release; the pop-up shows it once on each device.
+const APP_VERSION='1.0';
+const UPDATES = [
+  {v:'1.0', date:'2026-10-26', items:[
+    'Bataan team: weekly runs and rucks on the Bataan calendar, a countdown to race day, a team board, charts, and an Excel export.',
+    'Two captains: Ranger Challenge Team Captain and Bataan Team Captain, each seeing only their own team.',
+    'New Home dashboards for leadership and soldiers.',
+    'Pick which calendars you see: Ranger Challenge, Battalion, and Bataan.',
+    'New color schemes under More \u2192 Appearance.',
+    'Countdown timers on the 9-line, SPOT, and SALUTE reports when a time limit is set.',
+    'Typos caught before they save: impossible times and future dates.',
+    'Security and reliability improvements.',
+  ]},
+];
 const NEWS_KEY='rustyAnvil_newsSeen';
-function whatsNewReady(){ return Array.isArray(WHATS_NEW.items) && WHATS_NEW.items.length>0; }
+function whatsNewReady(){ return UPDATES.length>0 && UPDATES[0].items.length>0; }
+function updateLabel(u){ return `Update ${u.v}`+(u.date?` \u00B7 ${calDayLabel(u.date,{month:'short',day:'numeric',year:'numeric'})}`:''); }
+// force: open the full list (More \u2192 Updates). Otherwise: the newest update, once.
 function showWhatsNew(force){
   if(!whatsNewReady() || document.getElementById('newsSheet')) return;
+  if(!force && (!STATE.session || document.querySelector('.sheet-wrap:not([hidden])') || (navigator.webdriver && !window.__showUpdates))) return;   // automated tests opt in
   let seen=null; try{ seen=localStorage.getItem(NEWS_KEY); }catch(e){}
-  if(!force && seen===WHATS_NEW.id) return;
+  if(!force && seen===UPDATES[0].v) return;
+  const list = force ? UPDATES : [UPDATES[0]];
   const w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='newsSheet';
-  w.innerHTML=`<div class="sheet news" role="dialog" aria-modal="true" aria-labelledby="newsH"><h2 id="newsH">${esc(WHATS_NEW.title)}</h2>
-    <ul class="news-list">${WHATS_NEW.items.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
-    <button class="btn primary" id="newsOk" style="width:100%">Got it</button></div>`;
+  w.innerHTML=`<div class="sheet news" role="dialog" aria-modal="true" aria-labelledby="newsH">
+    <h2 id="newsH">${force?'Updates':`Update ${esc(UPDATES[0].v)}`}</h2>
+    ${force?`<p class="soft" style="margin:0 0 6px;font-size:13px">Rusty Anvil ${esc(APP_VERSION)}</p>`:''}
+    <div class="news-scroll">${list.map(u=>`${force?`<h3 class="news-v">${esc(updateLabel(u))}</h3>`:''}<ul class="news-list">${u.items.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>`).join('')}</div>
+    <div class="row" style="gap:8px"><button class="btn primary" id="newsOk" style="flex:1">Got it</button>${!force&&UPDATES.length>1?'<button class="btn" id="newsAll">All updates</button>':''}</div></div>`;
   document.body.appendChild(w);
-  const done=()=>{ try{ localStorage.setItem(NEWS_KEY, WHATS_NEW.id); }catch(e){} w.remove(); };
+  const done=()=>{ try{ localStorage.setItem(NEWS_KEY, UPDATES[0].v); }catch(e){} w.remove(); };
   w.querySelector('#newsOk').onclick=done; w.onclick=e=>{ if(e.target===w) done(); };
+  const all=w.querySelector('#newsAll'); if(all) all.onclick=()=>{ done(); showWhatsNew(true); };
   w.querySelector('#newsOk').focus();
 }
 
@@ -5427,7 +5479,7 @@ const SYNC = {
   cfg:{}, queue:[], base:null, users:[], rolePins:{}, names:null, ready:null, signup:true,
   busy:false, pulling:false, online:true, lastOk:0, error:'', timer:null, pendingRender:false,
 };
-const ROLE_FROM_SERVER = {admin:'admin', leader:'leader', captain:'captain', grader:'grader', soldier:'soldier'};
+const ROLE_FROM_SERVER = {admin:'admin', leader:'leader', captain:'captain', btcap:'btcap', grader:'grader', soldier:'soldier'};
 function syncLoadLocal(){
   try{ SYNC.cfg=JSON.parse(localStorage.getItem(SYNC_KEY)||'{}')||{}; }catch(e){ SYNC.cfg={}; }
   try{ SYNC.queue=JSON.parse(localStorage.getItem(QUEUE_KEY)||'[]')||[]; }catch(e){ SYNC.queue=[]; }
@@ -5471,7 +5523,8 @@ const same = (a,b) => JSON.stringify(a===undefined?null:a)===JSON.stringify(b===
 function syncDiff(A, B, role){
   const ops=[];
   ['soldiers','scans','practice','times','calendar'].forEach(tab=>{
-    if(tab==='calendar' && !['admin','leader','captain'].includes(role)) return;
+    if(tab==='calendar' && !['admin','leader','captain','btcap'].includes(role)) return;
+    if(role==='btcap' && !['soldiers','times','calendar'].includes(tab)) return;
     if(role==='grader' && tab!=='soldiers') return;
     if(role==='soldier' && tab!=='scans' && tab!=='practice' && tab!=='times') return;
     const a=A[tab]||{}, b=B[tab]||{};
@@ -5481,12 +5534,12 @@ function syncDiff(A, B, role){
       new Set([...Object.keys(a[id]), ...Object.keys(b[id])]).forEach(k=>{ if(!same(a[id][k], b[id][k])){ patch[k]=b[id][k]===undefined?null:b[id][k]; n++; } });
       if(n) ops.push({op:'put', tab, id, patch});
     });
-    if(role==='grader' || tab==='practice') return;
+    if(role==='grader' || tab==='practice' || (role==='btcap' && tab==='soldiers')) return;
     Object.keys(a).forEach(id=>{ if(!b[id]) ops.push({op:'del', tab, id}); });
   });
-  if(role==='admin' || role==='captain'){   // the Team Captain changes tryout settings, never app content (c: keys)
+  if(role==='admin' || role==='captain' || role==='btcap'){   // the RC Team Captain: tryout settings, never app content (c: keys); the Bataan Team Captain: race day only
     const patch={}; let n=0;
-    new Set([...Object.keys(A.settings||{}), ...Object.keys(B.settings||{})]).forEach(k=>{ if(role==='captain' && k.indexOf('c:')===0) return; if(!same((A.settings||{})[k], (B.settings||{})[k])){ const v=(B.settings||{})[k]; patch[k]=v===undefined?null:v; n++; } });
+    new Set([...Object.keys(A.settings||{}), ...Object.keys(B.settings||{})]).forEach(k=>{ if(role==='captain' && (k.indexOf('c:')===0 || k==='bataan')) return; if(role==='btcap' && k!=='bataan') return; if(!same((A.settings||{})[k], (B.settings||{})[k])){ const v=(B.settings||{})[k]; patch[k]=v===undefined?null:v; n++; } });
     if(n) ops.push({op:'settings', patch});
   }
   return ops;
@@ -5665,7 +5718,7 @@ async function syncLoadNames(force){
   }catch(e){ SYNC.names=null; STATE.gate.offline=true; }
   if(!STATE.session) render();
 }
-const ROLE_ORDER=['soldier','grader','captain','leader','admin'];
+const ROLE_ORDER=['soldier','grader','captain','btcap','leader','admin'];
 // One entry per person: a soldier sign-in plus any access tied to it, or a cadre sign-in on its own.
 function syncPeople(){
   const N=SYNC.names||[], byId={}, out=[];
@@ -5806,8 +5859,8 @@ function showAdminKey(key){
 }
 
 /* ---------- Settings: who can sign in (system admin; the Team Captain manages graders only) ---------- */
-const ACCESS_ROLES=['grader','captain','leader','admin'];
-const ROLE_DESC={grader:'Enters Ranger Challenge results. Sees only that a result is recorded.', captain:'Ranger Challenge only: rankings, results, health, times, the RC calendar, tryout settings, and grader sign-ins.', leader:'Sees and enters data for the whole battalion and Ranger Challenge, edits both calendars, moves people between them. No sign-ins or settings.', admin:'Everything, including sign-ins and settings. Signs in with their PIN plus the secret key.'};
+const ACCESS_ROLES=['grader','captain','btcap','leader','admin'];
+const ROLE_DESC={btcap:'Bataan only: who\'s on the team, their runs and rucks, assigning workouts on the Bataan calendar, and race day. Sees the battalion calendar. Nothing from Ranger Challenge.', grader:'Enters Ranger Challenge results. Sees only that a result is recorded.', captain:'Ranger Challenge only: rankings, results, health, times, the RC calendar, tryout settings, and grader sign-ins.', leader:'Sees and enters data for the whole battalion and Ranger Challenge, edits both calendars, moves people between them. No sign-ins or settings.', admin:'Everything, including sign-ins and settings. Signs in with their PIN plus the secret key.'};
 function syncAccessHtml(){
   const me=SYNC.cfg.user||{}, U=SYNC.users||[], st=STATE.ua||{}, cap=isCaptain();
   const roles = cap ? ['grader'] : ACCESS_ROLES;
@@ -5820,9 +5873,9 @@ function syncAccessHtml(){
     return `<div class="ua-row"><div><b>${esc(u.name)}</b>${self?' <span class="soft">(you)</span>':''} ${badge(u.role)}${u.locked?' <span class="badge b-bad">paused: wrong PINs</span>':''}
       ${u.pinFrom?`<div class="soft" style="font-size:12.5px">Also a soldier. Uses their soldier PIN${u.hasPin?'':' (not chosen yet)'}.</div>`:(!u.hasPin?' <span class="soft" style="font-size:12.5px">no PIN yet</span>':'')}</div>
     <div class="row" style="gap:6px">${st.pin===u.id?pinBtns(u):(st.del===u.id?`<button class="btn danger sm" data-uadelyes="${u.id}">${u.pinFrom?'Remove '+ROLE_LABEL[u.role]+' access':'Remove'}</button><button class="btn sm" data-uacancel="1">Keep</button>`
-      :`${u.pinFrom&&!u.hasPin?'':pinBtns(u)}${self||cap?'':`<select class="input" style="width:auto;height:32px;padding:4px 8px;font-size:13px" data-uaswap="${u.id}" aria-label="Change access">${ACCESS_ROLES.map(r=>`<option value="${r}" ${r===u.role?'selected':''}>${ROLE_LABEL[r]}</option>`).join('')}</select>`}${self?'':`<button class="btn sm" data-uadel="${u.id}">${u.pinFrom?'Remove access':'Remove'}</button>`}`)}</div></div>`; };
+      :`${u.pinFrom&&!u.hasPin?'':pinBtns(u)}${self||cap||u.role==='btcap'?'':`<select class="input" style="width:auto;height:32px;padding:4px 8px;font-size:13px" data-uaswap="${u.id}" aria-label="Change access">${ACCESS_ROLES.filter(r=>r!=='btcap').map(r=>`<option value="${r}" ${r===u.role?'selected':''}>${ROLE_LABEL[r]}</option>`).join('')}</select>`}${self?'':`<button class="btn sm" data-uadel="${u.id}">${u.pinFrom?'Remove access':'Remove'}</button>`}`)}</div></div>`; };
   const rcSid=sid=>isRCs(soldierById(sid));
-  const soldRow=u=>{ const has=extras(u.id).map(x=>x.role), can=roles.filter(r=>!has.includes(r) && (r==='leader'||r==='admin'||rcSid(u.sid)));
+  const soldRow=u=>{ const has=extras(u.id).map(x=>x.role), can=roles.filter(r=>!has.includes(r) && (r==='leader'||r==='admin'||(r==='btcap'?isBataan(soldierById(u.sid)):rcSid(u.sid))));
     return `<div class="ua-row" data-uaname="${esc(String(u.name).toLowerCase())}"><div><b>${esc(u.name)}</b> <span class="soft" style="font-size:12.5px">${rcSid(u.sid)?'RC':'Battalion'}</span>${has.map(r=>' '+badge(r)).join('')}${u.locked?' <span class="badge b-bad">paused: wrong PINs</span>':''}${!u.hasPin?' <span class="soft" style="font-size:12.5px">no PIN yet</span>':''}</div>
     <div class="row" style="gap:6px">${cap?'':pinBtns(u)}${st.pin===u.id||!can.length?'':!u.hasPin?`<span class="soft" style="font-size:12.5px">${cap?'Needs to sign in once and choose a PIN':'Set a PIN'} before giving access</span>`:`<select class="input" style="width:auto;height:32px;padding:4px 8px;font-size:13px" data-uapromote="${u.id}" aria-label="Give access"><option value="">Give access\u2026</option>${can.map(r=>`<option value="${r}">${ROLE_LABEL[r]}</option>`).join('')}</select>`}</div></div>`; };
   const rp=SYNC.rolePins||{};
@@ -5834,7 +5887,7 @@ function syncAccessHtml(){
     <h3 style="margin-top:16px">Add ${cap?'a grader':'someone who isn\'t on the roster'}</h3>
     <div class="grid" style="margin-top:6px">
       <label class="field"><span>Name</span><input class="input" id="uaName" placeholder="Rank Last, First"></label>
-      ${cap?'':`<label class="field"><span>Access</span><select class="input" id="uaRole">${ACCESS_ROLES.map(r=>`<option value="${r}">${ROLE_LABEL[r]}</option>`).join('')}</select></label>`}
+      ${cap?'':`<label class="field"><span>Access</span><select class="input" id="uaRole">${ACCESS_ROLES.filter(r=>r!=='btcap').map(r=>`<option value="${r}">${ROLE_LABEL[r]}</option>`).join('')}</select></label>`}
       <label class="field"><span>Their own PIN</span><input class="input" type="password" inputmode="numeric" id="uaNewPin"></label>
     </div>
     <div class="row" style="margin-top:10px"><button class="btn primary sm" id="uaAdd">Add</button></div>
@@ -5944,13 +5997,21 @@ function calsVisible(){
   if(r==='soldier'){ const me=meSoldier(); return ['bn', ...(isRCs(me)?['rc']:[]), ...(isBataan(me)?['bataan']:[])]; }
   if(r==='grader'||r==='tester') return ['rc'];
   if(r==='captain') return ['rc','bn'];
+  if(r==='btcap') return ['bn','bataan'];
   return ['rc','bn','bataan'];
 }
 function calBothVisible(){ return calsVisible().length>1; }
 function calRoleSees(e){ return calsVisible().includes(calOf(e)); }
-function calShows(e){ if(!calRoleSees(e)) return false; const f=calBothVisible() && STATE.cal && STATE.cal.show; return !f || f==='all' || calOf(e)===f; }
-function calCanEdit(e){ const r=myRole(); return r==='admin' || r==='leader' || (r==='captain' && (!e || calOf(e)==='rc')); }
-function calCanAdd(){ return ['admin','leader','captain'].includes(myRole()); }
+// Each person picks which of their calendars to show (saved on this device). Hidden ones drop out of the calendar,
+// Home, and the today/tomorrow reminders. At least one always stays on.
+const CAL_HIDE_KEY='rustyAnvil_calHidden';
+function calHidden(){ try{ const h=JSON.parse(localStorage.getItem(CAL_HIDE_KEY)||'[]'); return Array.isArray(h)?h:[]; }catch(e){ return []; } }
+function calSetHidden(h){ try{ localStorage.setItem(CAL_HIDE_KEY, JSON.stringify(h)); }catch(e){} }
+function calOn(k){ const v=calsVisible(), h=calHidden().filter(x=>v.includes(x)); return h.length>=v.length ? true : !h.includes(k); }
+function calUnhide(k){ calSetHidden(calHidden().filter(x=>x!==k)); }
+function calShows(e){ return calRoleSees(e) && calOn(calOf(e)); }
+function calCanEdit(e){ const r=myRole(); return r==='admin' || r==='leader' || (r==='captain' && (!e || calOf(e)==='rc')) || (r==='btcap' && (!e || calOf(e)==='bataan')); }
+function calCanAdd(){ return ['admin','leader','captain','btcap'].includes(myRole()); }
 const CAL_NAME={rc:'Ranger Challenge', bn:'Battalion', bataan:'Bataan'}, CAL_TAG={rc:'RC', bn:'BN', bataan:'BT'};
 // "Ruck \u00B7 6 mi \u00B7 35 lb"
 function wkText(wk){ if(!wk || !wk.kind) return ''; return [wk.kind==='ruck'?'Ruck':'Run', wk.dist?tlDist(wk.dist)+' mi':'', wk.kind==='ruck'&&wk.lb?wk.lb+' lb':''].filter(Boolean).join(' \u00B7 '); }
@@ -6032,7 +6093,7 @@ function renderCalendar(c){
         <div class="row" style="gap:6px"><button class="btn sm" id="calPrev" aria-label="Previous month">\u2039</button><h2 style="margin:0;min-width:9.5em;text-align:center">${first.toLocaleDateString([], {month:'long', year:'numeric'})}</h2><button class="btn sm" id="calNext" aria-label="Next month">\u203A</button></div>
         <div class="row" style="gap:6px"><button class="btn sm" id="calToday">Today</button>${admin?'<button class="btn primary sm" id="calAdd">+ Add</button>':''}</div>
       </div>
-      ${both?`<div class="row" style="gap:8px;margin:10px 0 2px"><span class="soft" style="font-size:13.5px">Show</span><div class="seg" role="group" aria-label="Which calendar">${[['all',calsVisible().length>2?'All':'Both'], ...calsVisible().map(k=>[k,CAL_NAME[k]])].map(([k,l])=>`<button data-calshow="${k}" aria-pressed="${(C.show||'all')===k}">${l}</button>`).join('')}</div></div>`:''}
+      ${both?`<div class="row cal-pick" style="gap:8px;margin:10px 0 2px"><span class="soft" style="font-size:13.5px">Show</span>${calsVisible().map(k=>`<button class="cal-tog ${k}" data-caltog="${k}" aria-pressed="${calOn(k)}"><i aria-hidden="true"></i>${CAL_NAME[k]}</button>`).join('')}</div>`:''}
       <div class="cal-grid" role="grid">${DAYS_SHORT.map((d,i)=>`<div class="cal-dow"><span class="full">${d}</span><span class="one">${DAYS_LETTER[i]}</span></div>`).join('')}${cells}</div>
     </div>
     <div class="two cal-lower">
@@ -6049,7 +6110,9 @@ function renderCalendar(c){
   $('calPrev').onclick=()=>{ const d=new Date(Y,M-2,1); go(isoOf(d).slice(0,7)); };
   $('calNext').onclick=()=>{ const d=new Date(Y,M,1); go(isoOf(d).slice(0,7)); };
   $('calToday').onclick=()=>{ C.month=today.slice(0,7); C.day=today; render(); };
-  c.querySelectorAll('[data-calshow]').forEach(b=>b.onclick=()=>{ C.show=b.dataset.calshow; render(); });
+  c.querySelectorAll('[data-caltog]').forEach(b=>b.onclick=()=>{ const k=b.dataset.caltog, v=calsVisible(), on=v.filter(calOn);
+    if(calOn(k) && on.length<=1){ toast('Keep at least one calendar on.'); return; }
+    const h=calHidden().filter(x=>v.includes(x)); calSetHidden(calOn(k) ? [...h, k] : h.filter(x=>x!==k)); render(); });
   c.querySelectorAll('[data-calday]').forEach(b=>b.onclick=()=>{ C.day=b.dataset.calday; if(C.day.slice(0,7)!==C.month) C.month=C.day.slice(0,7); render(); const p=$('calDay'); if(p && window.innerWidth<760) p.scrollIntoView({behavior:'smooth', block:'start'}); });
   c.querySelectorAll('[data-calgo]').forEach(b=>b.onclick=()=>{ C.day=b.dataset.calgo; C.month=C.day.slice(0,7); render(); const p=$('calDay'); if(p) p.scrollIntoView({behavior:'smooth', block:'start'}); });
   if(admin){
@@ -6087,8 +6150,8 @@ function calPickScope(id, day, action){
 }
 function calEdit(e, day, isNewCopy, onCancel, preset){
   if(document.getElementById('calSheet')) return;
-  const shown=STATE.cal&&STATE.cal.show;
-  const isNew = !e || isNewCopy, x = e ? clone(e) : Object.assign({id:uid(), title:'', start:day||isoOf(new Date()), cal: isCaptain() ? 'rc' : ['rc','bn','bataan'].includes(shown) ? shown : myRole()==='leader' ? 'bn' : 'rc'}, preset||{});
+  const onNow=calsVisible().filter(calOn), shown=onNow.length===1?onNow[0]:null;
+  const isNew = !e || isNewCopy, x = e ? clone(e) : Object.assign({id:uid(), title:'', start:day||isoOf(new Date()), cal: isCaptain() ? 'rc' : isBtCap() ? 'bataan' : ['rc','bn','bataan'].includes(shown) ? shown : myRole()==='leader' ? 'bn' : 'rc'}, preset||{});
   if(e && !x.cal) x.cal=calOf(e);
   const rep = x.repeat && x.repeat.days && x.repeat.days.length;
   const w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='calSheet';
@@ -6097,7 +6160,7 @@ function calEdit(e, day, isNewCopy, onCancel, preset){
     <h2 id="calH">${isNewCopy?`Change ${calDayLabel(x.start,{month:'short',day:'numeric'})} only`:isNew?'Add to the calendar':'Edit entry'}</h2>
     <p class="sub">Only the name (or a Bataan workout) and date are required. Fill in the W's when you know them.</p>
     <div class="stack" style="gap:10px">
-      ${isCaptain()||isNewCopy?`<p class="sub" style="margin:0">${CAL_NAME[calOf(x)]} calendar</p>`:`<label class="field"><span>Calendar</span><select class="input" id="ceCal"><option value="rc" ${calOf(x)==='rc'?'selected':''}>Ranger Challenge (RC soldiers see it)</option><option value="bn" ${calOf(x)==='bn'?'selected':''}>Battalion (everyone sees it)</option><option value="bataan" ${calOf(x)==='bataan'?'selected':''}>Bataan (Bataan team sees it)</option></select></label>`}
+      ${isCaptain()||isBtCap()||isNewCopy?`<p class="sub" style="margin:0">${CAL_NAME[calOf(x)]} calendar</p>`:`<label class="field"><span>Calendar</span><select class="input" id="ceCal"><option value="rc" ${calOf(x)==='rc'?'selected':''}>Ranger Challenge (RC soldiers see it)</option><option value="bn" ${calOf(x)==='bn'?'selected':''}>Battalion (everyone sees it)</option><option value="bataan" ${calOf(x)==='bataan'?'selected':''}>Bataan (Bataan team sees it)</option></select></label>`}
       <div id="ceWkBox" class="cal-wkbox" ${calOf(x)==='bataan'?'':'hidden'}>
         <div class="soft" style="font-size:13px;margin-bottom:6px">Assigned workout. People log their time against it on the Bataan screen.</div>
         <div class="seg" role="group" aria-label="Workout">${[['','None'],['run','Run'],['ruck','Ruck']].map(([k,l])=>`<button type="button" data-cewk="${k}" aria-pressed="${((x.wk&&x.wk.kind)||'')===k}">${l}</button>`).join('')}</div>
@@ -6424,23 +6487,33 @@ function wireContentSettings(c){
 const THEME_KEY='rustyAnvil_theme';
 function themePref(){ try{ return localStorage.getItem(THEME_KEY)||'auto'; }catch(e){ return 'auto'; } }
 function themeResolved(){ const p=themePref(); return p==='light'||p==='dark' ? p : (window.matchMedia && matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'); }
+const SCHEME_KEY='rustyAnvil_scheme';
+const SCHEMES=[['anvil','Rusty Anvil','Rust and brass',['#C25B2C','#D49A5C','#2F4B47']],['woodland','Woodland','Olive and tan',['#4F6B2A','#CDAE72','#2E3B22']],['desert','Desert','Coyote and sand',['#A8642A','#DCC291','#7D8A75']],['midnight','Midnight','Violet and cyan',['#6B3FD0','#5FD3E8','#3B2E6E']],['mules','Mules','UCM red and black',['#C8102E','#1C1A1B','#D1CACC']]];
+function schemePref(){ try{ const s=localStorage.getItem(SCHEME_KEY); return SCHEMES.some(x=>x[0]===s)?s:'anvil'; }catch(e){ return 'anvil'; } }
 function applyTheme(){
   const t=themeResolved(); document.documentElement.dataset.theme=t;
-  const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', t==='light'?'#262B33':'#111214');
+  const sc=schemePref(); if(sc==='anvil') document.documentElement.removeAttribute('data-scheme'); else document.documentElement.dataset.scheme=sc;
+  const hdr=getComputedStyle(document.documentElement).getPropertyValue(t==='light'?'--hdr':'--bg').trim();
+  const m=document.querySelector('meta[name="theme-color"]'); if(m) m.setAttribute('content', hdr || (t==='light'?'#262B33':'#111214'));
 }
 applyTheme();
 if(window.matchMedia){ const mq=matchMedia('(prefers-color-scheme: light)'); const on=()=>{ if(themePref()==='auto'){ applyTheme(); if(typeof render==='function' && typeof STATE!=='undefined') render(); } }; mq.addEventListener ? mq.addEventListener('change', on) : mq.addListener(on); }
 function setTheme(p){ try{ localStorage.setItem(THEME_KEY, p); }catch(e){} applyTheme(); render(); }
+function setScheme(s){ try{ localStorage.setItem(SCHEME_KEY, s); }catch(e){} applyTheme(); render(); }
 function showTheme(){
   if(document.getElementById('themeSheet')) return;
   const cur=themePref(), w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='themeSheet';
   const opt=(k,l,d)=>`<button class="sheet-item" data-theme-pick="${k}" ${cur===k?'aria-current="page"':''}><span><b style="font-weight:600">${l}</b><br><span class="soft" style="font-size:13px">${d}</span></span></button>`;
+  const sc=schemePref();
   w.innerHTML=`<div class="sheet" role="dialog" aria-modal="true" aria-label="Appearance"><h2 style="margin:6px 12px 8px">Appearance</h2>
     ${opt('auto','Auto','Match this phone or computer')}${opt('light','Light','Light background')}${opt('dark','Dark','Dark background')}
+    <h3 style="margin:14px 12px 6px;font-size:14px">Colors</h3>
+    <div class="scheme-grid">${SCHEMES.map(([k,l,d,sw])=>`<button class="scheme-pick" data-scheme-pick="${k}" aria-pressed="${sc===k}"><span class="scheme-sw">${sw.map(c=>`<i style="background:${c}"></i>`).join('')}</span><b>${l}</b><small>${d}</small></button>`).join('')}</div>
     <button class="sheet-item sheet-close" id="themeClose">Close</button></div>`;
   document.body.appendChild(w);
   const close=()=>w.remove();
   w.querySelectorAll('[data-theme-pick]').forEach(b=>b.onclick=()=>{ close(); setTheme(b.dataset.themePick); });
+  w.querySelectorAll('[data-scheme-pick]').forEach(b=>b.onclick=()=>{ close(); setScheme(b.dataset.schemePick); });
   w.querySelector('#themeClose').onclick=close; w.onclick=e=>{ if(e.target===w) close(); };
   w.onkeydown=e=>{ if(e.key==='Escape') close(); };
   const f=w.querySelector('[aria-current]')||w.querySelector('.sheet-item'); if(f) f.focus();
@@ -6451,8 +6524,9 @@ function showTheme(){
 const CHART_Q=[]; let CHARTS_LIVE=[], chartTick=false;
 function chartTheme(){
   const cs=getComputedStyle(document.documentElement), v=k=>cs.getPropertyValue(k).trim(), light=document.documentElement.dataset.theme==='light';
-  return {light, ink:v('--ink'), soft:v('--inkSoft'), line:v('--line'), panel:v('--panel'), good:v('--good'), bad:v('--alert'), warn:light?'#C77A12':'#E0A13A', pri:v('--navy'),
-    series: light ? ['#B5481C','#1F3A5F','#2F855A','#8A6116','#6B46C1','#2B8A9E','#BE185D','#64748B'] : ['#E07A45','#7FA7D9','#62C0A6','#D49A5C','#B49BE8','#5FC3D6','#E58FB6','#9EA2A8']};
+  const base = light ? ['#B5481C','#1F3A5F','#2F855A','#8A6116','#6B46C1','#2B8A9E','#BE185D','#64748B'] : ['#E07A45','#7FA7D9','#62C0A6','#D49A5C','#B49BE8','#5FC3D6','#E58FB6','#9EA2A8'];
+  const sc=document.documentElement.dataset.scheme, series = sc ? [v('--navy'), v('--bt')||base[1], v('--good'), v('--brass'), ...base.slice(4)] : base;
+  return {light, ink:v('--ink'), soft:v('--inkSoft'), line:v('--line'), panel:v('--panel'), good:v('--good'), bad:v('--alert'), warn:light?'#C77A12':'#E0A13A', pri:v('--navy'), series};
 }
 // cfg is a function (theme)=>Chart config, so colors follow Light / Dark.
 function chartBox(cfg, o){
@@ -6708,7 +6782,7 @@ function btPersonStats(s){
 /* ---------- the screen ---------- */
 function renderBataan(c){
   STATE.bt = STATE.bt || {week:btMon(todayISO()), form:null, pick:null, set:false};
-  const B=STATE.bt, staff=['admin','leader'].includes(myRole());
+  const B=STATE.bt, staff=canBtStaff();
   if(staff) renderBataanStaff(c, B); else renderBataanMember(c, B);
   wireBtMeter(c); wireBtForm(c);
 }
@@ -6728,7 +6802,7 @@ function btUpcomingHtml(){
   </div>`;
 }
 function wireBtUpcoming(c){
-  const go=d=>{ STATE.cal=STATE.cal||{}; STATE.cal.show='bataan'; if(d){ STATE.cal.day=d; STATE.cal.month=d.slice(0,7); } STATE.tab='cal'; render(); window.scrollTo(0,0); };
+  const go=d=>{ STATE.cal=STATE.cal||{}; calUnhide('bataan'); if(d){ STATE.cal.day=d; STATE.cal.month=d.slice(0,7); } STATE.tab='cal'; render(); window.scrollTo(0,0); };
   const b=c.querySelector('#btCal'); if(b) b.onclick=()=>go(null);
   c.querySelectorAll('[data-btcalgo]').forEach(x=>x.onclick=()=>go(x.dataset.btcalgo));
 }
@@ -6792,7 +6866,7 @@ function wireBtLogTable(c){
 
 /* staff view: admin and battalion leadership */
 function renderBataanStaff(c, B){
-  const M=bataanMembers(), today=todayISO(), wkEnd=addDays(B.week,6), wkA=btAssignments(B.week, wkEnd), cfg=btCfg(), sys=isSys();
+  const M=bataanMembers(), today=todayISO(), wkEnd=addDays(B.week,6), wkA=btAssignments(B.week, wkEnd), cfg=btCfg(), sys=isSys(), manage=canBtManage();
   const logsBy={}; M.forEach(s=>logsBy[s.id]=btLogsOf(s.id));
   const S=M.map(s=>Object.assign({s}, btPersonStats(s)));
   // this week's board
@@ -6819,20 +6893,21 @@ function renderBataanStaff(c, B){
     </div>`; })() : '';
   c.innerHTML=`<div class="stack bataan">
     ${btMeterHtml(false)}
-    ${sys?`<div class="panel"><details class="bt-set" ${B.set||!cfg.race?'open':''} id="btSetBox"><summary><b>Race day settings</b></summary>
+    ${manage?`<div class="panel"><details class="bt-set" ${B.set||!cfg.race?'open':''} id="btSetBox"><summary><b>Race day settings</b></summary>
       <div class="grid" style="margin-top:10px">
         <label class="field"><span>Race name</span><input class="input" id="bs_name" value="${esc(cfg.name)}"></label>
         <label class="field"><span>Race day</span><input class="input" type="date" id="bs_race" value="${esc(cfg.race)}"></label>
         <label class="field"><span>Training started</span><input class="input" type="date" id="bs_start" value="${esc(cfg.start)}"></label>
       </div><p class="sub" style="margin:8px 0 0;font-size:13px">The meter fills from the training start to race day. Runs and rucks before the training start don't count here.</p>
       <div class="row" style="margin-top:10px"><button class="btn primary sm" id="bs_save">Save</button><span id="bs_msg" class="sub" style="margin:0"></span></div></details></div>`:''}
+    ${btTeamHtml(B)}
     <div class="panel"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0">Week plan</h2>${btWeekNav(B)}</div>
       ${wkA.length?`<ol class="bt-list">${wkA.map(a=>`<li class="bt-as"><div><div class="bt-as-day">${calDayLabel(a.day)}</div><b>${esc(wkText(a.e.wk))}</b>${a.e.title&&a.e.title!==wkText(a.e.wk)?` <span class="soft">\u00B7 ${esc(a.e.title)}</span>`:''}${a.e.repeat&&a.e.repeat.days&&a.e.repeat.days.length?' <span class="soft" style="font-size:12.5px">(repeats)</span>':''}</div><div class="bt-as-st"><button class="btn sm" data-btedit="${a.e.id}|${a.day}">Edit</button></div></li>`).join('')}</ol>`:'<p class="sub" style="margin:0">Nothing assigned this week yet.</p>'}
       <div class="row" style="margin-top:12px"><button class="btn primary" id="btAssign">+ Assign a run or ruck</button>${btAssignments(addDays(B.week,-7), addDays(B.week,-1)).some(a=>!(a.e.repeat&&a.e.repeat.days&&a.e.repeat.days.length))?'<button class="btn" id="btCopy">Copy last week\'s plan</button>':''}</div>
       <div id="btCopyMsg"></div>
     </div>
     <div class="panel"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Team this week</h2><button class="btn sm" id="btXl">Export to Excel (.xlsx)</button></div>
-      <p class="sub" style="margin:4px 0 10px">${M.length?`${M.length} on the Bataan team. Times show when someone logs an assigned workout; "missed" means the day passed with nothing logged.`:`No one is on the Bataan team yet. ${sys?'Open someone in People, then Manage \u2192 Bataan team.':'The system admin adds people from their page in People.'}`}</p>
+      <p class="sub" style="margin:4px 0 10px">${M.length?`${M.length} on the Bataan team. Times show when someone logs an assigned workout; "missed" means the day passed with nothing logged.`:`No one is on the Bataan team yet. ${manage?'Add people under Team above.':'The system admin or the Bataan Team Captain adds people.'}`}</p>
       ${wkA.length?board:M.length?'<p class="sub" style="margin:0">Assign a workout to see the board.</p>':''}
       ${B.form && !B.form.asg && B.form.sid && !pick ? btFormHtml(B.form) : ''}
     </div>
@@ -6853,7 +6928,7 @@ function renderBataanStaff(c, B){
   c.querySelectorAll('[data-btwho]').forEach(b=>b.onclick=()=>{ B.pick=b.dataset.btwho||null; if(B.form && B.form.sid!==B.pick) B.form=null; render(); if(B.pick){ const p=c.querySelector('.bt-pick'); if(p) p.scrollIntoView({block:'start'}); } });
   c.querySelectorAll('[data-btlogfor]').forEach(b=>b.onclick=()=>btOpenForm({sid:b.dataset.btlogfor, kind:'run'}));
   c.querySelectorAll('[data-btedit]').forEach(b=>b.onclick=()=>{ const [id,day]=b.dataset.btedit.split('|'), e=calList().find(x=>x.id===id); if(!e) return;
-    if(e.repeat&&e.repeat.days&&e.repeat.days.length){ STATE.cal=STATE.cal||{}; STATE.cal.show='bataan'; STATE.cal.day=day; STATE.cal.month=day.slice(0,7); STATE.tab='cal'; render(); window.scrollTo(0,0); toast('Repeating workout: change it here in the calendar.'); return; }
+    if(e.repeat&&e.repeat.days&&e.repeat.days.length){ STATE.cal=STATE.cal||{}; calUnhide('bataan'); STATE.cal.day=day; STATE.cal.month=day.slice(0,7); STATE.tab='cal'; render(); window.scrollTo(0,0); toast('Repeating workout: change it here in the calendar.'); return; }
     calEdit(e); });
   $('btAssign').onclick=()=>{ const d=B.week<=today && today<=wkEnd ? today : B.week; calEdit(null, d, false, null, {cal:'bataan', wk:{kind:'run'}}); };
   const cp=c.querySelector('#btCopy'); if(cp) cp.onclick=()=>{
@@ -6865,6 +6940,7 @@ function renderBataanStaff(c, B){
     else $('btCopyMsg').innerHTML='<p class="sub" style="margin:8px 0 0">Last week\'s workouts are already on this week.</p>';
   };
   $('btXl').onclick=exportBataanXlsx;
+  wireBtTeam(c, B);
   const bs=c.querySelector('#bs_save'); if(bs){
     const d=c.querySelector('#btSetBox'); if(d) d.ontoggle=()=>{ B.set=d.open; };
     bs.onclick=()=>{ const name=$('bs_name').value.trim()||'Bataan Memorial Death March', race=$('bs_race').value, start=$('bs_start').value;
@@ -6894,6 +6970,38 @@ function exportBataanXlsx(){
   const info=[['Setting','Value'],['Race',cfg.name],['Race day',cfg.race||'Not set'],['Training started',cfg.start||'Not set'],['Days to go',cfg.race?Math.max(0,btDays(today,cfg.race)):''],['On the team',M.length],['Counted from',first],['Exported',new Date().toLocaleString()]];
   const bytes=buildXlsx([{name:'Workouts', rows:work, widths:[11,11,24,7,20,7,9,12,9,11,30]}, {name:'Weekly', rows:wkRows, widths:[11,24,10,8,6,9,12,7,10,13,13,7,9]}, {name:'Assignments', rows:asRows, widths:[11,22,7,7,9,24,12,40]}, {name:'People', rows:pRows, widths:[24,10,8,15,7,9,6,12,30,7,13,30,16,15,13]}, {name:'Race', rows:info, widths:[18,32]}]);
   offerFile(`Rusty_Anvil_Bataan_${stamp()}.xlsx`, bytes, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+
+/* ---------- the team: members, adding and removing, and Bataan Team Captains ---------- */
+// The system admin and the Bataan Team Captain add and remove members. The system admin and battalion leadership
+// name Bataan Team Captains (a sign-in that uses the member's own soldier PIN; needs the Google Sheet).
+function btTeamHtml(B){
+  const M=bataanMembers(), manage=canBtManage(), lead=(isSys()||myRole()==='leader') && syncActive();
+  const U=(typeof SYNC!=='undefined' && SYNC.users)||[];
+  const signin=s=>U.find(x=>x.role==='soldier' && x.sid===s.id);
+  const capOf=s=>{ const u=signin(s); return u ? U.find(x=>x.role==='btcap' && x.pinFrom===u.id) : null; };
+  const q=String(B.addQ||'').trim().toLowerCase();
+  const found=q ? DATA.soldiers.filter(s=>!isBataan(s) && String(s.name).toLowerCase().includes(q)).sort((a,b)=>String(a.name).localeCompare(String(b.name))).slice(0,8) : [];
+  const row=s=>{ const cap=lead?capOf(s):null, si=lead?signin(s):null;
+    return `<li class="bt-tm"><span><b>${esc(s.name)}</b>${cap?' <span class="badge b-bt">Bataan Team Captain</span>':''}</span>
+      <span class="row" style="gap:6px">${lead ? (cap ? `<button class="btn sm" data-btuncap="${esc(cap.id)}" data-n="${esc(s.name)}">Remove captain</button>` : si && si.hasPin ? `<button class="btn sm" data-btmkcap="${esc(si.id)}" data-n="${esc(s.name)}">Make captain</button>` : si ? '<span class="soft" style="font-size:12.5px">needs a PIN to be captain</span>' : '') : ''}
+      ${manage ? (B.rm===s.id ? `<button class="btn danger sm" data-btrmyes="${esc(s.id)}">Remove</button><button class="btn sm" data-btrmno="1">Keep</button>` : `<button class="btn sm" data-btrm="${esc(s.id)}">Remove from team</button>`) : ''}</span></li>`; };
+  return `<div class="panel"><details class="bt-team" id="btTeamBox" ${B.teamOpen||!M.length?'open':''}><summary><b>Team (${M.length})</b>${lead?' <span class="soft" style="font-size:13px;font-weight:400">\u00B7 members and captains</span>':''}</summary>
+    ${M.length?`<ul class="bt-tlist">${M.map(row).join('')}</ul>`:'<p class="sub" style="margin:8px 0 0">No one yet.</p>'}
+    ${manage?`<div style="margin-top:12px"><label class="field"><span>Add someone</span><input class="input" id="btAddQ" value="${esc(B.addQ||'')}" placeholder="Start typing a name" autocomplete="off"></label>
+      ${q?(found.length?`<ul class="bt-tlist">${found.map(s=>`<li class="bt-tm"><span>${esc(s.name)}</span><button class="btn primary sm" data-btadd="${esc(s.id)}">Add</button></li>`).join('')}</ul>`:'<p class="sub" style="margin:6px 0 0">No one by that name who isn\'t already on the team.</p>'):''}</div>`:''}
+    ${lead?'<p class="sub" style="margin:10px 0 0;font-size:13px">A Bataan Team Captain signs in with their own soldier PIN and sees only Bataan: the team, their runs and rucks, the Bataan calendar, and race day.</p>':''}
+  </details></div>`;
+}
+function wireBtTeam(c, B){
+  const d=c.querySelector('#btTeamBox'); if(d) d.ontoggle=()=>{ B.teamOpen=d.open; };
+  const q=c.querySelector('#btAddQ'); if(q){ q.oninput=()=>{ B.addQ=q.value; const at=q.selectionStart; render(); const n=$('btAddQ'); if(n){ n.focus(); try{ n.setSelectionRange(at,at); }catch(e){} } }; }
+  c.querySelectorAll('[data-btadd]').forEach(b=>b.onclick=()=>{ const s=soldierById(b.dataset.btadd); if(!s) return; s.bataan=true; B.addQ=''; save(); toast(`${s.name} is on the Bataan team.`); render(); });
+  c.querySelectorAll('[data-btrm]').forEach(b=>b.onclick=()=>{ B.rm=b.dataset.btrm; render(); });
+  c.querySelectorAll('[data-btrmno]').forEach(b=>b.onclick=()=>{ B.rm=null; render(); });
+  c.querySelectorAll('[data-btrmyes]').forEach(b=>b.onclick=()=>{ const s=soldierById(b.dataset.btrmyes); B.rm=null; if(!s) return; s.bataan=false; save(); toast(`${s.name} is off the Bataan team. Their runs and rucks stay saved.`); render(); });
+  c.querySelectorAll('[data-btmkcap]').forEach(b=>b.onclick=()=>syncAdminOps([{op:'promote', id:b.dataset.btmkcap, role:'btcap'}], `${b.dataset.n} is a Bataan Team Captain.`));
+  c.querySelectorAll('[data-btuncap]').forEach(b=>b.onclick=()=>syncAdminOps([{op:'userDel', id:b.dataset.btuncap}], `${b.dataset.n} is no longer a Bataan Team Captain.`));
 }
 
 /* ============================== dashboards (leadership Home and soldier Home) ============================== */
