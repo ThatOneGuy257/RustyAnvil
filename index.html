@@ -763,6 +763,8 @@ table.bt-board td,table.bt-board th{white-space:nowrap}
 .bt-pick{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
 .bt-set summary{cursor:pointer}
 .bt-team summary{cursor:pointer}
+.bt-hbtn{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:right;text-decoration:underline;text-decoration-color:var(--line);text-underline-offset:3px}
+.bt-detail td,.bt-detail th{white-space:nowrap}
 .bt-tlist{list-style:none;margin:10px 0 0;padding:0}
 .bt-tm{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding:7px 0;border-top:1px solid var(--line)}
 .bt-tm:first-child{border-top:0}
@@ -5296,8 +5298,13 @@ function wireShare(c){
 
 /* ---------- updates: a pop-up once per new version, and the full list under More \u2192 Updates ---------- */
 // Newest first. Add an entry with each release; the pop-up shows it once on each device.
-const APP_VERSION='1.0';
+const APP_VERSION='1.1';
 const UPDATES = [
+  {v:'1.1', date:'2026-10-26', items:[
+    'Bataan: tap Results on any assignment to see who has done it, with their time, pace, pack weight, notes, and photos.',
+    'Bataan: tap a name to see every assignment and workout for that person, done or missed.',
+    'Add a photo when you log a Bataan run or ruck.',
+  ]},
   {v:'1.0', date:'2026-10-26', items:[
     'Bataan team: weekly runs and rucks on the Bataan calendar, a countdown to race day, a team board, charts, and an Excel export.',
     'Two captains: Ranger Challenge Team Captain and Bataan Team Captain, each seeing only their own team.',
@@ -6712,6 +6719,8 @@ function btMeterHtml(compact){
 function wireBtMeter(el){ const b=el && el.querySelector('#btMeterGo'); if(b) b.onclick=()=>{ STATE.tab='bataan'; render(); window.scrollTo(0,0); }; }
 
 /* ---------- the log form (a member logging their own, or leadership logging for someone) ---------- */
+// Photos go to the Google Drive folder through the sheet, so they need the sign-in connected. The Bataan Team Captain views them but doesn't add them.
+function btCanPhoto(){ return typeof syncActive==='function' && syncActive() && myRole()!=='btcap'; }
 function btFormHtml(f){
   const kind=f.kind||'run', ruck=kind==='ruck';
   return `<div class="bt-form" id="btForm">
@@ -6723,6 +6732,7 @@ function btFormHtml(f){
       <label class="field"><span>Time (${ruck?'h:mm:ss':'m:ss or h:mm:ss'})</span><input class="input" id="bt_time" inputmode="numeric" data-time="long" autocomplete="off" placeholder="${ruck?'2:05:30':'32:10'}"></label>
       ${ruck?`<label class="field"><span>Pack weight (lb)</span><input class="input" inputmode="numeric" id="bt_lb" value="${esc(f.lb||'')}" placeholder="e.g. 35"></label>`:''}
       <label class="field"><span>Note (optional)</span><input class="input" id="bt_note" placeholder="e.g. hills, boots, hot spots"></label>
+      ${btCanPhoto()?`<label class="field tl-photo"><span>Photo (optional)</span><input type="file" accept="image/*" id="bt_photo"><span class="soft" style="font-size:12px">A watch or app screenshot works well.</span></label>`:''}
     </div>
     <p class="tl-pace" id="bt_pace" aria-live="polite"></p>
     <div class="row" style="margin-top:6px"><button class="btn primary" id="bt_save">Save</button><button class="btn" id="bt_cancel">Cancel</button><span id="bt_msg" class="sub" style="margin:0"></span></div>
@@ -6736,7 +6746,7 @@ function wireBtForm(c){
   const pace=()=>{ const p=btPace(parseLong(v('bt_time')), +v('bt_dist')); const o=$('bt_pace'); if(o) o.innerHTML=p?`Pace: <b>${btPaceTxt(p)}</b>`:''; };
   ['bt_time','bt_dist'].forEach(id=>{ const el=$(id); if(el) el.addEventListener('input',()=>setTimeout(pace,0)); });
   $('bt_cancel').onclick=()=>{ STATE.bt.form=null; render(); };
-  const go=()=>{
+  const go=async()=>{
     const msg=$('bt_msg'), bad=(id,t)=>{ const el=$(id); if(el){ el.classList.add('bad'); el.focus(); } msg.innerHTML=`<span style="color:var(--alert)">${t}</span>`; };
     c.querySelectorAll('#btForm .input.bad').forEach(el=>el.classList.remove('bad'));
     const kind=f.kind||'run', d=+v('bt_dist'), sec=parseLong(v('bt_time')), lbRaw=v('bt_lb');
@@ -6750,8 +6760,12 @@ function wireBtForm(c){
     const note=v('bt_note'); if(note) e.note=note;
     if(myRole()==='soldier') e.self=true;
     e.bt=true;   // logged on the Bataan screen: kept out of the tryout run/ruck averages
+    const pf=$('bt_photo'), file=pf && pf.files && pf.files[0];
+    let photo=null;
+    if(file){ msg.textContent='Preparing photo\u2026'; try{ photo=await shrinkPhoto(file); }catch(err){ return bad('bt_photo','That picture couldn\'t be read. Try a different one.'); } }
     timeLogs().push(e); STATE.bt.form=null; save();
-    toast(`Saved: ${BT_KINDS[kind].toLowerCase()} ${tlDist(e.dist)} mi in ${fmtLong(sec)} (${btPaceTxt(btPace(sec,e.dist))}).`); render();
+    if(photo) syncQueuePhoto(e.id, photo);
+    toast(`Saved: ${BT_KINDS[kind].toLowerCase()} ${tlDist(e.dist)} mi in ${fmtLong(sec)} (${btPaceTxt(btPace(sec,e.dist))})${photo?', with photo':''}.`); render();
   };
   $('bt_save').onclick=go;
   c.querySelectorAll('#btForm .input').forEach(el=>el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); go(); } }));
@@ -6852,12 +6866,14 @@ function btLogTable(L, mine){
   if(!L.length) return '';
   const rows=[...L].sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(b.at||0)-(a.at||0)), del=STATE.bt.del;
   return `<details class="tbl" ${STATE.bt.showAll?'open':''} id="btAll"><summary>${mine?'All my':'All'} runs and rucks (${rows.length})</summary>
-    <div class="scroll"><table><thead><tr><th>Date</th>${mine?'':'<th>Name</th>'}<th>Type</th><th class="num">Miles</th><th class="num">Time</th><th class="num">Pace</th><th class="num">Pack</th><th>For</th><th></th></tr></thead>
+    <div class="scroll"><table><thead><tr><th>Date</th>${mine?'':'<th>Name</th>'}<th>Type</th><th class="num">Miles</th><th class="num">Time</th><th class="num">Pace</th><th class="num">Pack</th><th>For</th><th>Photo</th><th></th></tr></thead>
     <tbody>${rows.map(t=>{ const a=t.asg?calList().find(e=>e.id===t.asg):null, can=!mine||t.self;
-      return `<tr><td>${esc(tlDate(t.date))}</td>${mine?'':`<td>${esc((soldierById(t.sid)||{}).name||'')}</td>`}<td>${BT_KINDS[t.kind]}</td><td class="num">${tlDist(t.dist)}</td><td class="num">${fmtLong(t.sec)}</td><td class="num">${btPaceTxt(btPace(t.sec,t.dist))}</td><td class="num">${+t.lb?(+t.lb)+' lb':''}</td><td>${a?esc(wkText(a.wk)):'<span class="soft">extra</span>'}${t.note?` <span class="soft">\u00B7 ${esc(t.note)}</span>`:''}</td>
+      return `<tr><td>${esc(tlDate(t.date))}</td>${mine?'':`<td>${esc((soldierById(t.sid)||{}).name||'')}</td>`}<td>${BT_KINDS[t.kind]}</td><td class="num">${tlDist(t.dist)}</td><td class="num">${fmtLong(t.sec)}</td><td class="num">${btPaceTxt(btPace(t.sec,t.dist))}</td><td class="num">${+t.lb?(+t.lb)+' lb':''}</td><td>${a?esc(wkText(a.wk)):'<span class="soft">extra</span>'}${t.note?` <span class="soft">\u00B7 ${esc(t.note)}</span>`:''}</td><td>${btPhotoCell(t)}</td>
         <td style="white-space:nowrap">${!can?'':del===t.id?`<button class="btn danger sm" data-btdelyes="${esc(t.id)}">Delete</button> <button class="btn sm" data-btdelno="1">Keep</button>`:`<button class="btn sm" data-btdel="${esc(t.id)}" aria-label="Delete">Delete</button>`}</td></tr>`; }).join('')}</tbody></table></div></details>`;
 }
+function btPhotoCell(t){ return t.photo ? `<button class="btn sm" data-tlphoto="${esc(t.photo)}">Photo</button>` : (typeof syncPhotoPending==='function' && syncPhotoPending(t.id)) ? '<span class="soft" style="font-size:12.5px">sending\u2026</span>' : ''; }
 function wireBtLogTable(c){
+  c.querySelectorAll('[data-tlphoto]').forEach(b=>b.onclick=()=>showPhoto(b.dataset.tlphoto));
   const d=c.querySelector('#btAll'); if(d) d.ontoggle=()=>{ STATE.bt.showAll=d.open; };
   c.querySelectorAll('[data-btdel]').forEach(b=>b.onclick=()=>{ STATE.bt.del=b.dataset.btdel; render(); });
   c.querySelectorAll('[data-btdelno]').forEach(b=>b.onclick=()=>{ STATE.bt.del=null; render(); });
@@ -6873,7 +6889,7 @@ function renderBataanStaff(c, B){
   const cell=(s,a)=>{ const t=btDoneLog(s.id,a,logsBy[s.id]); return t ? `<td class="bt-c ok" title="${esc(fmtLong(t.sec)+' \u00B7 '+btPaceTxt(btPace(t.sec,t.dist)))}"><b class="mono">${fmtLong(t.sec)}</b><small>${btPaceTxt(btPace(t.sec,t.dist))}</small></td>` : a.day<today ? '<td class="bt-c miss">missed</td>' : '<td class="bt-c"></td>'; };
   const wkLogs=s=>logsBy[s.id].filter(t=>t.date>=B.week && t.date<=wkEnd);
   const extraN=s=>{ const used=new Set(wkA.map(a=>(btDoneLog(s.id,a,logsBy[s.id])||{}).id).filter(Boolean)); return wkLogs(s).filter(t=>!used.has(t.id)).length; };
-  const board = !M.length ? '' : `<div class="scroll"><table class="bt-board"><thead><tr><th>Name</th>${wkA.map(a=>`<th class="num"><span class="bt-h-day">${calDayLabel(a.day,{weekday:'short'})}</span>${esc(wkText(a.e.wk))}</th>`).join('')}<th class="num">Extra</th><th class="num">Miles</th><th class="num">Done</th></tr></thead>
+  const board = !M.length ? '' : `<div class="scroll"><table class="bt-board"><thead><tr><th>Name</th>${wkA.map(a=>`<th class="num"><button class="bt-hbtn" data-btres="${esc(a.e.id)}|${a.day}" title="See everyone's results"><span class="bt-h-day">${calDayLabel(a.day,{weekday:'short'})}</span>${esc(wkText(a.e.wk))}</button></th>`).join('')}<th class="num">Extra</th><th class="num">Miles</th><th class="num">Done</th></tr></thead>
     <tbody>${M.map(s=>{ const dueA=wkA.filter(a=>a.day<=today), d=dueA.filter(a=>btDoneLog(s.id,a,logsBy[s.id])).length;
       return `<tr><td><button class="linkish" data-btwho="${s.id}">${esc(s.name)}</button></td>${wkA.map(a=>cell(s,a)).join('')}<td class="num">${extraN(s)||''}</td><td class="num">${fmt1(btMiles(wkLogs(s)))}</td><td class="num">${dueA.length?`${d}/${dueA.length}`:'\u2013'}</td></tr>`; }).join('')}</tbody></table></div>`;
   // trends across the weeks
@@ -6886,8 +6902,9 @@ function renderBataanStaff(c, B){
   const pickChart = P ? (()=>{ const days=[...new Set(P.L.map(t=>t.date))].sort(); const on=(k,d)=>{ const x=P.L.filter(t=>t.kind===k&&t.date===d); return x.length?btAvgPace(x):null; };
     return `<div class="bt-pick"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${esc(pick.name)}</h3><button class="btn sm" data-btwho="">Close</button></div>
       <div class="bt-tiles"><div><span>Miles</span><b>${fmt1(P.miles)}</b></div><div><span>Done</span><b>${P.pct==null?'\u2013':Math.round(P.pct)+'%'}</b><small>${P.due?`${P.done} of ${P.due}`:''}</small></div><div><span>Run pace</span><b>${P.runPace?btPaceTxt(P.runPace):'\u2013'}</b><small>${esc(btChangeTxt(P.runCh))}</small></div><div><span>Ruck pace</span><b>${P.rukPace?btPaceTxt(P.rukPace):'\u2013'}</b><small>${esc(btChangeTxt(P.rukCh))}</small></div><div><span>Heaviest pack</span><b>${P.maxLb?P.maxLb+' lb':'\u2013'}</b><small>${P.longRuck?'longest ruck '+fmt1(P.longRuck)+' mi':''}</small></div></div>
-      ${days.length>1?lineChart(days.map(tlDate), [{label:'Run', data:days.map(d=>on('run',d))},{label:'Ruck', data:days.map(d=>on('ruck',d))}].filter(x=>x.data.some(v=>v!=null)), {y:'time', label:'Pace per mile', legend:true}):'<p class="sub" style="margin:8px 0 0">Their pace chart shows after two days of logs.</p>'}
-      ${barChart(weeks.map(wl), weeks.map(w=>Math.round(btMiles(P.L.filter(t=>btMon(t.date)===w))*10)/10), {label:'Miles', short:true})}
+      ${days.length>1?`<h3 class="chart-h">Pace <span style="font-weight:400">(lower is faster)</span></h3>`+lineChart(days.map(tlDate), [{label:'Run', data:days.map(d=>on('run',d))},{label:'Ruck', data:days.map(d=>on('ruck',d))}].filter(x=>x.data.some(v=>v!=null)), {y:'time', label:'Pace per mile', legend:true}):'<p class="sub" style="margin:8px 0 0">Their pace chart shows after two days of logs.</p>'}
+      <h3 class="chart-h">Miles each week</h3>${barChart(weeks.map(wl), weeks.map(w=>Math.round(btMiles(P.L.filter(t=>btMon(t.date)===w))*10)/10), {label:'Miles', short:true})}
+      ${btPersonWorkHtml(pick, P.L)}
       <div class="row" style="margin-top:10px"><button class="btn sm" data-btlogfor="${pick.id}">Log a run or ruck for them</button></div>
       ${B.form && B.form.sid===pick.id ? btFormHtml(B.form) : ''}
     </div>`; })() : '';
@@ -6902,10 +6919,11 @@ function renderBataanStaff(c, B){
       <div class="row" style="margin-top:10px"><button class="btn primary sm" id="bs_save">Save</button><span id="bs_msg" class="sub" style="margin:0"></span></div></details></div>`:''}
     ${btTeamHtml(B)}
     <div class="panel"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0">Week plan</h2>${btWeekNav(B)}</div>
-      ${wkA.length?`<ol class="bt-list">${wkA.map(a=>`<li class="bt-as"><div><div class="bt-as-day">${calDayLabel(a.day)}</div><b>${esc(wkText(a.e.wk))}</b>${a.e.title&&a.e.title!==wkText(a.e.wk)?` <span class="soft">\u00B7 ${esc(a.e.title)}</span>`:''}${a.e.repeat&&a.e.repeat.days&&a.e.repeat.days.length?' <span class="soft" style="font-size:12.5px">(repeats)</span>':''}</div><div class="bt-as-st"><button class="btn sm" data-btedit="${a.e.id}|${a.day}">Edit</button></div></li>`).join('')}</ol>`:'<p class="sub" style="margin:0">Nothing assigned this week yet.</p>'}
+      ${wkA.length?`<ol class="bt-list">${wkA.map(a=>`<li class="bt-as"><div><div class="bt-as-day">${calDayLabel(a.day)}</div><b>${esc(wkText(a.e.wk))}</b>${a.e.title&&a.e.title!==wkText(a.e.wk)?` <span class="soft">\u00B7 ${esc(a.e.title)}</span>`:''}${a.e.repeat&&a.e.repeat.days&&a.e.repeat.days.length?' <span class="soft" style="font-size:12.5px">(repeats)</span>':''}</div><div class="bt-as-st">${(()=>{ const n=M.filter(s=>btDoneLog(s.id,a,logsBy[s.id])).length; return M.length?`<span class="soft" style="font-size:13px">${n} of ${M.length} done</span>`:''; })()}<button class="btn sm ${B.asg===a.e.id+'|'+a.day?'primary':''}" data-btres="${esc(a.e.id)}|${a.day}">Results</button><button class="btn sm" data-btedit="${esc(a.e.id)}|${a.day}">Edit</button></div></li>`).join('')}</ol>`:'<p class="sub" style="margin:0">Nothing assigned this week yet.</p>'}
       <div class="row" style="margin-top:12px"><button class="btn primary" id="btAssign">+ Assign a run or ruck</button>${btAssignments(addDays(B.week,-7), addDays(B.week,-1)).some(a=>!(a.e.repeat&&a.e.repeat.days&&a.e.repeat.days.length))?'<button class="btn" id="btCopy">Copy last week\'s plan</button>':''}</div>
       <div id="btCopyMsg"></div>
     </div>
+    ${btAsgResultsHtml(B, M, logsBy)}
     <div class="panel"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Team this week</h2><button class="btn sm" id="btXl">Export to Excel (.xlsx)</button></div>
       <p class="sub" style="margin:4px 0 10px">${M.length?`${M.length} on the Bataan team. Times show when someone logs an assigned workout; "missed" means the day passed with nothing logged.`:`No one is on the Bataan team yet. ${manage?'Add people under Team above.':'The system admin or the Bataan Team Captain adds people.'}`}</p>
       ${wkA.length?board:M.length?'<p class="sub" style="margin:0">Assign a workout to see the board.</p>':''}
@@ -6926,6 +6944,8 @@ function renderBataanStaff(c, B){
   </div>`;
   wireBtWeek(c, B); wireBtUpcoming(c); wireBtLogTable(c);
   c.querySelectorAll('[data-btwho]').forEach(b=>b.onclick=()=>{ B.pick=b.dataset.btwho||null; if(B.form && B.form.sid!==B.pick) B.form=null; render(); if(B.pick){ const p=c.querySelector('.bt-pick'); if(p) p.scrollIntoView({block:'start'}); } });
+  c.querySelectorAll('[data-btres]').forEach(b=>b.onclick=()=>{ B.asg = B.asg===b.dataset.btres ? null : b.dataset.btres; render(); const p=$('btAsgBox'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); });
+  c.querySelectorAll('[data-btasgclose]').forEach(b=>b.onclick=()=>{ B.asg=null; render(); });
   c.querySelectorAll('[data-btlogfor]').forEach(b=>b.onclick=()=>btOpenForm({sid:b.dataset.btlogfor, kind:'run'}));
   c.querySelectorAll('[data-btedit]').forEach(b=>b.onclick=()=>{ const [id,day]=b.dataset.btedit.split('|'), e=calList().find(x=>x.id===id); if(!e) return;
     if(e.repeat&&e.repeat.days&&e.repeat.days.length){ STATE.cal=STATE.cal||{}; calUnhide('bataan'); STATE.cal.day=day; STATE.cal.month=day.slice(0,7); STATE.tab='cal'; render(); window.scrollTo(0,0); toast('Repeating workout: change it here in the calendar.'); return; }
@@ -7002,6 +7022,38 @@ function wireBtTeam(c, B){
   c.querySelectorAll('[data-btrmyes]').forEach(b=>b.onclick=()=>{ const s=soldierById(b.dataset.btrmyes); B.rm=null; if(!s) return; s.bataan=false; save(); toast(`${s.name} is off the Bataan team. Their runs and rucks stay saved.`); render(); });
   c.querySelectorAll('[data-btmkcap]').forEach(b=>b.onclick=()=>syncAdminOps([{op:'promote', id:b.dataset.btmkcap, role:'btcap'}], `${b.dataset.n} is a Bataan Team Captain.`));
   c.querySelectorAll('[data-btuncap]').forEach(b=>b.onclick=()=>syncAdminOps([{op:'userDel', id:b.dataset.btuncap}], `${b.dataset.n} is no longer a Bataan Team Captain.`));
+}
+
+/* ---------- breakdowns: one person's workouts, and one assignment across the team ---------- */
+function btCells(t){ return t ? `<td class="num mono">${fmtLong(t.sec)}</td><td class="num">${tlDist(t.dist)}</td><td class="num">${btPaceTxt(btPace(t.sec,t.dist))}</td><td class="num">${+t.lb?(+t.lb)+' lb':''}</td><td>${t.note?esc(t.note):''}</td><td>${btPhotoCell(t)}</td>` : '<td></td><td></td><td></td><td></td><td></td><td></td>'; }
+const BT_HEAD = '<th class="num">Time</th><th class="num">Miles</th><th class="num">Pace</th><th class="num">Pack</th><th>Note</th><th>Photo</th>';
+const btStatus = (t, day) => t ? '<span class="badge b-good">Done</span>' : day < todayISO() ? '<span class="badge b-bad">Missed</span>' : day === todayISO() ? '<span class="badge b-brass">Due today</span>' : '<span class="badge b-none">Upcoming</span>';
+// Every assignment they had (and the next week's), done or not, plus anything extra they logged. Newest first.
+function btPersonWorkHtml(s, L){
+  const today=todayISO(), A=btAssignments(btFirstDay(), addDays(today,7)), used=new Set();
+  const rows=A.map(a=>{ const t=btDoneLog(s.id,a,L); if(t) used.add(t.id); return {day:a.day, what:wkText(a.e.wk), t, asg:true}; });
+  L.filter(t=>!used.has(t.id)).forEach(t=>rows.push({day:t.date, what:`${BT_KINDS[t.kind]||''} \u00B7 ${tlDist(t.dist)} mi${+t.lb?' \u00B7 '+(+t.lb)+' lb':''}`, t, asg:false}));
+  rows.sort((a,b)=>a.day<b.day?1:a.day>b.day?-1:0);
+  if(!rows.length) return '<p class="sub" style="margin:10px 0 0">No assignments or workouts yet.</p>';
+  return `<h3 class="chart-h">Workouts</h3><div class="scroll"><table class="bt-detail"><thead><tr><th>Date</th><th>Workout</th><th>Status</th>${BT_HEAD}</tr></thead>
+    <tbody>${rows.map(r=>`<tr><td>${esc(tlDate(r.day))}</td><td>${esc(r.what)}</td><td>${r.asg?btStatus(r.t, r.day):'<span class="badge b-bt">Extra</span>'}</td>${btCells(r.t)}</tr>`).join('')}</tbody></table></div>`;
+}
+// One assignment: who's done it, what they put in, and how the times compare.
+function btAsgResultsHtml(B, M, logsBy){
+  if(!B.asg) return '';
+  const [id, day]=B.asg.split('|'), e=calList().find(x=>x.id===id); if(!e || !e.wk){ B.asg=null; return ''; }
+  const a={e, day}, R=M.map(s=>({s, t:btDoneLog(s.id,a,logsBy[s.id])})), done=R.filter(r=>r.t).sort((x,y)=>x.t.sec-y.t.sec), not=R.filter(r=>!r.t);
+  const avg=done.length?done.reduce((x,r)=>x+r.t.sec,0)/done.length:null, pace=btAvgPace(done.map(r=>r.t));
+  const order=[...done, ...not.sort((x,y)=>String(x.s.name).localeCompare(String(y.s.name)))];
+  return `<div class="panel" id="btAsgBox"><div class="row" style="justify-content:space-between;align-items:flex-start"><div><div class="bt-as-day">${esc(calDayLabel(day,{weekday:'long',month:'long',day:'numeric'}))}</div><h2 style="margin:0">${esc(wkText(e.wk))}</h2>${e.title&&e.title!==wkText(e.wk)?`<p class="sub" style="margin:2px 0 0">${esc(e.title)}</p>`:''}</div><button class="btn sm" data-btasgclose="1">Close</button></div>
+    <div class="bt-tiles"><div><span>Done</span><b>${done.length} of ${M.length}</b><small>${not.length&&day<todayISO()?`${not.length} missed`:not.length?`${not.length} still to go`:'everyone'}</small></div>
+      <div><span>Average time</span><b>${avg?fmtLong(avg):'\u2013'}</b></div><div><span>Average pace</span><b>${pace?btPaceTxt(pace):'\u2013'}</b></div>
+      <div><span>Fastest</span><b>${done.length?fmtLong(done[0].t.sec):'\u2013'}</b><small>${done.length?esc(done[0].s.name):''}</small></div>
+      <div><span>Slowest</span><b>${done.length>1?fmtLong(done.at(-1).t.sec):'\u2013'}</b><small>${done.length>1?esc(done.at(-1).s.name):''}</small></div></div>
+    ${done.length>1?`<h3 class="chart-h">Times <span style="font-weight:400">(shorter is faster)</span></h3>${barChart(done.map(r=>r.s.name), done.map(r=>r.t.sec), {horizontal:true, y:'time', label:'Time', after:i=>btPaceTxt(btPace(done[i].t.sec, done[i].t.dist))})}`:''}
+    <div class="scroll" style="margin-top:10px"><table class="bt-detail"><thead><tr><th>Name</th><th>Status</th>${BT_HEAD}</tr></thead>
+      <tbody>${order.map(r=>`<tr><td><button class="linkish" data-btwho="${esc(r.s.id)}">${esc(r.s.name)}</button></td><td>${btStatus(r.t, day)}</td>${btCells(r.t)}</tr>`).join('')}</tbody></table></div>
+  </div>`;
 }
 
 /* ============================== dashboards (leadership Home and soldier Home) ============================== */
