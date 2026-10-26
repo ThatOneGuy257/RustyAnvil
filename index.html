@@ -65,7 +65,8 @@ button,input,select,textarea{font:inherit;color:inherit}
 .tabs{display:flex;flex-wrap:wrap;gap:4px;background:var(--panelAlt);padding:4px;border-radius:6px}
 .tab{border:0;background:transparent;padding:7px 11px;font-size:13.5px;color:var(--inkSoft);border-radius:4px;cursor:pointer}
 .tab[aria-current="page"]{background:var(--panel);color:var(--ink);font-weight:600;box-shadow:0 1px 0 var(--line) inset}
-.who{white-space:nowrap;margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--inkSoft)}
+.who{white-space:nowrap;margin-left:auto;display:flex;align-items:center;gap:10px;font-size:13px;color:var(--inkSoft);min-width:0;max-width:100%}
+.who>span:first-child{overflow:hidden;text-overflow:ellipsis;min-width:0}
 .main{max-width:1160px;margin:0 auto;padding-block:22px 60px;padding-inline:16px}
 .stack{display:flex;flex-direction:column;gap:18px}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:18px 20px}
@@ -108,7 +109,7 @@ td.num,th.num{text-align:right;font-family:var(--mono);font-variant-numeric:tabu
 tr.cut td{border-bottom:2px dashed var(--alert);padding:0;height:0}
 tr.cutlabel td{color:var(--alert);font-size:12px;font-weight:600;padding:3px 8px;border-bottom:0}
 tr.below td{opacity:.72}
-.chips{display:inline-flex;gap:4px}
+.chips{display:inline-flex;flex-wrap:wrap;gap:4px;justify-content:flex-end;max-width:100%}
 .chip{font-size:11px;font-weight:600;padding:1px 6px;border-radius:3px;font-family:var(--mono)}
 .chip.go{background:var(--goodBg);color:var(--good)}
 .chip.ng{background:var(--alertBg);color:var(--alert)}
@@ -138,6 +139,8 @@ tr.below td{opacity:.72}
 .scenario{font-size:16px;line-height:1.6;max-width:70ch;margin:0 0 14px}
 .timer{font-family:var(--mono);font-size:40px;line-height:1;font-variant-numeric:tabular-nums}
 .timer.over{color:var(--alert)}
+.rp-clock{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;margin:0 0 14px;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.rp-clock .timer{font-size:32px}
 ol.lines{list-style:none;margin:0;padding:0}
 ol.lines>li{display:grid;grid-template-columns:3rem 1fr;gap:2px 12px;padding:10px 0;border-bottom:1px solid var(--line)}
 ol.lines>li:last-child{border-bottom:0}
@@ -573,6 +576,10 @@ tr.editing td{background:var(--panelAlt)}
 .drill .rpt-lines .rw{font-size:.88rem;color:var(--muted);margin-top:4px}
 .drill .rpt-lines .rw ul{margin:2px 0 0;padding-left:18px}
 
+.drill .rpt-clock{font-family:var(--mono,monospace);font-size:1.6rem;font-variant-numeric:tabular-nums;margin:0 0 12px;padding:8px 12px;border:1px solid var(--line,#444);border-radius:10px;display:inline-block}
+.drill .rpt-clock.over{color:var(--alert,#e06c5a);border-color:currentColor}
+.drill .rpt-time{margin:10px 0 0;font-size:.95rem}
+
 /* ---- admin/grader layout: help, needs attention, people, grade ---- */
 .help-q{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;padding:0;margin-left:4px;border-radius:50%;border:1px solid var(--line);background:var(--panelAlt);color:var(--inkSoft);font:600 12px/1 var(--sans,inherit);cursor:pointer;vertical-align:middle}
 .help-q[aria-expanded="true"]{background:var(--brassBg);color:var(--brass);border-color:var(--brass)}
@@ -634,6 +641,105 @@ h3.chart-h{font-size:14px;margin:14px 0 6px;color:var(--inkSoft);font-weight:600
 html .cal-tag{display:inline-block;font:600 10.5px/1 var(--sans);letter-spacing:.04em;padding:3px 5px;border-radius:4px;margin-right:6px;vertical-align:2px}
 .cal-tag.rc{background:var(--brassBg);color:var(--brass)}.cal-tag.bn{background:var(--goodBg);color:var(--good)}
 .cal-chip.k-bn{border-left:3px solid var(--good)}.cal-chip.k-rc{border-left:3px solid var(--brass)}
+/* Dashboards */
+:root{--kA:#27403C;--kB:#9C4424;--kC:#8C6326;--kD:#4A4775;--kInk:#FFFFFF;--kInkC:#FFFFFF}
+html[data-theme="light"]{--kA:#2F4B47;--kB:#C85A2E;--kC:#E8A762;--kD:#77729F;--kInkC:#3B2410}
+.db-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:stretch}
+.db-grid>*{grid-column:span var(--span,12);min-width:0}
+.db-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.db-kpi{display:flex;justify-content:space-between;align-items:center;gap:10px;border-radius:16px;padding:14px 16px;min-height:98px;border:0;text-align:left;font:inherit;color:var(--kInk);background:var(--kA);box-shadow:0 1px 2px rgba(0,0,0,.08),0 6px 18px rgba(0,0,0,.08);min-width:0}
+button.db-kpi{cursor:pointer;transition:transform .12s ease,box-shadow .12s ease}button.db-kpi:hover{transform:translateY(-1px);box-shadow:0 2px 4px rgba(0,0,0,.1),0 10px 24px rgba(0,0,0,.12)}
+.db-kpi.t-b{background:var(--kB)}.db-kpi.t-c{background:var(--kC);color:var(--kInkC)}.db-kpi.t-d{background:var(--kD)}
+.db-kpi-txt{min-width:0}
+.db-kpi-l{display:block;font-size:12.5px;letter-spacing:.02em;opacity:.88}
+.db-kpi-v{display:block;font-family:var(--mono);font-size:27px;line-height:1.15;margin:4px 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.db-kpi-s{display:block;font-size:12px;opacity:.85;line-height:1.3}
+.db-kpi-viz{flex:none;display:flex;align-items:center;justify-content:center;width:72px}
+.db-ring-bg{stroke:currentColor;opacity:.22}.db-ring-fg{stroke:currentColor}
+.db-ring-t{fill:currentColor;font:600 10.5px var(--sans)}
+.db-spark{display:block;width:72px;height:34px;overflow:visible}
+.db-spark-l{stroke:var(--navy);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.db-spark-a{fill:var(--navy);opacity:.13}
+.db-kpi .db-spark-l{stroke:currentColor}.db-kpi .db-spark-a{fill:currentColor;opacity:.18}
+.db-spark-b{fill:var(--navy);opacity:.45}.db-spark-b.now{opacity:1}.db-kpi .db-spark-b{fill:currentColor;opacity:.45}.db-kpi .db-spark-b.now{opacity:.95}
+.db-grid .sh-weak li{display:block;padding:0;border:0}.db-grid .sh-weak .db-bar{width:100%}
+.db-card,.db-grid .panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+html[data-theme="light"] .db-card,html[data-theme="light"] .db-grid .panel{border-color:transparent;box-shadow:var(--shadow)}
+.db-cell{display:flex;flex-direction:column}.db-cell>.panel{flex:1}
+.db-card-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.db-card-h h3,.db-grid .panel h2{margin:0;font-family:var(--sans);font-size:15px;font-weight:650;letter-spacing:.01em}
+.db-grid .panel .sub{font-size:13px}
+.db-link{background:none;border:0;color:var(--navy);font:600 13px var(--sans);cursor:pointer;padding:4px 0;white-space:nowrap}
+.db-link:hover{text-decoration:underline}
+.db-grid ol.top5 li{padding:7px 0}.db-grid ol.top5 b{font-size:15px}
+.db-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.db-bars-h{display:flex;justify-content:space-between;gap:8px;font-size:13.5px}.db-bars-h b{font-family:var(--mono);font-size:13.5px}
+.db-bar{height:7px;border-radius:99px;background:var(--panelAlt);overflow:hidden;margin:5px 0 3px}
+html[data-theme="light"] .db-bar{background:#E9ECF2}
+.db-bar i{display:block;height:100%;border-radius:99px;background:var(--good)}.db-bar.warn i{background:#D9912B}.db-bar.bad i{background:var(--alert)}
+.db-bars small{font-size:12px;color:var(--inkSoft)}
+.db-up{list-style:none;margin:0;padding:0}
+.db-up-b{display:flex;gap:12px;align-items:center;width:100%;background:none;border:0;border-top:1px solid var(--line);padding:7px 0;text-align:left;font:inherit;color:var(--ink);cursor:pointer}
+.db-up li:first-child .db-up-b{border-top:0;padding-top:0}
+.db-date{flex:none;width:42px;height:44px;border-radius:10px;background:var(--brassBg);color:var(--brass);display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1.05}
+.db-date small{font-size:10px;text-transform:uppercase;letter-spacing:.05em}.db-date b{font:700 17px var(--mono)}
+.db-up-t{min-width:0}.db-up-t b{display:block;font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.db-up-t small{color:var(--inkSoft);font-size:12.5px}
+.db-mini3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:6px}
+.db-mini3 div{background:var(--panelAlt);border-radius:10px;padding:8px 10px}
+html[data-theme="light"] .db-mini3 div{background:#F3F5F9}
+.db-mini3 span{display:block;font-size:12px;color:var(--inkSoft)}.db-mini3 b{font:700 18px var(--mono)}
+.db-sparkbox{margin-top:12px}.db-sparkbox span{font-size:12px}.db-sparkbox .db-spark{width:100%;height:48px;margin-top:4px}
+.bt-meter.flat{border:0;padding:0;box-shadow:none;background:none}
+.db-hello{margin:0 0 14px}.db-hello span{font-size:13px}.db-hello h2{margin:2px 0 0;font-family:var(--serif);font-size:24px}
+.db-grid .sh-day{padding:6px 0}.db-grid .sh-day h4{margin:0 0 2px;font-size:13.5px}.db-grid .sh-day h4 .soft{font-weight:400;font-size:12.5px}
+.db-grid .sh-ev{padding:7px 10px;border-radius:10px}
+.db-grid .tiles div{border-radius:10px;padding:10px 12px}
+.db-grid .chartbox{height:220px}
+@media (max-width:1100px){.db-grid>*{grid-column:span 12}}
+@media (max-width:760px){
+  .db-grid{gap:12px}.db-kpis{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .db-kpi{flex-direction:column;align-items:flex-start;min-height:0;padding:12px 13px;gap:6px;border-radius:14px}
+  .db-kpi-v{font-size:22px}.db-kpi-viz{width:auto;justify-content:flex-start}.db-kpi .db-ring{width:40px;height:40px}.db-kpi .db-spark{width:100%;height:26px}
+  .db-kpi-viz:has(.db-spark){width:100%}
+  .db-card,.db-grid .panel{border-radius:14px;padding:13px 14px}
+  .db-mini3 b{font-size:16px}
+}
+/* Bataan */
+:root{--bt:#8DB3E2;--btBg:#1A2636}
+html[data-theme="light"]{--bt:#1F4E8A;--btBg:#E2EAF5}
+.cal-tag.bataan{background:var(--btBg);color:var(--bt)}.cal-chip.k-bataan{border-left:3px solid var(--bt)}
+.b-bt{background:var(--btBg);color:var(--bt)}
+.cal-wk{margin:8px 0 0;font-size:14.5px}
+.cal-wkbox{border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panelAlt)}
+.bt-meter{display:block;width:100%;text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow,none)}
+.bt-meter .bt-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.bt-meter .bt-top b{font-family:var(--serif);font-size:18px}
+.bt-meter .bt-big{font-family:var(--mono);font-weight:700;font-size:20px;color:var(--bt);font-variant-numeric:tabular-nums}
+.bt-bar{position:relative;height:14px;border-radius:999px;background:var(--btBg);margin:10px 0 8px;overflow:hidden;border:1px solid var(--line)}
+.bt-bar i{position:absolute;left:0;top:0;bottom:0;border-radius:999px;background:linear-gradient(90deg,var(--navy),var(--brass));min-width:6px}
+.bt-sub{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--inkSoft)}
+.bt-meter.compact{padding:10px 14px;margin-bottom:14px;cursor:pointer}
+.bt-meter.compact .bt-top b{font-size:15px}.bt-meter.compact .bt-big{font-size:15px}
+.bt-meter.compact .bt-bar{height:9px;margin:7px 0 6px}
+.bt-open{color:var(--bt);font-weight:600}
+.bt-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.bt-as{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 12px;align-items:center;border:1px solid var(--line);border-left:4px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--panelAlt)}
+.bt-as.done{border-left-color:var(--good)}.bt-as.missed{border-left-color:var(--alert)}
+.bt-as-day{font-size:12.5px;color:var(--inkSoft);text-transform:uppercase;letter-spacing:.03em}
+.bt-as-st{display:flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.bt-form{border:1px solid var(--line);border-radius:10px;padding:12px;margin-top:10px;background:var(--panel)}
+.bt-tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:4px 0 6px}
+@media (max-width:760px){.bt-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.bt-tiles div{border:1px solid var(--line);border-radius:8px;padding:10px 12px;background:var(--panelAlt);display:flex;flex-direction:column;gap:2px}
+.bt-tiles span{font-size:12.5px;color:var(--inkSoft)}.bt-tiles b{font-family:var(--mono);font-size:18px}.bt-tiles small{font-size:12px;color:var(--inkSoft)}
+table.bt-board td,table.bt-board th{white-space:nowrap}
+.bt-h-day{display:block;font-size:11.5px;color:var(--inkSoft);font-weight:500}
+.bt-c{text-align:right}.bt-c b{display:block;font-size:13.5px}.bt-c small{font-size:11.5px;color:var(--inkSoft)}
+.bt-c.ok{background:var(--goodBg)}.bt-c.miss{color:var(--alert);font-size:12.5px}
+.bt-people tr.sel td{background:var(--btBg)}
+.bt-up{color:var(--good)}.bt-down{color:var(--alert)}
+.bt-pick{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.bt-set summary{cursor:pointer}
 .tl-pace{margin:10px 0 0;font-size:14.5px;min-height:1.4em;color:var(--inkSoft)}.tl-pace b{color:var(--ink);font-family:var(--mono)}
 .wk-pace{display:block;font-family:var(--mono);font-size:12px;margin-top:3px;min-height:1em}
 </style>
@@ -673,10 +779,10 @@ const REPORT_KEYS = ['medevac','spot','salute'];
 const FIELDS = [
   {k:'mdl', ev:'aft', label:'Deadlift', hint:'lb', type:'int', min:0, max:1000, w:'w-s'},
   {k:'hrp', ev:'aft', label:'Push-ups', hint:'reps', type:'int', min:0, max:200, w:'w-s'},
-  {k:'sdc', ev:'aft', label:'SDC', hint:'m:ss', type:'time', w:'w-m'},
-  {k:'plk', ev:'aft', label:'Plank', hint:'m:ss', type:'time', w:'w-m'},
-  {k:'run', ev:'aft', label:'2-mile', hint:'mm:ss', type:'time', w:'w-m'},
-  {k:'cft', ev:'cft', label:'CFT', hint:'mm:ss', type:'time', w:'w-m', long:'CFT total time (mm:ss)'},
+  {k:'sdc', ev:'aft', label:'SDC', hint:'m:ss', type:'time', w:'w-m', tmin:60, tmax:600},
+  {k:'plk', ev:'aft', label:'Plank', hint:'m:ss', type:'time', w:'w-m', tmin:5, tmax:900},
+  {k:'run', ev:'aft', label:'2-mile', hint:'mm:ss', type:'time', w:'w-m', tmin:480, tmax:2700},
+  {k:'cft', ev:'cft', label:'CFT', hint:'mm:ss', type:'time', w:'w-m', long:'CFT total time (mm:ss)', tmin:300, tmax:7200},
   {k:'cff', ev:'cff', label:'CFF', type:'gonogo', w:'w-l', long:'Call for fire'},
   {k:'grenade', ev:'grenade', label:'Grenade ID', hint:'# right', type:'grenade', w:'w-s'},
   {k:'throw', ev:'throw', label:'Grenade throw', type:'gonogo', w:'w-l', long:'Grenade deployment'},
@@ -708,10 +814,11 @@ function rebuildRegistry(){
   FIELDS.length=0; FIELDS.push(...BASE_FIELDS);
   PHYS_EVENTS.length=0; PHYS_EVENTS.push(...BASE_PHYS);
   customTests().forEach(t=>{
-    PHYS_EVENTS.push({k:ctKey(t), short:t.short||t.name, name:t.name, custom:true});
-    t.events.forEach(e=>{ const ty=CT_TYPES[e.type]||CT_TYPES.numHigh;
-      FIELDS.push({k:ctField(t,e), ev:ctKey(t), label:e.name, hint:ty.time?'m:ss':(e.unit||''), type:ty.time?'time':'num', w:'w-m',
-        long:`${e.name}${ty.time?' (m:ss)':e.unit?` (${e.unit})`:''}`}); });
+    const P=plainText;
+    PHYS_EVENTS.push({k:ctKey(t), short:P(t.short||t.name), name:P(t.name), custom:true});
+    t.events.forEach(e=>{ const ty=CT_TYPES[e.type]||CT_TYPES.numHigh, nm=P(e.name), un=P(e.unit||'');
+      FIELDS.push({k:ctField(t,e), ev:ctKey(t), label:nm, hint:ty.time?'m:ss':un, type:ty.time?'time':'num', w:'w-m',
+        long:`${nm}${ty.time?' (m:ss)':un?` (${un})`:''}`}); });
   });
   if(typeof MERGE_KEYS!=='undefined'){ MERGE_KEYS.length=0; MERGE_KEYS.push('name','age','sex', ...FIELDS.map(f=>f.k)); }
   if(typeof applyContent==='function') applyContent();
@@ -838,8 +945,16 @@ function migrateSettings(S){
   const av=S.avgTimes||{}; S.avgTimes={run:Object.assign({dist:2, best:720, zero:1080}, av.run||{}), ruck:Object.assign({dist:12, best:9000, zero:12600}, av.ruck||{})};
   S.enabled = Object.assign({}, DEFAULT_ENABLED, S.enabled||{});
   S.timeLimits = Object.assign({m249:150, m240b:150, m4:150}, S.timeLimits||{});
+  // Numbers stay numbers, whatever arrives from a file or the sheet (they're written straight into the page).
+  const num=(v,d)=>{ const n=Number(v); return isFinite(n)?n:d; }, D=DEFAULT_SETTINGS;
+  ['goPoints','cutLine','minFemale','grenadeGo','grenadeTotal','circleBonus','cftBest','cftZero'].forEach(k=>{ if(k in S) S[k]=num(S[k], D[k]); });
+  ['weights','physWeights','timeLimits'].forEach(g=>{ const o=S[g]||{}; Object.keys(o).forEach(k=>{ o[k] = o[k]==null ? null : num(o[k], null); }); });
+  if(S.physMode!=='points') S.physMode='mix';
+  if(Array.isArray(S.customTests)) S.customTests.forEach(t=>{ ['name','short'].forEach(k=>{ if(t[k]!=null) t[k]=plainText(t[k]); }); (t.events||[]).forEach(e=>{ ['name','unit'].forEach(k=>{ if(e[k]!=null) e[k]=plainText(e[k]); }); }); });
   return S;
 }
+// Strips characters that could turn text into markup. For names and labels that are written into the page in many places.
+function plainText(v){ return String(v).replace(/[<>"'`&]/g,'').slice(0,80); }
 let DATA = { app:'team-tryout-scorebook', version:1, settings:clone(DEFAULT_SETTINGS), soldiers:[] };
 const STATE = {
   session:null, gate:{step:'choose', error:''}, tab:'rank', view:'overall', testTab:'setup',
@@ -877,7 +992,7 @@ function exportProgram(){
   if(!style || !script){ toast("Couldn't read the program's code on this device."); return; }
   // Tags are assembled from pieces so this code never contains literal page tags (hosts that scan the file would trip on them).
   const L=String.fromCharCode(60), tag=(n,attrs)=>L+n+(attrs?' '+attrs:'')+'>', end=n=>L+'/'+n+'>';
-  const payload=JSON.stringify(Object.assign({}, DATA, {exportedAt:new Date().toISOString(), fromPackage:undefined})).replace(/</g,'\\u003c');
+  const payload=JSON.stringify(Object.assign(exportable(), {fromPackage:undefined})).replace(/</g,'\\u003c');
   const code=script.textContent.split(L+'/scr'+'ipt').join(L+'\\/scr'+'ipt');
   const fontUrl='https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500&family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@600;700&display=swap';
   const html = L+'!doctype html>\n'+tag('html','lang="en"')+tag('he'+'ad')+tag('meta','charset="utf-8"')+tag('meta','name="viewport" content="width=device-width, initial-scale=1"')
@@ -901,12 +1016,13 @@ function isSys(){ return myRole()==='admin'; }                                  
 function isCaptain(){ return myRole()==='captain'; }
 function canSettings(){ return isSys() || isCaptain(); }                         // tryout settings
 function canMoveRC(){ return isSys() || myRole()==='leader'; }                   // move someone between Ranger Challenge and the battalion
+const isBataan = s => !!s && s.bataan===true;                                    // the system admin puts people on the Bataan team
 const isRCs = s => !!s && s.rc!==false;                                          // everyone from before the split is Ranger Challenge
 const ROLE_LABEL={admin:'System admin', leader:'Battalion leadership', captain:'Team Captain', grader:'Grader', soldier:'Soldier'};
 // The roster this person may see: the Team Captain and graders see Ranger Challenge only.
 function rosterAll(){ return ['captain','grader','tester'].includes(myRole()) ? DATA.soldiers.filter(isRCs) : DATA.soldiers; }
 // People / Home: leadership and the admin can narrow to Ranger Challenge or the battalion.
-function scopeRoster(){ const g=isCaptain()?'rc':(STATE.pGroup||'all'), L=rosterAll(); return g==='rc'?L.filter(isRCs):g==='bn'?L.filter(s=>!isRCs(s)):L; }
+function scopeRoster(){ const g=isCaptain()?'rc':(STATE.pGroup||'all'), L=rosterAll(); return g==='rc'?L.filter(isRCs):g==='bn'?L.filter(s=>!isRCs(s)):g==='bt'?L.filter(isBataan):L; }
 const GROUP_NAME={all:'Everyone', rc:'Ranger Challenge', bn:'Battalion'};
 function fmtTime(sec){ if(sec==null||isNaN(sec)) return ''; sec=Math.round(sec); return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0'); }
 function parseTime(s){
@@ -1020,7 +1136,7 @@ function parseField(f, raw){
   if(f.type==='int'){ if(!/^\d+$/.test(raw)) return {ok:false, msg:`${f.label}: whole number`}; const v=+raw; if(v<f.min||v>f.max) return {ok:false,msg:`${f.label}: ${f.min}\u2013${f.max}`}; return {ok:true,val:v}; }
   if(f.type==='num'){ if(!/^\d+(\.\d+)?$/.test(raw)) return {ok:false, msg:`${f.label}: a number`}; return {ok:true,val:+raw}; }
   if(f.type==='grenade'){ const max=DATA.settings.grenadeTotal; if(!/^\d+$/.test(raw)||+raw>max) return {ok:false,msg:`Grenade: 0\u2013${max} correct`}; return {ok:true,val:+raw}; }
-  if(f.type==='time'){ const v=parseTime(raw); if(v==null||isNaN(v)) return {ok:false,msg:`${f.label}: use m:ss`}; return {ok:true,val:v}; }
+  if(f.type==='time'){ const v=parseTime(raw); if(v==null||isNaN(v)) return {ok:false,msg:`${f.label}: use m:ss`}; if(f.tmin!=null && (v<f.tmin||v>f.tmax)) return {ok:false,msg:`${f.label}: ${fmtTime(f.tmin)}\u2013${fmtTime(f.tmax)} (check for a typo)`}; return {ok:true,val:v}; }
   if(f.type==='gonogo'){ const v=normGo(raw); if(v==='?') return {ok:false,msg:`${f.label}: Go or No-Go`}; return {ok:true,val:v||null}; }
   if(f.type==='yesno'){ const v=normYes(raw); if(v==='?') return {ok:false,msg:`${f.label}: Yes or No`}; return {ok:true,val:v||null}; }
   return {ok:true,val:raw};
@@ -1030,7 +1146,7 @@ function fieldDisplay(f, v){
   if(f.type==='time') return fmtTime(v);
   if(f.type==='gonogo') return v==='go'?'go':'nogo';
   if(f.type==='yesno') return v==='yes'?'yes':'no';
-  return String(v);
+  const n=Number(v); return isFinite(n) ? String(n) : esc(String(v));   // never raw markup, even if someone sent text
 }
 function yesnoSelect(id, val, cls, attrs, ph){
   return `<select class="input ${cls||''}" id="${id}" ${attrs||''}><option value="">${ph||'\u2014'}</option><option value="yes" ${val==='yes'?'selected':''}>Yes</option><option value="no" ${val==='no'?'selected':''}>No</option></select>`;
@@ -1102,7 +1218,9 @@ async function offerFile(filename, data, mime){
   setTimeout(()=>URL.revokeObjectURL(url), 4000); toast(`Saved ${filename}.`);
 }
 function stamp(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
-function exportJSON(){ markBackup(); offerFile(`Rusty_Anvil_data_${stamp()}.json`, JSON.stringify(Object.assign({}, DATA, {exportedAt:new Date().toISOString()}), null, 2), 'application/json'); }
+// With the Google Sheet connected, PINs live on the sheet, so exported files leave out the device's PIN hashes.
+function exportable(){ const D=Object.assign({}, DATA, {exportedAt:new Date().toISOString()}); if(SYNC.on){ D.soldiers=D.soldiers.map(s=>{ const x=Object.assign({}, s); delete x.pinHash; return x; }); D.settings=Object.assign({}, D.settings); delete D.settings.adminPinHash; delete D.settings.testerPinHash; } return D; }
+function exportJSON(){ markBackup(); offerFile(`Rusty_Anvil_data_${stamp()}.json`, JSON.stringify(exportable(), null, 2), 'application/json'); }
 function exportXlsx(){
   const S=DATA.settings, cut=cutIndex(ranked('overall')), aftOn=isOn('aft'), cftOn=isOn('cft'), sk=SKILLS_ON();
   const gn2=v=>v==='go'?'Go':v==='nogo'?'No-Go':'';
@@ -1149,7 +1267,7 @@ function exportXlsx(){
   if(aftOn) settingsRows.push(['AFT failure is an automatic cut',S.aftFailCut?'Yes':'No'], ...(physPointsMode()?[]:EVENTS).map(e=>[`Weight: ${e.name}`, `${S.weights[e.k]} (${fmt1(S.weights[e.k]/wsum*100)}%)`]));
   if(isOn('grenade')) settingsRows.push(['Grenade ID Go standard',`${S.grenadeGo}/${S.grenadeTotal}`]);
   if(isOn('throw')) settingsRows.push(['Bonus for grenade in the circle',S.circleBonus]);
-  WEAPON_KEYS.filter(isOn).forEach(k=>settingsRows.push([`${eventShort(k)} time limit`, S.timeLimits[k]?fmtTime(S.timeLimits[k]):'None set']));
+  [...WEAPON_KEYS, ...REPORT_KEYS].filter(isOn).forEach(k=>settingsRows.push([`${eventShort(k)} time limit`, S.timeLimits[k]?fmtTime(S.timeLimits[k]):'None set']));
   settingsRows.push(['Exported',new Date().toLocaleString()]);
   const hRows=[['Name','In tryout','Scan date','Weight (lb)','BMI','SMM (lb)','Body fat mass (lb)','PBF (%)','Visceral fat','BMR','TDEE','Status','Practice tries','Practice right (%)']];
   DATA.soldiers.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(x=>{ const sc=latestScan(x), t=sc?calcTargets(sc):null, P=practiceSummary(x), n=v=>v===''||v==null?'':+v;
@@ -1212,7 +1330,7 @@ function readImport(file){
     // Rope bridge, ruck, and run times: add the ones this device doesn't have yet, pointed at the matching soldier here.
     const have=new Set(timeLogs().map(e=>e.id));
     plan.times = (Array.isArray(inc)||!Array.isArray(inc.timeLogs) ? [] : inc.timeLogs)
-      .filter(e=>e && e.id && TL_KINDS[e.kind] && e.sec>0 && !have.has(e.id))
+      .filter(e=>e && e.id && ((TL_KINDS[e.kind] && e.sec>0) || (e.kind==='weight' && e.lb>0)) && !have.has(e.id))
       .map(e=>Object.assign({}, e, e.sid && idMap[e.sid] ? {sid:idMap[e.sid]} : {}));
     if(!plan.conflicts.length){ applyImport(plan); }
     else { STATE.pendingImport = plan; STATE.tab='data'; render(); }
@@ -2146,6 +2264,8 @@ function genMedevac(fixed){
   const pc={},tc={L:0,A:0},sc={};
   pts.forEach(p=>{pc[p.inj.p]=(pc[p.inj.p]||0)+1; p.inj.L?tc.L++:tc.A++; sc[p.stat]=(sc[p.stat]||0)+1;});
   const eq=[]; if(ev.hoist)eq.push('B'); if(extract)eq.push('C'); if(pts.some(p=>p.inj.v))eq.push('D'); if(!eq.length)eq.push('A');
+  // Line 4: an extra D (ventilator) isn't docked when any casualty is urgent; only when it's clearly unneeded.
+  const urgent=pts.some(p=>p.inj.p==='A'), altEq = urgent && !eq.includes('D') ? [...eq.filter(k=>k!=='A'),'D'].sort() : null;
   const l5=[tc.L?tc.L+'L':'',tc.A?tc.A+'A':''].filter(Boolean).join(', ');
   const who=p=>p.stat==='A'?'Soldier':FOREIGN[p.stat].replace(/^a /,'').replace(/^./,c=>c.toUpperCase());
   const l9=ev.cbrn?'C':`Terrain: ${terrain}`;
@@ -2153,7 +2273,7 @@ function genMedevac(fixed){
     ['Location of pickup site',grid,'Your grid, read exactly as given.'],
     ['Radio frequency, call sign, suffix',`${f}, ${cs}`,'Your frequency, then your call sign.'],
     ['Number of patients by precedence',countStr(pc,['A','B','C','D']),'<ul>'+pts.map(p=>`<li>${esc(who(p))}: ${PREC[p.inj.p]} (${esc(p.inj.why)})</li>`).join('')+'</ul>'],
-    ['Special equipment',eq.join(', '),eq.map(k=>`${k} = ${EQUIP[k]}`).join('; ')+(ev.hoist?'. Helicopter can\u2019t land, so hoist.':extract?'. Pinned casualty needs extraction equipment.':'')],
+    ['Special equipment',eq.join(', '),eq.map(k=>`${k} = ${EQUIP[k]}`).join('; ')+(ev.hoist?'. Helicopter can\u2019t land, so hoist.':extract?'. Pinned casualty needs extraction equipment.':'')+(altEq?`. ${altEq.join(', ')} is also accepted: with an urgent casualty, asking for a ventilator (D) isn\u2019t wrong.`:'')],
     ['Number of patients by type',l5,'L = litter (can\u2019t walk), A = ambulatory (can walk).'],
     ['Security of pickup site',sec,`${sec} = ${SEC[sec]}.`],
     ['Method of marking',mk,`${mk} = ${MARK[mk]}.`+(night&&mk!=='B'?' Smoke and panels don\u2019t work at night.':'')],
@@ -2163,7 +2283,7 @@ function genMedevac(fixed){
   const script=[`${rx}, this is ${cs}, request MEDEVAC, over.`,...lines.map((l,i)=>`Line ${i+1}: ${l[1]}`),'Over.'];
   const ck=['grid','freqcs','count','letters','count','letters','letters','count',ev.cbrn?'letters':'free'];
   return {text,html:renderLines('Answer: 9-Line MEDEVAC',lines.map((l,i)=>[i+1,...l]),'Full call',script),
-    key:lines.map((l,i)=>({n:i+1,label:l[0],ans:l[1],why:l[2],check:ck[i],parts:i===1?[f,cs]:null})),script};
+    key:lines.map((l,i)=>({n:i+1,label:l[0],ans:l[1],why:l[2],check:ck[i],parts:i===1?[f,cs]:null,alts:i===3&&altEq?[altEq.join(', ')]:null})),script};
 }
 
 
@@ -2629,7 +2749,7 @@ function generate(){
   const typedRpt = RPT_MODES.includes(mode) && cur.key && typeof autoCheck==='function';
   root.__cur=cur;
   $('scnView').innerHTML = cur.range ? cur.view + (typedRpt?'':rangeCheckHtml()) : '';
-  $('rptBox').innerHTML=''; if(typedRpt){ cur.rpt={typed:{}, marks:{}, checked:false}; drawRpt(); }
+  $('rptBox').innerHTML=''; if(typedRpt){ cur.rpt={typed:{}, marks:{}, checked:false, t0:Date.now(), lim:rptLim(mode), used:null}; drawRpt(); }
   if(cur.range && !typedRpt){ const go=()=>{ const ok=rangeOk($('rgIn').value, cur.range.exact), res=$('rgRes');
       res.innerHTML = !$('rgIn').value.trim() ? '<span class="flag">Type your range in meters first.</span>' : ok ? `<b style="color:var(--good,#62C0A6)">Correct: about ${cur.range.dist} m.</b>` : `<b class="flag">Not quite.</b> Count the dots again, then use (height in inches \u00D7 25.4) \u00F7 mils.`; };
     $('rgChk').onclick=go; $('rgIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } }); }
@@ -2655,19 +2775,27 @@ function wireGrenadeQuiz(){
     if(!cur.checked){ cur.checked=true; precord('grenade', right===sels.length, `${right} of ${sels.length}`); } };
 }
 // 9-line, SPOT, SALUTE: type each line, the tool checks what it can, you mark the wording lines yourself.
+// Countdown from the report's time limit (Settings \u2192 Time limits). It starts with each new scenario; going over is a No-Go.
+const rptLim = m => typeof rptLimitFor==='function' ? rptLimitFor(m) : null;
+const mss = s => { s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
+const rptUsed = R => R.used!=null ? R.used : (Date.now()-R.t0)/1000;
+function rptClockText(R){ const left=R.lim-rptUsed(R); return left>=0 ? mss(left)+' left' : 'Time\u2019s up (+'+mss(-left)+')'; }
+clearInterval(window.__rptTick); window.__rptTick=setInterval(()=>{ const el=document.getElementById('rptClock'); if(!el || !cur || !cur.rpt || cur.rpt.checked) return; el.textContent=rptClockText(cur.rpt); el.classList.toggle('over', rptUsed(cur.rpt)>cur.rpt.lim); }, 250);
 const rptAuto=(l,v)=>{ const a=autoCheck(l,v); if(a!==null) return a; return String(v||'').trim() && typeof normRpt==='function' && normRpt(v)===normRpt(l.ans) ? true : null; };
 function drawRpt(){
   const R=cur.rpt, key=cur.key, box=$('rptBox');
   if(!R.checked){
-    box.innerHTML=`<h3 class="pg-h" style="margin-top:4px">Send your report</h3><p class="sub" style="margin:0 0 10px;font-size:.95rem">Type each line as you'd say it on the radio, then check it.</p>
+    box.innerHTML=`<h3 class="pg-h" style="margin-top:4px">Send your report</h3><p class="sub" style="margin:0 0 10px;font-size:.95rem">Type each line as you'd say it on the radio, then check it.${R.lim?` You have ${mss(R.lim)}.`:''}</p>
+      ${R.lim?`<div class="rpt-clock ${rptUsed(R)>R.lim?'over':''}" id="rptClock" role="timer">${rptClockText(R)}</div>`:''}
       <ol class="rpt-lines">${key.map((l,i)=>`<li><span class="rn">${esc(String(l.n))}</span><label><span>${esc(l.label)}</span><input class="rpt-in" data-ri="${i}" value="${esc(R.typed[i]||'')}" autocomplete="off" autocorrect="off" spellcheck="false"></label></li>`).join('')}</ol>
       <div class="actions" style="margin:12px 0 14px"><button class="btn primary" id="rptCheck">Check my report</button></div>`;
     const ins=[...box.querySelectorAll('.rpt-in')];
     ins.forEach((el,i)=>{ el.oninput=()=>{ R.typed[i]=el.value; }; el.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); if(ins[i+1]) ins[i+1].focus(); else $('rptCheck').click(); } }; });
-    $('rptCheck').onclick=()=>{ R.checked=true; R.marks={}; key.forEach((l,i)=>{ const a=rptAuto(l, R.typed[i]); if(a!==null) R.marks[i]=a?'ok':'bad'; else if(!String(R.typed[i]||'').trim()) R.marks[i]='bad'; }); drawRpt(); maybeRecordRpt(); };
+    $('rptCheck').onclick=()=>{ if(R.used==null) R.used=(Date.now()-R.t0)/1000; R.checked=true; R.marks={}; key.forEach((l,i)=>{ const a=rptAuto(l, R.typed[i]); if(a!==null) R.marks[i]=a?'ok':'bad'; else if(!String(R.typed[i]||'').trim()) R.marks[i]='bad'; }); drawRpt(); maybeRecordRpt(); };
     return;
   }
-  const left=key.filter((_,i)=>!R.marks[i]).length, bad=key.filter((_,i)=>R.marks[i]==='bad').length;
+  const left=key.filter((_,i)=>!R.marks[i]).length, bad=key.filter((_,i)=>R.marks[i]==='bad').length, over=!!(R.lim && R.used>R.lim);
+  const overTxt = over ? `Over the time limit (${mss(R.used)}, limit ${mss(R.lim)})` : '';
   box.innerHTML=`<h3 class="pg-h" style="margin-top:4px">Your report</h3>
     <ol class="rpt-lines graded">${key.map((l,i)=>{ const m=R.marks[i], auto=rptAuto(l,R.typed[i]);
       return `<li class="${m||'open'}"><span class="rn">${esc(String(l.n))}</span><div><div class="rl">${esc(l.label)}</div>
@@ -2675,7 +2803,8 @@ function drawRpt(){
         ${m==='ok'&&auto!==null?'':`<div class="ra"><b>Answer:</b> ${esc(l.ans)}</div>${l.why&&m==='bad'?`<div class="rw">${l.why}</div>`:''}`}
         ${auto===null&&String(R.typed[i]||'').trim()?`<div class="rself"><span>${m?'You marked this':'Does yours match?'}</span><button class="btn sm" data-rm="${i}" data-v="ok" aria-pressed="${m==='ok'}">Right</button><button class="btn sm" data-rm="${i}" data-v="bad" aria-pressed="${m==='bad'}">Wrong</button></div>`:''}</div>
         <span class="rmark">${m==='ok'?'\u2713':m==='bad'?'\u2717':''}</span></li>`; }).join('')}</ol>
-    <p class="rpt-sum">${left?`Mark the ${left} line${left===1?'':'s'} the tool can't check (the wording lines), then your result is saved.`:bad?`<b class="flag">${bad} line${bad===1?'':'s'} wrong: No-Go.</b> Saved to My progress.`:'<b style="color:var(--good)">Every line right: Go.</b> Saved to My progress.'}</p>
+    ${R.lim?`<p class="rpt-time ${over?'flag':''}">${over?overTxt+'.':`Time: ${mss(R.used)} of ${mss(R.lim)}.`}</p>`:''}
+    <p class="rpt-sum">${left?`Mark the ${left} line${left===1?'':'s'} the tool can't check (the wording lines), then your result is saved.`:bad||over?`<b class="flag">${[bad?`${bad} line${bad===1?'':'s'} wrong`:'', over?(bad?'over time':'Over time'):''].filter(Boolean).join(' and ')}: No-Go.</b> Saved to My progress.`:'<b style="color:var(--good)">Every line right: Go.</b> Saved to My progress.'}</p>
     ${cur.recorded?'':'<div class="actions" style="margin-bottom:14px"><button class="btn" id="rptEdit">Fix my answers</button></div>'}`;
   box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ if(cur.recorded) return; R.marks[+b.dataset.rm]=b.dataset.v; drawRpt(); maybeRecordRpt(); });
   const ed=$('rptEdit'); if(ed) ed.onclick=()=>{ R.checked=false; drawRpt(); };
@@ -2684,7 +2813,8 @@ function maybeRecordRpt(){
   const R=cur.rpt, key=cur.key; if(cur.recorded || key.some((_,i)=>!R.marks[i])) return;
   const miss=key.filter((_,i)=>R.marks[i]==='bad').map(l=>String(l.n)), right=key.length-miss.length;
   cur.recorded=true; cur.checked=true;
-  precord(mode, !miss.length, `${right} of ${key.length} lines`, {miss, of:key.length});
+  const over=!!(R.lim && R.used>R.lim);
+  precord(mode, !miss.length && !over, `${right} of ${key.length} lines`+(R.lim?`, ${mss(R.used)} of ${mss(R.lim)}${over?' (over time)':''}`:''), {miss, of:key.length});
   drawRpt();
 }
 const modeBtns=root.querySelectorAll('.modes button');
@@ -2742,7 +2872,7 @@ function renderScreen(){
   if(r==='grader' && !STATE.graderEvents){ renderPick(app); return; }
   const c=shell(app, r, `${ROLE_LABEL[r]||r}${STATE.session.preview?' (preview)':''} \u00B7 ${tryoutSoldiers().length} in tryout`);
   if(!c) return;
-  ({home:renderHome, people:renderPeople, grade:renderGrade, data:renderData, settings:renderSettings})[STATE.tab](c);
+  ({home:renderHome, people:renderPeople, grade:renderGrade, data:renderData, settings:renderSettings, bataan:renderBataan})[STATE.tab](c);
   tuckText(c);
 }
 
@@ -3551,7 +3681,7 @@ function tickClock(){
   el.classList.toggle('over', left<0);
   el.setAttribute('aria-label', left>=0?`${fmtTime(left)} left`:`Time is up, ${fmtTime(-left)} over`);
 }
-setInterval(()=>{ if(STATE.cffTimer.startedAt) tickClock(); if(STATE.tcTimer.startedAt) tickTcClock(); if(STATE.wt && Object.values(STATE.wt).some(w=>w.T.startedAt)) tickWtClock(); }, 250);
+setInterval(()=>{ if(STATE.cffTimer.startedAt) tickClock(); if(STATE.tcTimer.startedAt) tickTcClock(); if(STATE.wt && Object.values(STATE.wt).some(w=>w.T.startedAt)) tickWtClock(); if(STATE.rp && Object.values(STATE.rp).some(r=>r.T&&r.T.startedAt)) tickRpClock(); }, 250);
 function tickTcClock(){
   const el=$('tcClock'); if(!el) return; const T=STATE.tcTimer;
   const used=T.elapsed+(T.startedAt?Date.now()-T.startedAt:0), left=600-Math.floor(used/1000);
@@ -3586,7 +3716,7 @@ function testGrenade(el){
           <p class="sub">Soldiers name all ${S.grenadeTotal} from memory, so the list stays hidden while testing.</p>
           <details><summary style="cursor:pointer">Show the list (grader only)</summary>
             ${list.length?`<ol class="plain">${list.map(x=>`<li>${esc(x)}</li>`).join('')}</ol>`:`<p class="sub">${admin?'Add the grenade list below.':'The admin has not added the grenade list yet.'}</p>`}
-            ${admin?`<label class="field" style="margin-top:8px"><span>Edit the list (admin)</span><textarea class="input" id="gList" style="font-family:var(--sans);font-size:14px">${esc(S.grenadeList)}</textarea></label><button class="btn sm" id="gListSave" style="margin-top:8px">Save list</button>`:''}
+            ${canSettings()?`<label class="field" style="margin-top:8px"><span>Edit the list (admin)</span><textarea class="input" id="gList" style="font-family:var(--sans);font-size:14px">${esc(S.grenadeList)}</textarea></label><button class="btn sm" id="gListSave" style="margin-top:8px">Save list</button>`:''}
           </details>
         </div>
         <div><h3>References</h3>
@@ -3787,19 +3917,36 @@ function autoCheck(line, typed){
   switch(line.check){
     case 'grid': case 'dtg': return normRpt(typed)===normRpt(line.ans);
     case 'count': return countMap(typed)===countMap(line.ans) && countMap(line.ans)!=='[]';
-    case 'letters': return letterSet(typed)===letterSet(line.ans) && letterSet(line.ans)!=='';
+    case 'letters': return letterSet(line.ans)!=='' && [line.ans, ...(line.alts||[])].some(x=>letterSet(typed)===letterSet(x));
     case 'freqcs': return line.parts.every(p=>normRpt(typed).includes(normRpt(p)));
     case 'range': { const n=parseFloat(String(typed).replace(/[^0-9.]/g,'')); return isFinite(n) && Math.abs(n-line.exact)<=Math.max(2, line.exact*0.02); }
     default: return null;
   }
 }
-function newReport(k){ return {sc:REPORT_GEN[k](!STATE.randomCalls), marks:{}, typed:{}, submitted:false}; }
+function newReport(k){ return {sc:REPORT_GEN[k](!STATE.randomCalls), marks:{}, typed:{}, submitted:false, T:{startedAt:null, elapsed:0}}; }
+// Report time limits (m:ss in Settings \u2192 Time limits). Blank means no timer.
+function rptLimitFor(k){ const v=(DATA.settings.timeLimits||{})[k]; return v>0 ? v : null; }
+function rpStop(R){ if(R.T && R.T.startedAt){ R.T.elapsed+=Date.now()-R.T.startedAt; R.T.startedAt=null; } }
+function tickRpClock(){
+  const el=$('rpClock'); if(!el) return; const k=el.dataset.k, R=STATE.rp[k], lim=rptLimitFor(k); if(!R||!lim) return;
+  const used=wtElapsed(R.T), over=used>lim; el.textContent=wtClockText(used, lim); el.classList.toggle('over', over);
+  if(over && !R.timeUp){ R.timeUp=true;
+    const a=document.activeElement, i=a && a.dataset ? a.dataset.ty : null, pos=a && a.selectionStart;
+    render();
+    if(i!=null){ const el=document.querySelector(`[data-ty="${i}"]`); if(el){ el.focus(); try{ el.setSelectionRange(pos,pos); }catch(e){} } } }
+}
 function testReport(el, k){
   STATE.rp = STATE.rp || {}; STATE.rpMode = STATE.rpMode || {};
   const R = STATE.rp[k] || (STATE.rp[k]=newReport(k));
+  R.T = R.T || {startedAt:null, elapsed:0};
   const mode = STATE.rpMode[k] || 'typed', key=R.sc.key, name=eventName(k);
+  const lim=rptLimitFor(k), used=wtElapsed(R.T), over=!!(lim && used>lim), running=!!R.T.startedAt;
   const allMarked = key.every((_,i)=>R.marks[i]), anyBad = key.some((_,i)=>R.marks[i]==='bad');
-  const verdict = anyBad ? 'nogo' : allMarked ? 'go' : null;
+  const verdict = anyBad || over ? 'nogo' : allMarked ? 'go' : null;
+  const clock = lim ? `<div class="rp-clock"><div><div class="soft" style="font-size:13px">Time left (limit ${fmtTime(lim)})</div><div class="timer ${over?'over':''}" id="rpClock" data-k="${k}">${wtClockText(used, lim)}</div></div>
+      <div class="row"><button class="btn ${running?'':'primary'}" id="rpStart">${running?'Stop':used?'Resume':`Start ${fmtTime(lim)}`}</button><button class="btn" id="rpReset">Reset clock</button></div>
+      ${over?'<span class="flag">Over the time limit: No-Go</span>':''}</div>`
+    : `<p class="soft" style="font-size:13px;margin:0 0 10px">No time limit is set for this report. ${isAdmin()?'Set one in Settings \u2192 Time limits.':'The admin sets it in Settings.'}</p>`;
   const okN = key.filter((_,i)=>R.marks[i]==='ok').length;
   const markBtns = i => `<div class="seg" role="group" aria-label="Line ${esc(key[i].n)}"><button data-mk="${i}" data-v="ok" aria-pressed="${R.marks[i]==='ok'}">Correct</button><button data-mk="${i}" data-v="bad" aria-pressed="${R.marks[i]==='bad'}">Wrong</button></div>`;
   let body='';
@@ -3830,8 +3977,8 @@ function testReport(el, k){
       </div>
       <p class="scenario">${esc(R.sc.text)}</p>${R.sc.view||''}
     </div>
-    <div class="panel"><h2>${mode==='spoken'?'Answer key':R.submitted?'Grading':'Soldier\'s report'}</h2>${body}
-      <div class="row" style="margin-top:12px">${!key.some((_,i)=>R.marks[i]) ? '' : anyBad ? `<span class="flag">${key.filter((_,i)=>R.marks[i]==='bad').length} line(s) wrong: No-Go</span>` : allMarked ? '<span class="badge b-good">All lines correct</span>' : `<span class="soft">${okN} of ${key.length} lines marked correct.</span>`}</div>
+    <div class="panel"><h2>${mode==='spoken'?'Answer key':R.submitted?'Grading':'Soldier\'s report'}</h2>${clock}${body}
+      <div class="row" style="margin-top:12px">${!key.some((_,i)=>R.marks[i]) ? '' : over && !anyBad ? `<span class="flag">Over the time limit (${fmtTime(used)}): No-Go</span>` : anyBad ? `<span class="flag">${key.filter((_,i)=>R.marks[i]==='bad').length} line(s) wrong: No-Go</span>` : allMarked ? '<span class="badge b-good">All lines correct</span>' : `<span class="soft">${okN} of ${key.length} lines marked correct.</span>`}</div>
       ${recorder(k, goButtons(k))}
     </div>
   </div>`;
@@ -3840,7 +3987,9 @@ function testReport(el, k){
   el.querySelectorAll('[data-ty]').forEach(inp=>inp.oninput=()=>{ R.typed[+inp.dataset.ty]=inp.value; });
   const sh=$('rpShow'); if(sh) sh.onclick=()=>{ R.shown=true; render(); };
   const hd=$('rpHide'); if(hd) hd.onclick=()=>{ R.shown=false; render(); };
-  const sb=$('rpSubmit'); if(sb) sb.onclick=()=>{ R.submitted=true; R.marks={}; key.forEach((l,i)=>{ const a=autoCheck(l,R.typed[i]); if(a!==null) R.marks[i]=a?'ok':'bad'; }); render(); };
+  const st=$('rpStart'); if(st) st.onclick=()=>{ if(R.T.startedAt) rpStop(R); else R.T.startedAt=Date.now(); render(); };
+  const rs=$('rpReset'); if(rs) rs.onclick=()=>{ R.T={startedAt:null, elapsed:0}; R.timeUp=false; render(); };
+  const sb=$('rpSubmit'); if(sb) sb.onclick=()=>{ rpStop(R); R.submitted=true; R.marks={}; key.forEach((l,i)=>{ const a=autoCheck(l,R.typed[i]); if(a!==null) R.marks[i]=a?'ok':'bad'; }); render(); };
   const ed=$('rpEdit'); if(ed) ed.onclick=()=>{ R.submitted=false; R.marks={}; render(); };
   $('rpNew').onclick=()=>{ STATE.rp[k]=newReport(k); render(); };
   $('rpRand').onchange=e=>{ STATE.randomCalls=e.target.checked; STATE.rp[k]=newReport(k); render(); };
@@ -4048,7 +4197,7 @@ function renderSettings(c){
   const sec=(id,title,sub,body)=>`<details class="panel ref-card set-sec" id="set-${id}" data-sec="${id}" ${SO[id]?'open':''}><summary><div><h2>${title}</h2><p class="sub" style="margin:2px 0 0">${sub}</p></div></summary><div class="set-body">${body}</div></details>`;
   const saveRow=(id)=>`<div class="row" style="margin-top:14px"><button class="btn primary ${id?'':'saveAny'}" ${id?`id="${id}"`:''}>Save settings</button></div>`;
   const showAccess=isSys()||(isCaptain()&&syncActive()), showContent=isSys();
-  const SECS=[['events','Events'],['weights','Physical score'],['scoring','Scoring rules'],['times','Run & ruck averages'],['weapons','Weapon time limits'],...(showAccess?[['access',syncActive()?(isCaptain()?'Grader sign-ins':'Sign-in access'):'PINs']]:[]),...(showContent?[['content','App content']]:[])];
+  const SECS=[['events','Events'],['weights','Physical score'],['scoring','Scoring rules'],['times','Run & ruck averages'],['weapons','Time limits'],...(showAccess?[['access',syncActive()?(isCaptain()?'Grader sign-ins':'Sign-in access'):'PINs']]:[]),...(showContent?[['content','App content']]:[])];
   c.innerHTML = `<div class="stack">
     <div class="panel ref-top"><h2>Settings</h2><p class="sub" style="margin-bottom:10px">Tap a section to open it. Changes count for everyone as soon as you save.</p>
       <div class="ref-chips">${SECS.map(([id,l])=>`<button class="chip-btn" data-setgo="${id}">${l}</button>`).join('')}</div>
@@ -4107,10 +4256,13 @@ function renderSettings(c){
         <label class="field"><span>${L.label} average for 0 points (${L.fmt})</span><input class="input" id="av-${k}-zero" inputmode="numeric" data-time="long" value="${fmtLong(a.zero)}"></label>
       </div>`; }).join('')}
       ${saveRow()}`)}
-    ${sec('weapons','Weapon time limits','Time allowed to clear, disassemble, assemble, and functions check each weapon.', `
-      
+    ${sec('weapons','Time limits','Time allowed for each weapon and each report (9-line, SPOT, SALUTE).', `
+      <h3>Weapons</h3>
       <p class="sub">From "Go" through clearing, disassembly, assembly, and the functions check. The standard is 2:30 for each weapon. Leave a box blank for no limit.</p>
       <div class="grid">${WEAPON_KEYS.map(k=>`<label class="field"><span>${eventShort(k)} (m:ss)</span><input class="input" id="tl-${k}" inputmode="numeric" data-time="short" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
+      <h3>Reports</h3>
+      <p class="sub">A countdown shows on the test and in Practice. Going over the limit is a No-Go. Leave a box blank for no timer.</p>
+      <div class="grid">${REPORT_KEYS.map(k=>`<label class="field"><span>${esc(eventName(k))} (m:ss)</span><input class="input" id="tl-${k}" inputmode="numeric" data-time="short" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
       ${saveRow()}`)}
     ${!showAccess?'':sec('access', syncActive()?(isCaptain()?'Grader sign-ins':'Sign-in access'):'PINs', syncActive()?(isCaptain()?'Add graders, reset their PINs, and change the shared grader PIN.':'Who can sign in, what each person can do, and resetting someone\'s PIN.'):'The admin and grader PINs on this device.', `${syncActive()?syncAccessHtml():`<div>
       <p class="sub">Both PINs are saved in the .json, so they carry over to any device that imports your roster fresh. They keep casual users out of the admin view; they don't encrypt the data.</p>
@@ -4129,16 +4281,17 @@ function renderSettings(c){
   if(showContent) wireContentSettings(c);
   $('saveSet').onclick=()=>{
     const msgs=[], n=id=>+$(id).value;
-    const w={}; EVENTS.forEach(e=>{ const v=+$('w-'+e.k).value; if(!(v>=0)||$('w-'+e.k).value.trim()==='') msgs.push(`${e.name} weight must be 0 or more.`); w[e.k]=v; });
+    const w={}; EVENTS.forEach(e=>{ const v=+$('w-'+e.k).value; if(!(v>=0 && v<=100)||$('w-'+e.k).value.trim()==='') msgs.push(`${e.name} weight must be between 0 and 100.`); w[e.k]=v; });
     if(EVENTS.every(e=>!w[e.k])) msgs.push('At least one AFT weight must be above 0.');
     const circ=n('s-circ'); if(!(circ>=0)) msgs.push('Circle bonus must be 0 or more.');
     const go=n('s-go'), cut=n('s-cut'), minf=n('s-minf'), gGo=n('s-gGo'), gTot=n('s-gTot');
     const best=parseTime($('s-best').value), zero=parseTime($('s-zero').value);
-    if(!(go>=0)) msgs.push('Points per Go must be 0 or more.');
+    if(!(go>=0 && go<=1000)) msgs.push('Points per Go must be between 0 and 1000.');
     if(!(cut>=1)||!Number.isInteger(cut)) msgs.push('Cut line must be a whole number, 1 or more.');
     if(!(minf>=0)||!Number.isInteger(minf)) msgs.push('Minimum women must be a whole number.');
+    else if(cut>=1 && minf>cut) msgs.push('Minimum women above the cut can\'t be more than the cut line.');
     if(!(gTot>=1)||!Number.isInteger(gTot)||!(gGo>=0&&gGo<=gTot)) msgs.push('Grenade Go must be between 0 and the number shown.');
-    const pw={}; [...PHYS_EVENTS, ...TIME_EVENTS].forEach(e=>{ const el=$('pw-'+e.k); const v=+el.value; if(el.value.trim()===''||!(v>=0)) msgs.push(`${e.short} weight in the physical mix must be 0 or more.`); pw[e.k]=v; });
+    const pw={}; [...PHYS_EVENTS, ...TIME_EVENTS].forEach(e=>{ const el=$('pw-'+e.k); const v=+el.value; if(el.value.trim()===''||!(v>=0 && v<=100)) msgs.push(`${e.short} weight in the physical mix must be between 0 and 100.`); pw[e.k]=v; });
     if(!(best>0)||!(zero>0)||best>=zero) msgs.push('CFT times must be m:ss, with the 100-point time faster than the 0-point time.');
     const avgT={}; ['run','ruck'].forEach(k=>{ const L=TL_KINDS[k].label, d=+$('av-'+k+'-dist').value, b=parseLong($('av-'+k+'-best').value), z=parseLong($('av-'+k+'-zero').value);
       if(!(d>0&&d<100)) msgs.push(`${L} distance must be a number of miles.`);
@@ -4146,7 +4299,7 @@ function renderSettings(c){
       avgT[k]={dist:Math.round(d*100)/100, best:b, zero:z}; });
     const en={}; c.querySelectorAll('[data-en]').forEach(b=>en[b.dataset.en]=b.checked);
     if(!Object.values(en).some(Boolean)) msgs.push('Turn on at least one event.');
-    const tl={}; WEAPON_KEYS.forEach(k=>{ const raw=$('tl-'+k).value.trim(); if(!raw){ tl[k]=null; return; } const v=parseTime(raw); if(!(v>0)) msgs.push(`${eventShort(k)} time limit must be m:ss, or blank for none.`); tl[k]=v; });
+    const tl={}; [...WEAPON_KEYS, ...REPORT_KEYS].forEach(k=>{ const raw=$('tl-'+k).value.trim(); if(!raw){ tl[k]=null; return; } const v=parseTime(raw); if(!(v>0)) msgs.push(`${eventName(k).split(' clear,')[0]} time limit must be m:ss, or blank for none.`); tl[k]=v; });
     if(msgs.length){ $('setMsg').innerHTML=`<div class="note warn"><ul class="plain">${msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`; $('setMsg').scrollIntoView({block:'center'}); return; }
     Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, physMode:(c.querySelector('input[name=physMode]:checked')||{}).value==='points'?'points':'mix', cftBest:best, cftZero:zero, avgTimes:avgT, countSelfTimes:$('av-self').checked, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
     rebuildRegistry(); STATE.grid=null; save(); toast('Settings saved. Rankings updated.'); render();
@@ -4159,7 +4312,7 @@ function renderSettings(c){
     $('ctMsg').innerHTML=`<div class="note warn" style="margin-top:8px">Delete ${esc(t.name)}? Its point tables are removed and it stops counting. Results already entered stay in the .json. <div class="row" style="margin-top:8px"><button class="btn danger sm" id="ctDelYes">Delete test</button><button class="btn sm" id="ctDelNo">Keep</button></div></div>`;
     $('ctDelYes').onclick=()=>{ S.customTests=S.customTests.filter(x=>x.id!==t.id); delete S.enabled[ctKey(t)]; delete S.physWeights[ctKey(t)]; rebuildRegistry(); STATE.grid=null; save(); toast(`Deleted ${t.name}.`); render(); };
     $('ctDelNo').onclick=()=>{ $('ctMsg').innerHTML=''; }; });
-  $('resetSet').onclick=()=>{ const keep={adminPinHash:S.adminPinHash, testerPinHash:S.testerPinHash, grenadeList:S.grenadeList, enabled:S.enabled, timeLimits:S.timeLimits, customTests:S.customTests}; Object.keys(S).forEach(k=>{ if(k.startsWith('c:')) keep[k]=S[k]; }); DATA.settings=Object.assign(clone(DEFAULT_SETTINGS),keep); rebuildRegistry(); save(); toast('Settings restored to defaults.'); render(); };
+  $('resetSet').onclick=()=>{ const keep={adminPinHash:S.adminPinHash, testerPinHash:S.testerPinHash, grenadeList:S.grenadeList, enabled:S.enabled, timeLimits:S.timeLimits, customTests:S.customTests, bataan:S.bataan}; Object.keys(S).forEach(k=>{ if(k.startsWith('c:')) keep[k]=S[k]; }); DATA.settings=Object.assign(clone(DEFAULT_SETTINGS),keep); rebuildRegistry(); save(); toast('Settings restored to defaults.'); render(); };
   if(syncActive() && showAccess) syncWireAccess();
   if($('savePins')) $('savePins').onclick=()=>{
     const a=$('pinA').value, t=$('pinT').value;
@@ -4348,6 +4501,7 @@ function personManageHtml(s){
       <div class="stack" style="gap:8px">
         ${canMoveRC()?`<label class="row" style="gap:8px"><input type="checkbox" id="hRC" ${rc?'checked':''}> Ranger Challenge <span class="soft" style="font-size:13px">(off = regular battalion soldier)</span></label>`:`<span class="soft">${rc?'Ranger Challenge':'Battalion'}</span>`}
         ${rc?`<label class="row" style="gap:8px"><input type="checkbox" id="hTry" ${s.tryout!==false?'checked':''}> In the tryout</label>`:''}
+        ${isSys()?`<label class="row" style="gap:8px"><input type="checkbox" id="hBT" ${isBataan(s)?'checked':''}> Bataan team <span class="soft" style="font-size:13px">(sees the Bataan screen and calendar)</span></label>`:isBataan(s)?'<span class="soft">Bataan team</span>':''}
       </div>
       ${isSys()?`<div class="row"><button class="btn sm" id="hPrint">Print</button><button class="btn sm" id="hPin" ${s.pinHash?'':'disabled'}>${s.pinHash?'Reset their PIN':'No PIN set yet'}</button><button class="btn danger sm" id="hDel">Delete person</button></div>`:'<button class="btn sm" id="hPrint">Print</button>'}</div>
       ${isSys()?`<div class="row" style="margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
@@ -4463,6 +4617,8 @@ function wireHealthTools(s){
   const mg=$('hMergeGo'); if(mg) mg.onclick=()=>{ const d=soldierById(T.dup); if(!d) return;
     mergeScansInto(s, d.scans); mergePracticeInto(s, d.practice);
     FIELDS.forEach(f=>{ if((s[f.k]==null||s[f.k]==='') && d[f.k]!=null && d[f.k]!=='') s[f.k]=d[f.k]; });
+    timeLogs().forEach(e=>{ if(e.sid===d.id) e.sid=s.id; });   // runs, rucks, weigh-ins, and Bataan logs come along
+    if(isBataan(d)) s.bataan=true;
     if(!s.pinHash && d.pinHash) s.pinHash=d.pinHash; if(d.tryout!==false) s.tryout=true; if(!s.age && d.age) s.age=d.age; if(!s.sex && d.sex) s.sex=d.sex;
     DATA.soldiers=DATA.soldiers.filter(x=>x.id!==d.id); s.updated=new Date().toISOString(); STATE.grid=null; save(); STATE.hTool=null; toast(`Merged ${d.name} into ${s.name}.`); render(); };
   const cg=$('hClearGo'); if(cg) cg.onclick=()=>{ s.scans=[]; save(); STATE.hTool=null; STATE.hEdit=null; toast(`Removed ${s.name}'s scans.`); render(); };
@@ -4502,6 +4658,7 @@ function wireHealthProfile(s, admin){
   const es=$('hEditSave'); if(es) es.onclick=()=>{ const sc=readScanForm('he-', $('hEditMsg'), st); if(!sc) return; s.scans[STATE.hEdit.i]=sc; s.scans.sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0); save(); STATE.hEdit=null; toast('Scan updated.'); render(); };
   if(!admin) return;
   if($('hImpFile')) wireHealthTools(s);
+  const btBox=$('hBT'); if(btBox) btBox.onchange=e=>{ s.bataan=e.target.checked; save(); toast(s.bataan?`${s.name} is on the Bataan team.`:`${s.name} is off the Bataan team. Their runs and rucks stay saved.`); render(); };
   const rcBox=$('hRC'); if(rcBox) rcBox.onchange=e=>{ s.rc=e.target.checked; if(s.rc) s.tryout=true; STATE.grid=null; save(); toast(s.rc?`${s.name} is on Ranger Challenge and in the tryout.`:`${s.name} is a battalion soldier now. Their history went with them.`); render(); };
   if($('hTry')) $('hTry').onchange=e=>{ s.tryout=e.target.checked; s.reviewed=true; STATE.grid=null; save(); toast(s.tryout?`${s.name} is in the tryout.`:`${s.name} is out of the tryout. Their results are kept.`); render(); };
   if($('hPrint')) $('hPrint').onclick=()=>window.print();
@@ -4618,6 +4775,7 @@ function renderSoldierApp(app){
   else if(STATE.tab==='mylog') renderMyLog(c,s);
   else if(STATE.tab==='myresults') renderMyResults(c,s);
   else if(STATE.tab==='mytimes') renderMyTimes(c,s);
+  else if(STATE.tab==='bataan') renderBataan(c);
   else { c.innerHTML='<div id="drillRoot"></div>'; const pm=STATE.practiceMode; STATE.practiceMode=null; Drill.mount($('drillRoot'), {mode:pm, store:{load:()=>({log:s.practice}), save:d=>{ s.practice=d.log; save(); }}, who:s.name}); }
 }
 function renderMyLog(c,s){
@@ -4711,6 +4869,7 @@ async function tlSave(kind, who){
   if(kind!=='rope'){ const d=+v('tl_dist'); if(!(d>0&&d<100)) return bad('tl_dist','Enter the distance in miles, like 12 or 2.'); e.dist=Math.round(d*100)/100; }
   const sec=parseLong(v('tl_time'));
   if(sec==null||isNaN(sec)||sec<=0) return bad('tl_time',`Enter the time as ${TL_KINDS[kind].fmt}, like ${TL_KINDS[kind].ex}. Digits only works too.`);
+  { const pr=tlProblem(kind, e.dist||0, sec, e.date); if(pr) return bad(pr.includes('date')?'tl_date':'tl_time', pr); }
   e.sec=sec; e.at=Date.now();
   if(STATE.session && STATE.session.role==='soldier') e.self=true;
   const pf=$('tl_photo'), file=pf && pf.files && pf.files[0];
@@ -4724,6 +4883,15 @@ async function tlSave(kind, who){
   const t=$('tl_time'); if(t) t.focus();
 }
 
+// Catches typos before they skew averages and "best" times: no future dates, no superhuman paces.
+const TL_FASTEST={run:210, ruck:300};   // seconds per mile: 3:30 running, 5:00 rucking
+function tlProblem(kind, dist, sec, date){
+  if(date && date>todayISO()) return 'That date is in the future.';
+  if(kind!=='rope' && dist>60) return 'Distance looks too long. Check the miles.';
+  if(TL_FASTEST[kind] && dist>0 && sec/dist<TL_FASTEST[kind]) return `That's faster than ${fmtTime(TL_FASTEST[kind])} per mile. Check the time and distance.`;
+  if(kind==='rope' && sec>3600) return 'Rope bridge times are under an hour. Check the time.';
+  return '';
+}
 // Pace per mile, shown live as the distance and time are typed.
 function paceText(sec, dist){ return sec>0 && dist>0 ? fmtTime(sec/dist)+' /mi' : ''; }
 document.addEventListener('input', e=>setTimeout(()=>{   // after the colon is filled in
@@ -4745,7 +4913,7 @@ function tlAllTable(kind, who, list, ro){
   return `<details class="tbl" ${STATE.tl.showAll===k?'open':''} data-tlall="${k}"><summary>All ${team?'team ':''}${TL_KINDS[kind].label.toLowerCase()} times (${rows.length})</summary>
     <div class="scroll"><table><thead><tr><th>Date</th>${team?'<th>Team</th>':''}${dist?'<th class="num">Miles</th>':''}<th class="num">Time</th>${dist?'<th class="num">Pace</th>':''}<th>Note</th><th></th></tr></thead>
     <tbody>${rows.map(e=>`<tr><td>${esc(tlDate(e.date))}</td>${team?`<td>${esc(e.team)}</td>`:''}${dist?`<td class="num">${tlDist(e.dist)}</td>`:''}<td class="num">${fmtLong(e.sec)}</td>${dist?`<td class="num">${tlPace(e)}</td>`:''}<td>${e.self?'<span class="badge b-brass" title="Logged by the soldier">self-logged</span> ':''}${esc(e.note||'')}${e.photo?` <button class="btn sm" data-tlphoto="${esc(e.photo)}">Photo</button>`:syncPhotoPending(e.id)?' <span class="soft" style="font-size:12.5px">photo sending\u2026</span>':''}</td>
-      ${ro&&!e.self?'<td></td>':`<td style="white-space:nowrap">${conf===e.id?`<button class="btn danger sm" data-tldelyes="${e.id}">Delete</button> <button class="btn sm" data-tldelno="1">Keep</button>`:`<button class="btn sm" data-tldel="${e.id}" aria-label="Delete this time">Delete</button>`}</td>`}</tr>`).join('')}</tbody></table></div></details>`;
+      ${ro&&!e.self?'<td></td>':`<td style="white-space:nowrap">${conf===e.id?`<button class="btn danger sm" data-tldelyes="${esc(e.id)}">Delete</button> <button class="btn sm" data-tldelno="1">Keep</button>`:`<button class="btn sm" data-tldel="${esc(e.id)}" aria-label="Delete this time">Delete</button>`}</td>`}</tr>`).join('')}</tbody></table></div></details>`;
 }
 function tlLogButton(kind, who){
   const k=tlKey(kind,who);
@@ -4814,7 +4982,7 @@ function indivTimesHtml(s, ro){
         <div><b>${fmtLong(best.sec)}</b><span>best ${p.d} mi (${esc(tlDate(best.date))})</span></div>
         <div><b>${fmtLong(latest.sec)}</b><span>latest ${p.d} mi (${esc(tlDate(latest.date))})</span></div>
         <div><b>${tlPace(best).replace('/mi','')}</b><span>best pace per mile</span></div>
-      </div>`:`<p class="sub" style="margin:6px 0 0">No ${K.label.toLowerCase()} times for ${esc(s.name)} yet.</p>`}
+      </div>`:`<p class="sub" style="margin:6px 0 0">No ${K.label.toLowerCase()} times ${STATE.session&&STATE.session.role==='soldier'?'yet':'for '+esc(s.name)+' yet'}.</p>`}
     ${p.d?tlTrendSvg(list, `${K.label}, ${p.d} mi`):''}
     ${tlAllTable(kind,s.id,all,ro)}
   </div>`;
@@ -4832,7 +5000,7 @@ const TIME_EVENTS=[{k:'avgrun', kind:'run', short:'Run avg', name:'Average run t
 const AVG_DEFAULTS={run:{dist:2, best:720, zero:1080}, ruck:{dist:12, best:9000, zero:12600}};
 function avgCfg(kind){ return Object.assign({}, AVG_DEFAULTS[kind], ((DATA.settings.avgTimes||{})[kind])||{}); }
 function avgTime(s, kind){
-  const c=avgCfg(kind), d=tlDist(c.dist), L=tlOf(kind,s.id).filter(e=>tlDist(e.dist)===d && (!e.self || DATA.settings.countSelfTimes));
+  const c=avgCfg(kind), d=tlDist(c.dist), L=tlOf(kind,s.id).filter(e=>tlDist(e.dist)===d && !e.bt && !e.asg && (!e.self || DATA.settings.countSelfTimes));   // Bataan training stays out of tryout scoring
   if(!L.length) return {n:0, avg:null, pts:null, dist:d};
   const avg=L.reduce((a,e)=>a+e.sec,0)/L.length;
   const pts= avg<=c.best ? 100 : avg>=c.zero ? 0 : (c.zero-avg)/(c.zero-c.best)*100;
@@ -4887,13 +5055,14 @@ function renderWeekend(c){
     keep(); W.bad={};
     const dist=+W.dist;
     if(!(dist>0&&dist<100)){ $('wk_dist').classList.add('bad'); $('wkMsg').innerHTML='<span style="color:var(--alert)">Enter the distance in miles, like 2 or 12.</span>'; return; }
-    const rows=[]; people.forEach(s=>{ const raw=W.vals[s.id]; if(!raw) return; const sec=parseLong(raw); if(sec==null||isNaN(sec)||sec<=0) W.bad[s.id]=true; else rows.push({s,sec}); });
-    if(Object.keys(W.bad).length){ render(); $('wkMsg').innerHTML=`<span style="color:var(--alert)">Fix the ${Object.keys(W.bad).length} time${Object.keys(W.bad).length===1?'':'s'} outlined in red (${TL_KINDS[W.kind].fmt}, like ${TL_KINDS[W.kind].ex}). Nothing was saved yet.</span>`; const f=c.querySelector('.wk-in.bad'); if(f) f.focus(); return; }
+    if(W.date>todayISO()){ $('wkMsg').innerHTML='<span style="color:var(--alert)">That date is in the future.</span>'; return; }
+    const rows=[]; people.forEach(s=>{ const raw=W.vals[s.id]; if(!raw) return; const sec=parseLong(raw); if(sec==null||isNaN(sec)||sec<=0||tlProblem(W.kind, dist, sec, null)) W.bad[s.id]=true; else rows.push({s,sec}); });
+    if(Object.keys(W.bad).length){ render(); $('wkMsg').innerHTML=`<span style="color:var(--alert)">Fix the ${Object.keys(W.bad).length} time${Object.keys(W.bad).length===1?'':'s'} outlined in red: use ${TL_KINDS[W.kind].fmt}, like ${TL_KINDS[W.kind].ex}, and check for typos (no faster than ${TL_FASTEST[W.kind]?fmtTime(TL_FASTEST[W.kind])+' per mile':'an hour'}). Nothing was saved yet.</span>`; const f=c.querySelector('.wk-in.bad'); if(f) f.focus(); return; }
     if(!rows.length){ $('wkMsg').innerHTML='<span style="color:var(--alert)">Type at least one time first.</span>'; return; }
     const D=Math.round(dist*100)/100, dd=tlDist(D);
     let replaced=0;
     rows.forEach(({s,sec})=>{
-      const old=timeLogs().filter(e=>e.kind===W.kind && e.sid===s.id && e.date===W.date && tlDist(e.dist)===dd); replaced+=old.length ? 1 : 0;
+      const old=timeLogs().filter(e=>e.kind===W.kind && e.sid===s.id && e.date===W.date && tlDist(e.dist)===dd && !e.self && !e.asg && !e.bt); replaced+=old.length ? 1 : 0;
       DATA.timeLogs=timeLogs().filter(e=>!old.includes(e));
       const e={id:uid(), kind:W.kind, date:W.date, sid:s.id, dist:D, sec}; if(W.note) e.note=W.note; timeLogs().push(e);
     });
@@ -4911,7 +5080,7 @@ function renderMyTimes(c, s){
 
 /* ---------- Dashboard: who's been practicing ---------- */
 function agoText(t){ const m=Math.round((Date.now()-t)/60000); if(m<1) return 'just now'; if(m<60) return m+' min ago'; const h=Math.round(m/60); if(h<24) return h+' hr ago'; const d=Math.round(h/24); return d===1?'yesterday':d<7?d+' days ago':new Date(t).toLocaleDateString([], {month:'short', day:'numeric'}); }
-function recentPracticeHtml(){
+function recentPracticeHtml(n){
   const all=[]; rosterAll().forEach(s=>(s.practice||[]).forEach(e=>all.push({s,e})));
   const vis=new Set(rosterAll().map(x=>x.id)); timeLogs().forEach(e=>{ const s=e.self && e.kind!=='weight' && vis.has(e.sid) && soldierById(e.sid); if(s){ const [y,m,d]=String(e.date).split('-'); all.push({s, e:{t:e.at||new Date(+y,+m-1,+d,12).getTime(), time:e}}); } });
   all.sort((a,b)=>b.e.t-a.e.t);
@@ -4922,7 +5091,7 @@ function recentPracticeHtml(){
       <div><h2 style="margin:0 0 2px">Recent activity</h2><p class="sub no-tuck" style="margin:0">${wk.length?`Last 7 days: ${people} ${people===1?'person':'people'} practiced, ${Math.round(right/wk.length*100)}% right.`:'Practice and self-logged runs and rucks.'}</p></div>
       <button class="btn sm" id="dashPrac">Everyone's practice</button>
     </div>
-    ${all.length?`<ol class="top5 prac-feed">${all.slice(0,8).map(({s,e})=>e.time
+    ${all.length?`<ol class="top5 prac-feed">${all.slice(0,n||8).map(({s,e})=>e.time
       ? `<li><span class="pg-badge log">${e.time.kind==='ruck'?'Ruck':'Run'}</span><span class="t5who"><button class="linkish" data-open="${s.id}">${esc(s.name)}</button><small>${tlDist(e.time.dist)} mi in ${fmtLong(e.time.sec)} \u00B7 ${tlPace(e.time)} \u00B7 self-logged${e.time.photo?' \u00B7 <button class="linkish" style="font-weight:500" data-tlphoto="'+esc(e.time.photo)+'">photo</button>':''}</small></span><span class="soft" style="font-size:13px;white-space:nowrap">${agoText(e.t)}</span></li>`
       : `<li><span class="pg-badge ${e.ok?'ok':'bad'}">${e.ok?'Right':'Missed'}</span><span class="t5who"><button class="linkish" data-open="${s.id}">${esc(s.name)}</button><small>${esc(label(e.task))}${e.detail?' \u00B7 '+esc(e.detail):''}</small></span><span class="soft" style="font-size:13px;white-space:nowrap">${agoText(e.t)}</span></li>`).join('')}</ol>`
       :'<p class="sub" style="margin:6px 0 0">Nothing yet.</p>'}
@@ -4945,6 +5114,7 @@ const ICON_PATHS = {
   data:'<path d="M8 4v12M4 12l4 4 4-4M16 20V8M12 12l4-4 4 4"/>',
   settings:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
   cal:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  bataan:'<path d="M5 21V4"/><path d="M5 4h12l-2.5 4L17 12H5"/>',
   more:'<circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/>',
   share:'<path d="M12 4v11M8 8l4-4 4 4M5 13v6h14v-6"/>',
   signout:'<path d="M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10"/>',
@@ -4965,18 +5135,18 @@ function navFor(role){
   if(syncActive()) news.unshift({id:'mypin', label:'Change my PIN', icon:'settings'});
   news.push(themeA);
   if(role==='admin' || role==='leader' || role==='captain') return {
-    tabs:[['home','Home'],['people','People'],['grade','Grade'],['cal','Calendar'],['ref','Reference'],['data','Export / import'],...(role==='leader'?[]:[['settings','Settings']])],
-    primary:['home','people','grade','cal'], bar:['home','people','grade','cal'], actions:[shareA, ...news, outA]};
-  if(role==='soldier') return {
-    tabs:[['mydash','Home'],['myhealth','My health'],['mylog','Log my scan'],...(meSoldier() && isRCs(meSoldier()) && meSoldier().tryout!==false?[['myresults','My tryout results']]:[]),['cal','Calendar'],['mytimes','My times'],['mypractice','Practice'],['ref','Reference']],
-    bar:['mydash','cal','mytimes','mypractice'], actions:[{id:'myexport', label:'Export my data', icon:'export'}, shareA, ...news, outA]};
+    tabs:[['home','Home'],['people','People'],['grade','Grade'],['cal','Calendar'],...(role==='captain'?[]:[['bataan','Bataan']]),['ref','Reference'],['data','Export / import'],...(role==='leader'?[]:[['settings','Settings']])],
+    primary:['home','people','grade','cal','bataan'], bar:['home','people','grade','cal',...(role==='captain'?[]:['bataan'])], actions:[shareA, ...news, outA]};
+  if(role==='soldier'){ const bt=isBataan(meSoldier()); return {
+    tabs:[['mydash','Home'],['myhealth','My health'],['mylog','Log my scan'],...(meSoldier() && isRCs(meSoldier()) && meSoldier().tryout!==false?[['myresults','My tryout results']]:[]),['cal','Calendar'],...(bt?[['bataan','Bataan']]:[]),['mytimes','My times'],['mypractice','Practice'],['ref','Reference']],
+    bar:['mydash','cal',...(bt?['bataan']:[]),'mytimes','mypractice'], actions:[{id:'myexport', label:'Export my data', icon:'export'}, shareA, ...news, outA]}; }
   if(role==='practice') return {
     tabs:[['practice','Practice'],['ref','Reference']], bar:['practice','ref'], barActions:[shareA, {id:'signout', label:'Exit', icon:'signout'}], actions:[...news]};
   return { // grader
     tabs:[['grade','Grade'],['cal','Calendar'],['ref','Reference'],['data','Export / import']],
     primary:['grade','cal','ref'], bar:['grade','cal','ref'], actions:[{id:'events', label:'Change events', icon:'events'}, shareA, ...news, outA]};
 }
-const TAB_ICON = {home:'dash',people:'one',grade:'tests',mydash:'dash',cal:'cal',dash:'dash',rank:'rank',team:'team',one:'one',health:'health',tests:'tests',ref:'ref',data:'data',settings:'settings',myhealth:'health',mylog:'mylog',myresults:'myresults',mytimes:'mytimes',mypractice:'practice',practice:'practice'};
+const TAB_ICON = {bataan:'bataan',home:'dash',people:'one',grade:'tests',mydash:'dash',cal:'cal',dash:'dash',rank:'rank',team:'team',one:'one',health:'health',tests:'tests',ref:'ref',data:'data',settings:'settings',myhealth:'health',mylog:'mylog',myresults:'myresults',mytimes:'mytimes',mypractice:'practice',practice:'practice'};
 
 // Draws the frame and returns the content element, or null when the frame handled the screen itself (Reference, Share).
 function shell(app, role, who){
@@ -4999,7 +5169,7 @@ function shell(app, role, who){
     <nav class="tabs" aria-label="Sections">${N.tabs.filter(([k])=>prim.includes(k)).map(([k,l])=>`<button class="tab" data-tab="${k}" ${STATE.tab===k?'aria-current="page"':''}>${esc(l)}${k==='cal'&&calUnseen()?'<i class="nav-dot" aria-label="updated"></i>':''}</button>`).join('')}${deskMore?`<button class="tab" id="tabMore" aria-haspopup="true" ${inMore?'aria-current="page"':''}>More \u25BE</button>`:''}</nav>
     <div class="who"><span>${esc(who)}${syncActive()?'<span id="syncStat" class="sync-stat"></span>':''}</span><span class="who-btns">${deskBtns}</span></div>
   </header>
-  <main class="main"><div id="calRemind">${calReminderHtml()}</div><div id="content"></div></main>
+  <main class="main">${role==='soldier' && isBataan(meSoldier()) && STATE.tab!=='bataan' ? `<div id="btHead">${btMeterHtml(true)}</div>` : ''}<div id="calRemind">${calReminderHtml()}</div><div id="content"></div></main>
   <nav class="bbar" aria-label="Sections">
     ${N.bar.map(k=>barBtn(k,label(k),TAB_ICON[k],STATE.tab===k,`data-nav="${k}"`).replace('</svg>', k==='cal'&&calUnseen()?'</svg><i class="nav-dot"></i>':'</svg>')).join('')}
     ${(N.barActions||[]).map(a=>barBtn(a.id,a.label,a.icon,STATE.tab===a.id,`data-navact="${a.id}"`)).join('')}
@@ -5022,7 +5192,7 @@ function shell(app, role, who){
   sheet.onclick=e=>{ if(e.target===sheet) sheet.hidden=true; };
   sheet.onkeydown=e=>{ if(e.key==='Escape') sheet.hidden=true; };
   if(syncActive()) syncStatus();
-  wireCalReminder($('calRemind'));
+  wireCalReminder($('calRemind')); wireBtMeter($('btHead'));
   const c=$('content');
   if(STATE.tab==='cal'){ renderCalendar(c); return null; }
   if(STATE.tab==='ref'){ renderReference(c); return null; }
@@ -5316,7 +5486,7 @@ function syncDiff(A, B, role){
   });
   if(role==='admin' || role==='captain'){   // the Team Captain changes tryout settings, never app content (c: keys)
     const patch={}; let n=0;
-    new Set([...Object.keys(A.settings||{}), ...Object.keys(B.settings||{})]).forEach(k=>{ if(role==='captain' && k.indexOf('c:')===0) return; if(!same((A.settings||{})[k], (B.settings||{})[k])){ patch[k]=(B.settings||{})[k]; n++; } });
+    new Set([...Object.keys(A.settings||{}), ...Object.keys(B.settings||{})]).forEach(k=>{ if(role==='captain' && k.indexOf('c:')===0) return; if(!same((A.settings||{})[k], (B.settings||{})[k])){ const v=(B.settings||{})[k]; patch[k]=v===undefined?null:v; n++; } });
     if(n) ops.push({op:'settings', patch});
   }
   return ops;
@@ -5409,13 +5579,16 @@ async function syncPull(full){
   finally{ SYNC.pulling=false; syncStatus(); }
 }
 // Redraw with fresh data, but never while someone is typing or in the middle of entering something.
-const SAFE_TABS=['mydash','dash','rank','health','data','myhealth','mytimes','myresults','cal'];
+const SAFE_TABS=['mydash','home','people','data','myhealth','mytimes','myresults','cal','bataan'];
 function syncRerender(){
   const a=document.activeElement, typing = a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && a.closest('#app');
-  const busy = document.querySelector('.tl-form, #moreSheet:not([hidden]), #newsSheet, #calSheet, #pinSheet, #photoSheet') || STATE.weekend || STATE.pendingImport;
+  const busy = document.querySelector('.tl-form, #btForm, .bt-form, #moreSheet:not([hidden]), #newsSheet, #calSheet, #pinSheet, #photoSheet') || STATE.weekend || STATE.pendingImport;
   if(typing || busy || !SAFE_TABS.includes(STATE.tab)){ SYNC.pendingRender=true; return; }
   SYNC.pendingRender=false; const y=window.scrollY; render(); window.scrollTo(0,y);
 }
+// Fresh data that arrived while someone was typing shows once they're done.
+document.addEventListener('focusout', ()=>setTimeout(()=>{ if(SYNC.pendingRender) syncRerender(); }, 400));
+document.addEventListener('visibilitychange', ()=>{ if(!document.hidden && SYNC.pendingRender) syncRerender(); });
 function syncStatus(){
   const el=$('syncStat'); if(!el) return;
   const n=SYNC.queue.length;
@@ -5651,7 +5824,7 @@ function syncAccessHtml(){
   const rcSid=sid=>isRCs(soldierById(sid));
   const soldRow=u=>{ const has=extras(u.id).map(x=>x.role), can=roles.filter(r=>!has.includes(r) && (r==='leader'||r==='admin'||rcSid(u.sid)));
     return `<div class="ua-row" data-uaname="${esc(String(u.name).toLowerCase())}"><div><b>${esc(u.name)}</b> <span class="soft" style="font-size:12.5px">${rcSid(u.sid)?'RC':'Battalion'}</span>${has.map(r=>' '+badge(r)).join('')}${u.locked?' <span class="badge b-bad">paused: wrong PINs</span>':''}${!u.hasPin?' <span class="soft" style="font-size:12.5px">no PIN yet</span>':''}</div>
-    <div class="row" style="gap:6px">${cap?'':pinBtns(u)}${st.pin===u.id||!can.length?'':`<select class="input" style="width:auto;height:32px;padding:4px 8px;font-size:13px" data-uapromote="${u.id}" aria-label="Give access"><option value="">Give access\u2026</option>${can.map(r=>`<option value="${r}">${ROLE_LABEL[r]}</option>`).join('')}</select>`}</div></div>`; };
+    <div class="row" style="gap:6px">${cap?'':pinBtns(u)}${st.pin===u.id||!can.length?'':!u.hasPin?`<span class="soft" style="font-size:12.5px">${cap?'Needs to sign in once and choose a PIN':'Set a PIN'} before giving access</span>`:`<select class="input" style="width:auto;height:32px;padding:4px 8px;font-size:13px" data-uapromote="${u.id}" aria-label="Give access"><option value="">Give access\u2026</option>${can.map(r=>`<option value="${r}">${ROLE_LABEL[r]}</option>`).join('')}</select>`}</div></div>`; };
   const rp=SYNC.rolePins||{};
   const pr=st.promote, pu=pr&&sold.find(x=>x.id===pr.id);
   return `<div id="uaPanel">
@@ -5763,14 +5936,24 @@ const CAL_W = [['who','Who'],['what','What'],['when','When'],['where','Where'],[
 const DAYS_SHORT=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'], DAYS_LETTER=['S','M','T','W','T','F','S'];
 const CAL_SEEN_KEY='rustyAnvil_calSeen', CAL_DISMISS_KEY='rustyAnvil_calDismiss';
 function calList(){ if(!Array.isArray(DATA.calendar)) DATA.calendar=[]; return DATA.calendar; }
-// Two calendars: Ranger Challenge (cal 'rc', and everything from before the split) and Battalion ('bn').
-const calOf = e => e.cal==='bn' ? 'bn' : 'rc';
-function calBothVisible(){ const r=myRole(); if(r==='soldier'){ const me=meSoldier(); return isRCs(me); } return r!=='grader' && r!=='tester'; }
-function calRoleSees(e){ const r=myRole(); if(r==='soldier') return calOf(e)==='bn' || isRCs(meSoldier()); if(r==='grader'||r==='tester') return calOf(e)==='rc'; return true; }
+// Three calendars: Ranger Challenge (cal 'rc', and everything from before the split), Battalion ('bn'), and Bataan ('bataan').
+// Bataan entries can carry an assigned workout: wk = {kind:'run'|'ruck', dist (miles), lb (pack weight, rucks)}.
+const calOf = e => e.cal==='bn' ? 'bn' : e.cal==='bataan' ? 'bataan' : 'rc';
+function calsVisible(){
+  const r=myRole();
+  if(r==='soldier'){ const me=meSoldier(); return ['bn', ...(isRCs(me)?['rc']:[]), ...(isBataan(me)?['bataan']:[])]; }
+  if(r==='grader'||r==='tester') return ['rc'];
+  if(r==='captain') return ['rc','bn'];
+  return ['rc','bn','bataan'];
+}
+function calBothVisible(){ return calsVisible().length>1; }
+function calRoleSees(e){ return calsVisible().includes(calOf(e)); }
 function calShows(e){ if(!calRoleSees(e)) return false; const f=calBothVisible() && STATE.cal && STATE.cal.show; return !f || f==='all' || calOf(e)===f; }
 function calCanEdit(e){ const r=myRole(); return r==='admin' || r==='leader' || (r==='captain' && (!e || calOf(e)==='rc')); }
 function calCanAdd(){ return ['admin','leader','captain'].includes(myRole()); }
-const CAL_NAME={rc:'Ranger Challenge', bn:'Battalion'};
+const CAL_NAME={rc:'Ranger Challenge', bn:'Battalion', bataan:'Bataan'}, CAL_TAG={rc:'RC', bn:'BN', bataan:'BT'};
+// "Ruck \u00B7 6 mi \u00B7 35 lb"
+function wkText(wk){ if(!wk || !wk.kind) return ''; return [wk.kind==='ruck'?'Ruck':'Run', wk.dist?tlDist(wk.dist)+' mi':'', wk.kind==='ruck'&&wk.lb?wk.lb+' lb':''].filter(Boolean).join(' \u00B7 '); }
 const isoOf = d => d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const dateOf = s => { const [y,m,d]=String(s).split('-').map(Number); return new Date(y,m-1,d); };
 const addDays = (s,n) => { const d=dateOf(s); d.setDate(d.getDate()+n); return isoOf(d); };
@@ -5811,7 +5994,7 @@ function renderCalendar(c){
   const occ=calExpand(gridStart, gridEnd), sel=C.day, selList=calExpand(sel, sel)[sel]||[];
   const upTo=addDays(today,13), upcoming=calExpand(today, upTo);
   const isNew = e => seenBefore && e.updated && e.updated>seenBefore && e.by!==calMe();
-  const tag = e => both ? `<span class="cal-tag ${calOf(e)}">${calOf(e)==='rc'?'RC':'BN'}</span>` : '';
+  const tag = e => both ? `<span class="cal-tag ${calOf(e)}">${CAL_TAG[calOf(e)]}</span>` : '';
   const chip = (e,d) => { const multi=e.end && e.end>e.start; return `<span class="cal-chip ${multi?'multi':''} ${isNew(e)?'new':''} ${both?'k-'+calOf(e):''}" title="${esc(e.title)}${both?' ('+CAL_NAME[calOf(e)]+')':''}">${e.from&&!multi?`<b>${fmtClock(e.from)}</b> `:''}${esc(e.title)}</span>`; };
   let cells='';
   for(let i=0;i<42;i++){
@@ -5833,6 +6016,7 @@ function renderCalendar(c){
         <div class="soft" style="font-size:13px">${calWhen(e)}</div></div>
         ${calCanEdit(e)?`<div class="row" style="gap:6px"><button class="btn sm" data-caledit="${e.id}">Edit</button><button class="btn sm" data-caldel="${e.id}">Delete</button></div>`:''}</div>
       ${calCanEdit(e) && blanks.length?`<p class="cal-nudge">${allBlank?'No details yet. Edit to add Who, What, When, Where, and Uniform if they apply.':`Still blank: ${blanks.join(', ')}.`}</p>`:''}
+      ${e.wk&&e.wk.kind?`<p class="cal-wk"><b>Assigned:</b> ${esc(wkText(e.wk))}</p>`:''}
       ${rows?`<div class="cal-ws">${rows}</div>`:''}
       ${e.notes?`<p class="cal-notes">${esc(e.notes).replace(/\n/g,'<br>')}</p>`:''}${rep}
       ${admin && e.by?`<p class="soft" style="font-size:12px;margin:6px 0 0">Last changed by ${esc(e.by)}${e.updated?', '+new Date(e.updated).toLocaleString([], {month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}):''}</p>`:''}
@@ -5848,7 +6032,7 @@ function renderCalendar(c){
         <div class="row" style="gap:6px"><button class="btn sm" id="calPrev" aria-label="Previous month">\u2039</button><h2 style="margin:0;min-width:9.5em;text-align:center">${first.toLocaleDateString([], {month:'long', year:'numeric'})}</h2><button class="btn sm" id="calNext" aria-label="Next month">\u203A</button></div>
         <div class="row" style="gap:6px"><button class="btn sm" id="calToday">Today</button>${admin?'<button class="btn primary sm" id="calAdd">+ Add</button>':''}</div>
       </div>
-      ${both?`<div class="row" style="gap:8px;margin:10px 0 2px"><span class="soft" style="font-size:13.5px">Show</span><div class="seg" role="group" aria-label="Which calendar">${[['all','Both'],['rc','Ranger Challenge'],['bn','Battalion']].map(([k,l])=>`<button data-calshow="${k}" aria-pressed="${(C.show||'all')===k}">${l}</button>`).join('')}</div></div>`:''}
+      ${both?`<div class="row" style="gap:8px;margin:10px 0 2px"><span class="soft" style="font-size:13.5px">Show</span><div class="seg" role="group" aria-label="Which calendar">${[['all',calsVisible().length>2?'All':'Both'], ...calsVisible().map(k=>[k,CAL_NAME[k]])].map(([k,l])=>`<button data-calshow="${k}" aria-pressed="${(C.show||'all')===k}">${l}</button>`).join('')}</div></div>`:''}
       <div class="cal-grid" role="grid">${DAYS_SHORT.map((d,i)=>`<div class="cal-dow"><span class="full">${d}</span><span class="one">${DAYS_LETTER[i]}</span></div>`).join('')}${cells}</div>
     </div>
     <div class="two cal-lower">
@@ -5901,19 +6085,25 @@ function calPickScope(id, day, action){
     calEdit(copy, null, true, ()=>{ e.skip=(e.skip||[]).filter(d=>d!==day); });
   };
 }
-function calEdit(e, day, isNewCopy, onCancel){
+function calEdit(e, day, isNewCopy, onCancel, preset){
   if(document.getElementById('calSheet')) return;
-  const isNew = !e || isNewCopy, x = e ? clone(e) : {id:uid(), title:'', start:day||isoOf(new Date()), cal: isCaptain() ? 'rc' : (STATE.cal&&STATE.cal.show==='rc') ? 'rc' : (STATE.cal&&STATE.cal.show==='bn') ? 'bn' : myRole()==='leader' ? 'bn' : 'rc'};
+  const shown=STATE.cal&&STATE.cal.show;
+  const isNew = !e || isNewCopy, x = e ? clone(e) : Object.assign({id:uid(), title:'', start:day||isoOf(new Date()), cal: isCaptain() ? 'rc' : ['rc','bn','bataan'].includes(shown) ? shown : myRole()==='leader' ? 'bn' : 'rc'}, preset||{});
   if(e && !x.cal) x.cal=calOf(e);
   const rep = x.repeat && x.repeat.days && x.repeat.days.length;
   const w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='calSheet';
   const f=(id,label,val,extra='')=>`<label class="field"><span>${label}</span><input class="input" id="${id}" value="${esc(val||'')}" ${extra}></label>`;
   w.innerHTML=`<div class="sheet news cal-form" role="dialog" aria-modal="true" aria-labelledby="calH">
     <h2 id="calH">${isNewCopy?`Change ${calDayLabel(x.start,{month:'short',day:'numeric'})} only`:isNew?'Add to the calendar':'Edit entry'}</h2>
-    <p class="sub">Only the name and date are required. Fill in the W's when you know them.</p>
+    <p class="sub">Only the name (or a Bataan workout) and date are required. Fill in the W's when you know them.</p>
     <div class="stack" style="gap:10px">
-      ${isCaptain()||isNewCopy?`<p class="sub" style="margin:0">${CAL_NAME[calOf(x)]} calendar</p>`:`<label class="field"><span>Calendar</span><select class="input" id="ceCal"><option value="rc" ${calOf(x)==='rc'?'selected':''}>Ranger Challenge (RC soldiers see it)</option><option value="bn" ${calOf(x)==='bn'?'selected':''}>Battalion (everyone sees it)</option></select></label>`}
-      ${f('ceTitle','Name (required)',x.title,'placeholder="e.g. PT, Lab, Spring Break"')}
+      ${isCaptain()||isNewCopy?`<p class="sub" style="margin:0">${CAL_NAME[calOf(x)]} calendar</p>`:`<label class="field"><span>Calendar</span><select class="input" id="ceCal"><option value="rc" ${calOf(x)==='rc'?'selected':''}>Ranger Challenge (RC soldiers see it)</option><option value="bn" ${calOf(x)==='bn'?'selected':''}>Battalion (everyone sees it)</option><option value="bataan" ${calOf(x)==='bataan'?'selected':''}>Bataan (Bataan team sees it)</option></select></label>`}
+      <div id="ceWkBox" class="cal-wkbox" ${calOf(x)==='bataan'?'':'hidden'}>
+        <div class="soft" style="font-size:13px;margin-bottom:6px">Assigned workout. People log their time against it on the Bataan screen.</div>
+        <div class="seg" role="group" aria-label="Workout">${[['','None'],['run','Run'],['ruck','Ruck']].map(([k,l])=>`<button type="button" data-cewk="${k}" aria-pressed="${((x.wk&&x.wk.kind)||'')===k}">${l}</button>`).join('')}</div>
+        <div class="grid2" id="ceWkFields" style="margin-top:10px" ${x.wk&&x.wk.kind?'':'hidden'}>${f('ceDist','Distance (miles)',x.wk&&x.wk.dist,'inputmode="decimal" placeholder="e.g. 6"')}<span id="ceLbWrap" ${x.wk&&x.wk.kind==='ruck'?'':'hidden'}>${f('ceLb','Pack weight (lb)',x.wk&&x.wk.lb,'inputmode="numeric" placeholder="e.g. 35"')}</span></div>
+      </div>
+      ${f('ceTitle','Name',x.title,'placeholder="e.g. PT, Lab, Spring Break"')}
       <div class="grid2">${f('ceStart','Date',x.start,'type="date"')}${isNewCopy?'':f('ceEnd','Through (for multi-day)',x.end,'type="date"')}</div>
       <label class="row" style="gap:8px;font-size:14px"><input type="checkbox" id="ceAll" ${x.from?'':'checked'}> All day (no set time)</label>
       <div class="grid2" id="ceTimes" ${x.from?'':'hidden'}>${f('ceFrom','From',x.from,'type="time"')}${f('ceTo','To (optional)',x.to,'type="time"')}</div>
@@ -5938,14 +6128,27 @@ function calEdit(e, day, isNewCopy, onCancel){
   w.querySelector('#ceAll').onchange=ev=>{ w.querySelector('#ceTimes').hidden=ev.target.checked; };
   const rb=w.querySelector('#ceRep'); if(rb) rb.onchange=()=>{ w.querySelector('#ceRepBox').hidden=!rb.checked; if(rb.checked && !w.querySelector('[data-ceday][aria-pressed=true]')){ const b=w.querySelector(`[data-ceday="${dateOf(v('ceStart')||x.start).getDay()}"]`); if(b) b.setAttribute('aria-pressed','true'); } };
   w.querySelectorAll('[data-ceday]').forEach(b=>b.onclick=()=>b.setAttribute('aria-pressed', b.getAttribute('aria-pressed')==='true'?'false':'true'));
+  let wkKind=(x.wk&&x.wk.kind)||'';
+  const cc=w.querySelector('#ceCal'); if(cc) cc.onchange=()=>{ w.querySelector('#ceWkBox').hidden=cc.value!=='bataan'; };
+  w.querySelectorAll('[data-cewk]').forEach(b=>b.onclick=()=>{ wkKind=b.dataset.cewk; w.querySelectorAll('[data-cewk]').forEach(y=>y.setAttribute('aria-pressed', String(y===b)));
+    w.querySelector('#ceWkFields').hidden=!wkKind; w.querySelector('#ceLbWrap').hidden=wkKind!=='ruck'; });
   w.querySelector('#ceSave').onclick=()=>{
     const msg=t=>{ w.querySelector('#ceMsg').textContent=t; };
-    const title=v('ceTitle'), start=v('ceStart'), end=v('ceEnd');
+    const cs0=w.querySelector('#ceCal'), calNow=cs0?cs0.value:calOf(x);
+    let wk=null;
+    if(calNow==='bataan' && wkKind){
+      const d=+v('ceDist'), lb=v('ceLb');
+      if(!(d>0 && d<100)) return msg('Enter the distance in miles, like 6 or 12.');
+      if(wkKind==='ruck' && lb && !(+lb>0 && +lb<200)) return msg('Pack weight is in pounds, like 35. Leave it blank for none.');
+      wk={kind:wkKind, dist:Math.round(d*100)/100}; if(wkKind==='ruck' && lb) wk.lb=+lb;
+    }
+    const title=v('ceTitle') || (wk ? wkText(wk) : ''), start=v('ceStart'), end=v('ceEnd');
     if(!title) return msg('Give it a name, like "PT" or "Spring Break".');
     if(!start) return msg('Pick a date.');
     if(end && end<start) return msg('"Through" can\'t be before the start date.');
     const all=w.querySelector('#ceAll').checked, from=all?'':v('ceFrom'), to=all?'':v('ceTo');
     if(!all && !from) return msg('Pick a start time, or check "All day".');
+    if(!all && to && to<=from) return msg('"To" has to be after "From".');
     let repeat=null;
     if(rb && rb.checked){
       const days=[...w.querySelectorAll('[data-ceday][aria-pressed=true]')].map(b=>+b.dataset.ceday);
@@ -5955,14 +6158,14 @@ function calEdit(e, day, isNewCopy, onCancel){
       repeat={days, until:until||null};
     }
     const cs=w.querySelector('#ceCal'); if(cs) x.cal=cs.value; if(!x.cal) x.cal='rc';
-    Object.assign(x, {title, start, end: end && end>start ? end : null, from:from||null, to:to||null, who:v('ceWho'), what:v('ceWhat'), where:v('ceWhere'), uniform:v('ceUni'), notes:w.querySelector('#ceNotes').value.trim(), repeat: isNewCopy ? null : repeat, updated:new Date().toISOString(), by:calMe()});
+    Object.assign(x, {wk: calNow==='bataan' ? wk : null, title, start, end: end && end>start ? end : null, from:from||null, to:to||null, who:v('ceWho'), what:v('ceWhat'), where:v('ceWhere'), uniform:v('ceUni'), notes:w.querySelector('#ceNotes').value.trim(), repeat: isNewCopy ? null : repeat, updated:new Date().toISOString(), by:calMe()});
     if(!x.repeat) x.skip=x.skip&&x.skip.length?x.skip:null;
     const L=calList(), i=L.findIndex(y=>y.id===x.id);
     if(i>=0) L[i]=x; else L.push(x);
     save(); close();
     STATE.cal=STATE.cal||{}; STATE.cal.day=start; STATE.cal.month=start.slice(0,7);
     const blanks=calBlank(x);
-    toast(blanks.length ? `Saved. Still blank: ${blanks.join(', ')}. Add them any time.` : 'Saved to the calendar.');
+    toast(x.wk ? `Assigned: ${wkText(x.wk)}.` : blanks.length ? `Saved. Still blank: ${blanks.join(', ')}. Add them any time.` : 'Saved to the calendar.');
     render();
   };
   w.querySelector('#ceTitle').focus();
@@ -6272,7 +6475,10 @@ const fmtPctTick = v => v+'%';
 function axisFor(kind, T, title){
   const a={grid:{color:T.line}, ticks:{color:T.soft}, title: title?{display:true, text:title, color:T.soft}:undefined};
   if(kind==='pct') Object.assign(a,{min:0, max:100, ticks:{color:T.soft, callback:fmtPctTick}});
-  if(kind==='time') a.ticks.callback=v=>fmtLong(v);
+  if(kind==='time'){ a.ticks.callback=v=>fmtLong(v);
+    // Ticks on round times (15 s, 30 s, 1 min, 5 min, ...) instead of whatever Chart.js picks.
+    a.afterBuildTicks=ax=>{ const r=ax.max-ax.min; if(!(r>0)) return; const st=[5,10,15,30,60,120,300,600,900,1800,3600,7200].find(s=>r/s<=6)||7200;
+      const t=[]; for(let v=Math.ceil(ax.min/st)*st; v<=ax.max+1e-9; v+=st) t.push({value:v}); if(t.length>=2) ax.ticks=t; }; }
   return a;
 }
 function fmtVal(kind, v){ if(v==null||isNaN(v)) return '\u2013'; return kind==='pct' ? Math.round(v)+'%' : kind==='time' ? fmtLong(v) : (Math.round(v*10)/10).toLocaleString(); }
@@ -6318,7 +6524,7 @@ function weightFormHtml(){
     <div class="row" style="margin-top:12px"><button class="btn primary" id="w_save">Save weight</button><span id="w_msg" class="sub" style="margin:0"></span></div></div>`;
 }
 function weightSave(sid){
-  const msg=$('w_msg'), lbEl=$('w_lb'), v=parseFloat(String(lbEl.value).replace(/[^0-9.]/g,''));
+  const msg=$('w_msg'), lbEl=$('w_lb'), raw=String(lbEl.value).trim(), v=/^\d+(\.\d+)?$/.test(raw) ? parseFloat(raw) : NaN;
   lbEl.classList.remove('bad');
   if(!(v>=60 && v<=500)){ lbEl.classList.add('bad'); lbEl.focus(); msg.innerHTML='<span style="color:var(--alert)">Enter your weight in pounds, like 182.4.</span>'; return false; }
   const date=$('w_date').value||todayISO();
@@ -6355,10 +6561,10 @@ function weightPanelHtml(s){
         <div><b>${fmtLb(last.lb)}</b><span>latest (${esc(tlDate(last.date))})</span></div>
         <div><b>${W.length>1?(last.lb-first.lb>0?'+':'')+fmtLb(last.lb-first.lb):'\u2013'}</b><span>since ${esc(tlDate(first.date))}</span></div>
         <div><b>${wkAvg!=null?fmtLb(wkAvg):'\u2013'}</b><span>7-day average</span></div>
-      </div>`:`<p class="sub" style="margin:6px 0 0">No weigh-ins yet. Log your weight as often as you like; the chart fills in over time.</p>`}
+      </div>`:`<p class="sub" style="margin:6px 0 0">${STATE.session&&STATE.session.role==='soldier'?'No weigh-ins yet. Log your weight as often as you like; the chart fills in over time.':'No weigh-ins logged yet.'}${scans.length?' The chart shows weights from InBody scans.':''}</p>`}
     ${days.length>=2?`<h3 class="chart-h">Weight over time (lb)</h3>${lineChart(days.map(tlDate), sets, {unit:'lb', legend:scans.length>0, label:'Weight over time'})}`:''}
     ${W.length?`<details class="tbl" ${STATE.wAll?'open':''} id="wAll"><summary>All weigh-ins (${W.length})</summary><div class="scroll"><table><thead><tr><th>Date</th><th class="num">Weight (lb)</th><th></th></tr></thead><tbody>
-      ${[...W].reverse().map(e=>`<tr><td>${esc(tlDate(e.date))}</td><td class="num">${fmtLb(e.lb)}</td><td style="white-space:nowrap;text-align:right">${conf===e.id?`<button class="btn danger sm" data-wdelyes="${e.id}">Delete</button> <button class="btn sm" data-wdelno="1">Keep</button>`:`<button class="btn sm" data-wdel="${e.id}">Delete</button>`}</td></tr>`).join('')}
+      ${[...W].reverse().map(e=>`<tr><td>${esc(tlDate(e.date))}</td><td class="num">${fmtLb(e.lb)}</td><td style="white-space:nowrap;text-align:right">${conf===e.id?`<button class="btn danger sm" data-wdelyes="${esc(e.id)}">Delete</button> <button class="btn sm" data-wdelno="1">Keep</button>`:(STATE.session&&STATE.session.role==='soldier'&&!e.self?'<span class="soft" style="font-size:12.5px">leadership</span>':`<button class="btn sm" data-wdel="${esc(e.id)}">Delete</button>`)}</td></tr>`).join('')}
     </tbody></table></div></details>`:''}
   </div>`;
 }
@@ -6370,6 +6576,502 @@ function wireWeightPanel(s){
   P.querySelectorAll('[data-wdel]').forEach(b=>b.onclick=()=>{ STATE.wDel=b.dataset.wdel; render(); });
   P.querySelectorAll('[data-wdelno]').forEach(b=>b.onclick=()=>{ STATE.wDel=null; render(); });
   P.querySelectorAll('[data-wdelyes]').forEach(b=>b.onclick=()=>{ DATA.timeLogs=timeLogs().filter(e=>e.id!==b.dataset.wdelyes); STATE.wDel=null; save(); toast('Weigh-in deleted.'); render(); });
+}
+
+/* ============================== Bataan ============================== */
+// The Bataan team: soldiers with bataan = true (the system admin sets it under Manage on their page).
+// Assignments are Bataan calendar entries with a workout, wk = {kind:'run'|'ruck', dist, lb?}. Admin and battalion leadership add them.
+// Logs are ordinary run/ruck time logs. One logged against an assignment carries asg (entry id) and asgDay (the day it was for);
+// rucks can carry lb (pack weight). Race day and the training start live in DATA.settings.bataan = {name, race, start}.
+const BT_KINDS={run:'Run', ruck:'Ruck'};
+function bataanMembers(){ return DATA.soldiers.filter(isBataan).sort((a,b)=>String(a.name).localeCompare(String(b.name))); }
+function btCfg(){ return Object.assign({name:'Bataan Memorial Death March', race:'', start:''}, DATA.settings.bataan||{}); }
+const btMon = iso => { const k=(dateOf(iso).getDay()+6)%7; return addDays(iso,-k); };   // weeks run Monday to Sunday
+const btDays = (a,b) => Math.round((dateOf(b)-dateOf(a))/86400000);
+const btPace = (sec, dist) => sec>0 && dist>0 ? sec/dist : null;
+const btPaceTxt = p => p==null ? '' : fmtTime(p)+'/mi';
+function btFirstDay(){
+  const c=btCfg(); if(c.start) return c.start;
+  const ds=[...btAssignEntries().map(e=>e.start), ...btLogsAll().map(t=>t.date)].filter(Boolean).sort();
+  const t=todayISO(); return ds[0] && ds[0]<t ? ds[0] : t;
+}
+
+/* ---------- assignments ---------- */
+function btAssignEntries(){ return calList().filter(e=>calOf(e)==='bataan' && e.wk && e.wk.kind && e.start); }
+// Every assigned workout from day a to day b: [{e, day}], in date order. Repeating entries show on each chosen weekday.
+function btAssignments(a, b){
+  const out=[];
+  btAssignEntries().forEach(e=>{
+    if(e.repeat && Array.isArray(e.repeat.days) && e.repeat.days.length){
+      const until=e.repeat.until && e.repeat.until<b ? e.repeat.until : b, skip=e.skip||[];
+      for(let d=e.start<a?a:e.start; d<=until; d=addDays(d,1)) if(e.repeat.days.includes(dateOf(d).getDay()) && !skip.includes(d)) out.push({e, day:d});
+    } else if(e.start>=a && e.start<=b) out.push({e, day:e.start});
+  });
+  return out.sort((x,y)=>x.day<y.day?-1:x.day>y.day?1:(x.e.from||'').localeCompare(y.e.from||'') || String(x.e.title).localeCompare(String(y.e.title)));
+}
+
+/* ---------- logs ---------- */
+function btLogsAll(){ return timeLogs().filter(t=>(t.kind==='run'||t.kind==='ruck') && t.sid && t.sec>0 && isBataan(soldierById(t.sid))); }
+function btLogs(){ const c=btCfg(); return btLogsAll().filter(t=>!c.start || t.date>=c.start); }
+function btLogsOf(sid){ return btLogs().filter(t=>t.sid===sid); }
+// Did this person do this assignment? A log made against it, or else an unlinked log of the same kind on that day.
+function btDoneLog(sid, a, logs){
+  const L=logs||btLogsOf(sid);
+  return L.find(t=>t.asg===a.e.id && t.asgDay===a.day) || (a.e.of ? L.find(t=>t.asg===a.e.of && t.asgDay===a.day) : null) || L.find(t=>!t.asg && t.date===a.day && t.kind===a.e.wk.kind) || null;
+}
+
+/* ---------- race-day meter ---------- */
+function btMeterHtml(compact){
+  const c=btCfg(), today=todayISO();
+  if(!c.race) return compact ? '' : `<div class="bt-meter"><div class="bt-top"><b>${esc(c.name)}</b></div><p class="sub" style="margin:6px 0 0">${isSys()?'Set race day below to start the countdown.':'Race day hasn\'t been set yet.'}</p></div>`;
+  const start=c.start && c.start<c.race ? c.start : addDays(c.race,-120), total=Math.max(1,btDays(start,c.race)), left=btDays(today,c.race);
+  const pct=Math.max(0, Math.min(100, (btDays(start,today))/total*100));
+  const wk=Math.floor(Math.max(0,btDays(start,today))/7)+1, wks=Math.ceil(total/7);
+  const big = left>1 ? `${left} days to go` : left===1 ? 'Race day is tomorrow' : left===0 ? 'Race day is today' : 'Race complete';
+  const sub = left<0 ? `Race day was ${calDayLabel(c.race,{month:'long',day:'numeric',year:'numeric'})}.` : `Race day ${calDayLabel(c.race,{weekday:'short',month:'short',day:'numeric',year:'numeric'})}${left>0&&btDays(start,today)>=0?` \u00B7 week ${Math.min(wk,wks)} of ${wks}`:''}`;
+  return `<${compact?'button type="button" id="btMeterGo"':'div'} class="bt-meter${compact?' compact':''}" aria-label="${esc(c.name)}: ${esc(big)}">
+    <div class="bt-top"><b>${esc(c.name)}</b><span class="bt-big">${esc(big)}</span></div>
+    <div class="bt-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(pct)}" aria-label="Training progress to race day"><i style="width:${pct.toFixed(1)}%"></i></div>
+    <div class="bt-sub"><span>${esc(sub)}</span>${compact?'<span class="bt-open">Bataan \u203A</span>':`<span>${Math.round(pct)}% of the way there</span>`}</div>
+  </${compact?'button':'div'}>`;
+}
+function wireBtMeter(el){ const b=el && el.querySelector('#btMeterGo'); if(b) b.onclick=()=>{ STATE.tab='bataan'; render(); window.scrollTo(0,0); }; }
+
+/* ---------- the log form (a member logging their own, or leadership logging for someone) ---------- */
+function btFormHtml(f){
+  const kind=f.kind||'run', ruck=kind==='ruck';
+  return `<div class="bt-form" id="btForm">
+    <h3 style="margin:0 0 8px">${f.asg?`Log: ${esc(wkText(f.wk))}, ${esc(calDayLabel(f.asgDay))}`:'Log a run or ruck'}${f.sid && myRole()!=='soldier'?` for ${esc((soldierById(f.sid)||{}).name||'')}`:''}</h3>
+    ${f.asg?'':`<div class="seg" role="group" aria-label="Run or ruck" style="margin-bottom:10px">${Object.entries(BT_KINDS).map(([k,l])=>`<button type="button" data-btkind="${k}" aria-pressed="${kind===k}">${l}</button>`).join('')}</div>`}
+    <div class="grid">
+      <label class="field"><span>Date</span><input class="input" type="date" id="bt_date" value="${esc(f.date||todayISO())}"></label>
+      <label class="field"><span>Distance (miles)</span><input class="input" inputmode="decimal" id="bt_dist" value="${esc(f.dist||'')}" placeholder="${ruck?'e.g. 8':'e.g. 4'}"></label>
+      <label class="field"><span>Time (${ruck?'h:mm:ss':'m:ss or h:mm:ss'})</span><input class="input" id="bt_time" inputmode="numeric" data-time="long" autocomplete="off" placeholder="${ruck?'2:05:30':'32:10'}"></label>
+      ${ruck?`<label class="field"><span>Pack weight (lb)</span><input class="input" inputmode="numeric" id="bt_lb" value="${esc(f.lb||'')}" placeholder="e.g. 35"></label>`:''}
+      <label class="field"><span>Note (optional)</span><input class="input" id="bt_note" placeholder="e.g. hills, boots, hot spots"></label>
+    </div>
+    <p class="tl-pace" id="bt_pace" aria-live="polite"></p>
+    <div class="row" style="margin-top:6px"><button class="btn primary" id="bt_save">Save</button><button class="btn" id="bt_cancel">Cancel</button><span id="bt_msg" class="sub" style="margin:0"></span></div>
+  </div>`;
+}
+function wireBtForm(c){
+  const f=STATE.bt && STATE.bt.form; if(!f || !c.querySelector('#btForm')) return;
+  const v=id=>{ const el=$(id); return el?el.value.trim():''; };
+  const keep=()=>{ f.date=v('bt_date'); f.dist=v('bt_dist'); const lb=$('bt_lb'); if(lb) f.lb=lb.value.trim(); };
+  c.querySelectorAll('[data-btkind]').forEach(b=>b.onclick=()=>{ keep(); f.kind=b.dataset.btkind; render(); });
+  const pace=()=>{ const p=btPace(parseLong(v('bt_time')), +v('bt_dist')); const o=$('bt_pace'); if(o) o.innerHTML=p?`Pace: <b>${btPaceTxt(p)}</b>`:''; };
+  ['bt_time','bt_dist'].forEach(id=>{ const el=$(id); if(el) el.addEventListener('input',()=>setTimeout(pace,0)); });
+  $('bt_cancel').onclick=()=>{ STATE.bt.form=null; render(); };
+  const go=()=>{
+    const msg=$('bt_msg'), bad=(id,t)=>{ const el=$(id); if(el){ el.classList.add('bad'); el.focus(); } msg.innerHTML=`<span style="color:var(--alert)">${t}</span>`; };
+    c.querySelectorAll('#btForm .input.bad').forEach(el=>el.classList.remove('bad'));
+    const kind=f.kind||'run', d=+v('bt_dist'), sec=parseLong(v('bt_time')), lbRaw=v('bt_lb');
+    if(!(d>0 && d<100)) return bad('bt_dist','Enter the distance in miles, like 4 or 12.');
+    if(sec==null || isNaN(sec) || sec<=0) return bad('bt_time','Enter the time like 32:10 or 2:05:30. Digits only works too.');
+    if(kind==='ruck' && lbRaw && !(+lbRaw>0 && +lbRaw<200)) return bad('bt_lb','Pack weight is in pounds, like 35. Leave it blank for none.');
+    { const pr=tlProblem(kind, d, sec, v('bt_date')||todayISO()); if(pr) return bad(pr.includes('date')?'bt_date':'bt_time', pr); }
+    const e={id:uid(), kind, date:v('bt_date')||todayISO(), sid:f.sid, dist:Math.round(d*100)/100, sec, at:Date.now()};
+    if(kind==='ruck' && lbRaw) e.lb=+lbRaw;
+    if(f.asg){ e.asg=f.asg; e.asgDay=f.asgDay; }
+    const note=v('bt_note'); if(note) e.note=note;
+    if(myRole()==='soldier') e.self=true;
+    e.bt=true;   // logged on the Bataan screen: kept out of the tryout run/ruck averages
+    timeLogs().push(e); STATE.bt.form=null; save();
+    toast(`Saved: ${BT_KINDS[kind].toLowerCase()} ${tlDist(e.dist)} mi in ${fmtLong(sec)} (${btPaceTxt(btPace(sec,e.dist))}).`); render();
+  };
+  $('bt_save').onclick=go;
+  c.querySelectorAll('#btForm .input').forEach(el=>el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); go(); } }));
+  const t=$('bt_time'); if(t && !STATE.bt.formFocused){ STATE.bt.formFocused=true; t.focus(); }
+}
+function btOpenForm(o){ STATE.bt.form=Object.assign({kind:'run'}, o); STATE.bt.formFocused=false; render(); const el=$('btForm'); if(el) el.scrollIntoView({block:'nearest'}); }
+
+/* ---------- stats ---------- */
+function btAvgPace(L){ const d=L.reduce((a,t)=>a+(+t.dist||0),0), s=L.reduce((a,t)=>a+(+t.sec||0),0); return d>0 ? s/d : null; }
+function btMiles(L){ return L.reduce((a,t)=>a+(+t.dist||0),0); }
+// Change in pace from their first week of that kind to their latest: negative = faster.
+function btChange(L){
+  const wk={}; L.forEach(t=>{ (wk[btMon(t.date)]=wk[btMon(t.date)]||[]).push(t); });
+  const ks=Object.keys(wk).sort(); if(ks.length<2) return null;
+  return btAvgPace(wk[ks[ks.length-1]]) - btAvgPace(wk[ks[0]]);
+}
+const btChangeTxt = ch => ch==null ? '' : Math.abs(ch)<1 ? 'no change' : `${ch<0?'\u2212':'+'}${fmtTime(Math.abs(ch))}/mi ${ch<0?'faster':'slower'}`;
+function btWeeks(){ const a=btMon(btFirstDay()), t=btMon(todayISO()), c=btCfg(), end=c.race && btMon(c.race)<t ? btMon(c.race) : t; const out=[]; for(let w=a; w<=end; w=addDays(w,7)) out.push(w); return out.slice(-52); }
+function btPersonStats(s){
+  const L=btLogsOf(s.id), runs=L.filter(t=>t.kind==='run'), rucks=L.filter(t=>t.kind==='ruck'), today=todayISO();
+  const due=btAssignments(btFirstDay(), today), done=due.filter(a=>btDoneLog(s.id,a,L)).length;
+  return {L, runs, rucks, miles:btMiles(L), due:due.length, done, pct: due.length ? done/due.length*100 : null,
+    runPace:btAvgPace(runs), rukPace:btAvgPace(rucks), runCh:btChange(runs), rukCh:btChange(rucks),
+    maxLb: rucks.reduce((m,t)=>Math.max(m,+t.lb||0),0), longRuck: rucks.reduce((m,t)=>Math.max(m,+t.dist||0),0),
+    last: L.map(t=>t.date).sort().pop()||''};
+}
+
+/* ---------- the screen ---------- */
+function renderBataan(c){
+  STATE.bt = STATE.bt || {week:btMon(todayISO()), form:null, pick:null, set:false};
+  const B=STATE.bt, staff=['admin','leader'].includes(myRole());
+  if(staff) renderBataanStaff(c, B); else renderBataanMember(c, B);
+  wireBtMeter(c); wireBtForm(c);
+}
+function btWeekNav(B){
+  const end=addDays(B.week,6), thisWk=btMon(todayISO());
+  return `<div class="row" style="gap:6px"><button class="btn sm" data-btwk="-7" aria-label="Previous week">\u2039</button><b style="min-width:10.5em;text-align:center">${calDayLabel(B.week,{month:'short',day:'numeric'})} \u2013 ${calDayLabel(end,{month:'short',day:'numeric'})}</b><button class="btn sm" data-btwk="7" aria-label="Next week">\u203A</button>${B.week!==thisWk?'<button class="btn sm" data-btwk="0">This week</button>':''}</div>`;
+}
+function wireBtWeek(c, B){ c.querySelectorAll('[data-btwk]').forEach(b=>b.onclick=()=>{ const n=+b.dataset.btwk; B.week = n ? addDays(B.week,n) : btMon(todayISO()); B.form=null; render(); }); }
+function btUpcomingHtml(){
+  const today=todayISO(), L=calList().filter(e=>calOf(e)==='bataan'), occ={};
+  L.forEach(e=>{ const days = e.repeat&&e.repeat.days&&e.repeat.days.length ? (()=>{ const o=[]; for(let d=e.start<today?today:e.start; d<=addDays(today,13) && (!e.repeat.until||d<=e.repeat.until); d=addDays(d,1)) if(e.repeat.days.includes(dateOf(d).getDay()) && !(e.skip||[]).includes(d)) o.push(d); return o; })() : (e.start>=today && e.start<=addDays(today,13) ? [e.start] : []);
+    days.forEach(d=>(occ[d]=occ[d]||[]).push(e)); });
+  const ds=Object.keys(occ).sort();
+  return `<div class="panel"><div class="row" style="justify-content:space-between"><h2 style="margin:0">Bataan calendar</h2><button class="btn sm" id="btCal">Open calendar</button></div>
+    <p class="sub" style="margin:4px 0 8px">Next two weeks.</p>
+    ${ds.length?`<ol class="cal-up">${ds.map(d=>occ[d].map(e=>`<li><button class="cal-uplink" data-btcalgo="${d}"><span class="cal-upd">${d===today?'Today':d===addDays(today,1)?'Tomorrow':calDayLabel(d)}</span><span><b>${esc(e.title)}</b><small>${[e.from?fmtClock(e.from)+(e.to?'\u2013'+fmtClock(e.to):''):'', e.where?esc(e.where):''].filter(Boolean).join(' \u00B7 ')||'&nbsp;'}</small></span></button></li>`).join('')).join('')}</ol>`:'<p class="sub" style="margin:0">Nothing on the Bataan calendar in the next two weeks.</p>'}
+  </div>`;
+}
+function wireBtUpcoming(c){
+  const go=d=>{ STATE.cal=STATE.cal||{}; STATE.cal.show='bataan'; if(d){ STATE.cal.day=d; STATE.cal.month=d.slice(0,7); } STATE.tab='cal'; render(); window.scrollTo(0,0); };
+  const b=c.querySelector('#btCal'); if(b) b.onclick=()=>go(null);
+  c.querySelectorAll('[data-btcalgo]').forEach(x=>x.onclick=()=>go(x.dataset.btcalgo));
+}
+
+/* member view */
+function renderBataanMember(c, B){
+  const s=meSoldier(); if(!s || !isBataan(s)){ c.innerHTML='<div class="panel"><p class="sub" style="margin:0">You\'re not on the Bataan team.</p></div>'; return; }
+  const today=todayISO(), wkA=btAssignments(B.week, addDays(B.week,6)), L=btLogsOf(s.id), st=btPersonStats(s), f=B.form;
+  const wkLogs=L.filter(t=>t.date>=B.week && t.date<=addDays(B.week,6)), linked=new Set(wkA.map(a=>(btDoneLog(s.id,a,L)||{}).id).filter(Boolean));
+  const item=a=>{ const t=btDoneLog(s.id,a,L); const open=f && f.asg===a.e.id && f.asgDay===a.day;
+    return `<li class="bt-as ${t?'done':a.day<today?'missed':''}"><div><div class="bt-as-day">${a.day===today?'Today':calDayLabel(a.day)}</div><b>${esc(wkText(a.e.wk))}</b>${a.e.title&&a.e.title!==wkText(a.e.wk)?` <span class="soft">\u00B7 ${esc(a.e.title)}</span>`:''}${a.e.notes?`<div class="soft" style="font-size:13px">${esc(a.e.notes)}</div>`:''}</div>
+      <div class="bt-as-st">${t?`<span class="badge b-good">Done</span> <span class="mono">${fmtLong(t.sec)}</span> <span class="soft">${btPaceTxt(btPace(t.sec,t.dist))}</span>`:open?'':`${a.day<today?'<span class="badge b-bad">Missed</span> ':a.day>today?'<span class="soft" style="font-size:13px">Upcoming</span> ':''}<button class="btn ${a.day<=today?'primary':''} sm" data-btlog="${a.e.id}|${a.day}">Log it</button>`}</div>
+      ${open?`<div style="grid-column:1/-1">${btFormHtml(f)}</div>`:''}</li>`; };
+  const extra=wkLogs.filter(t=>!linked.has(t.id));
+  const runs=st.runs.slice().sort((a,b)=>a.date<b.date?-1:1), rucks=st.rucks.slice().sort((a,b)=>a.date<b.date?-1:1);
+  const weeks=btWeeks(), wMiles=weeks.map(w=>btMiles(L.filter(t=>btMon(t.date)===w)));
+  const paceDays=[...new Set([...runs,...rucks].map(t=>t.date))].sort();
+  const paceOn=(arr,d)=>{ const x=arr.filter(t=>t.date===d); return x.length?btAvgPace(x):null; };
+  c.innerHTML=`<div class="stack bataan">
+    ${btMeterHtml(false)}
+    <div class="panel"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0">This week</h2>${btWeekNav(B)}</div>
+      ${wkA.length?`<ol class="bt-list">${wkA.map(item).join('')}</ol>`:'<p class="sub" style="margin:0">Nothing assigned this week.</p>'}
+      ${extra.length?`<h3 style="margin:14px 0 6px">Extra this week</h3><ol class="bt-list">${extra.map(t=>`<li class="bt-as done"><div><div class="bt-as-day">${calDayLabel(t.date)}</div><b>${BT_KINDS[t.kind]||''} \u00B7 ${tlDist(t.dist)} mi${+t.lb?' \u00B7 '+(+t.lb)+' lb':''}</b></div><div class="bt-as-st"><span class="mono">${fmtLong(t.sec)}</span> <span class="soft">${btPaceTxt(btPace(t.sec,t.dist))}</span></div></li>`).join('')}</ol>`:''}
+      ${f && !f.asg ? btFormHtml(f) : `<div class="row" style="margin-top:12px"><button class="btn" id="btExtra">+ Log another run or ruck</button></div>`}
+    </div>
+    <div class="panel"><h2>My training</h2>
+      <div class="bt-tiles">
+        <div><span>Miles</span><b>${fmt1(st.miles)}</b></div>
+        <div><span>Workouts</span><b>${st.L.length}</b></div>
+        <div><span>Assignments done</span><b>${st.pct==null?'\u2013':Math.round(st.pct)+'%'}</b><small>${st.due?`${st.done} of ${st.due}`:''}</small></div>
+        <div><span>Avg run pace</span><b>${st.runPace?btPaceTxt(st.runPace):'\u2013'}</b><small>${esc(btChangeTxt(st.runCh))}</small></div>
+        <div><span>Avg ruck pace</span><b>${st.rukPace?btPaceTxt(st.rukPace):'\u2013'}</b><small>${esc(btChangeTxt(st.rukCh))}</small></div>
+      </div>
+      ${weeks.length>1||wMiles.some(Boolean)?`<h3 class="chart-h">Miles each week</h3>${barChart(weeks.map(w=>calDayLabel(w,{month:'short',day:'numeric'})), wMiles.map(m=>Math.round(m*10)/10), {label:'Miles', short:true})}`:''}
+      ${paceDays.length>1?`<h3 class="chart-h">Pace <span style="font-weight:400">(lower is faster)</span></h3>${lineChart(paceDays.map(tlDate), [{label:'Run', data:paceDays.map(d=>paceOn(runs,d))},{label:'Ruck', data:paceDays.map(d=>paceOn(rucks,d))}].filter(x=>x.data.some(v=>v!=null)), {y:'time', label:'Pace per mile', legend:true})}`:''}
+      ${btLogTable(L, true)}
+    </div>
+    ${btUpcomingHtml()}
+  </div>`;
+  wireBtWeek(c, B); wireBtUpcoming(c); wireBtLogTable(c);
+  c.querySelectorAll('[data-btlog]').forEach(b=>b.onclick=()=>{ const [id,day]=b.dataset.btlog.split('|'), e=calList().find(x=>x.id===id); if(!e) return;
+    btOpenForm({sid:s.id, kind:e.wk.kind, asg:id, asgDay:day, wk:e.wk, date:day<=todayISO()?day:todayISO(), dist:e.wk.dist||'', lb:e.wk.lb||''}); });
+  const ex=c.querySelector('#btExtra'); if(ex) ex.onclick=()=>btOpenForm({sid:s.id, kind:'run'});
+}
+// All of someone's Bataan logs, newest first. Members can delete their own; leadership can delete any.
+function btLogTable(L, mine){
+  if(!L.length) return '';
+  const rows=[...L].sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:(b.at||0)-(a.at||0)), del=STATE.bt.del;
+  return `<details class="tbl" ${STATE.bt.showAll?'open':''} id="btAll"><summary>${mine?'All my':'All'} runs and rucks (${rows.length})</summary>
+    <div class="scroll"><table><thead><tr><th>Date</th>${mine?'':'<th>Name</th>'}<th>Type</th><th class="num">Miles</th><th class="num">Time</th><th class="num">Pace</th><th class="num">Pack</th><th>For</th><th></th></tr></thead>
+    <tbody>${rows.map(t=>{ const a=t.asg?calList().find(e=>e.id===t.asg):null, can=!mine||t.self;
+      return `<tr><td>${esc(tlDate(t.date))}</td>${mine?'':`<td>${esc((soldierById(t.sid)||{}).name||'')}</td>`}<td>${BT_KINDS[t.kind]}</td><td class="num">${tlDist(t.dist)}</td><td class="num">${fmtLong(t.sec)}</td><td class="num">${btPaceTxt(btPace(t.sec,t.dist))}</td><td class="num">${+t.lb?(+t.lb)+' lb':''}</td><td>${a?esc(wkText(a.wk)):'<span class="soft">extra</span>'}${t.note?` <span class="soft">\u00B7 ${esc(t.note)}</span>`:''}</td>
+        <td style="white-space:nowrap">${!can?'':del===t.id?`<button class="btn danger sm" data-btdelyes="${esc(t.id)}">Delete</button> <button class="btn sm" data-btdelno="1">Keep</button>`:`<button class="btn sm" data-btdel="${esc(t.id)}" aria-label="Delete">Delete</button>`}</td></tr>`; }).join('')}</tbody></table></div></details>`;
+}
+function wireBtLogTable(c){
+  const d=c.querySelector('#btAll'); if(d) d.ontoggle=()=>{ STATE.bt.showAll=d.open; };
+  c.querySelectorAll('[data-btdel]').forEach(b=>b.onclick=()=>{ STATE.bt.del=b.dataset.btdel; render(); });
+  c.querySelectorAll('[data-btdelno]').forEach(b=>b.onclick=()=>{ STATE.bt.del=null; render(); });
+  c.querySelectorAll('[data-btdelyes]').forEach(b=>b.onclick=()=>{ DATA.timeLogs=timeLogs().filter(t=>t.id!==b.dataset.btdelyes); STATE.bt.del=null; save(); toast('Deleted.'); render(); });
+}
+
+/* staff view: admin and battalion leadership */
+function renderBataanStaff(c, B){
+  const M=bataanMembers(), today=todayISO(), wkEnd=addDays(B.week,6), wkA=btAssignments(B.week, wkEnd), cfg=btCfg(), sys=isSys();
+  const logsBy={}; M.forEach(s=>logsBy[s.id]=btLogsOf(s.id));
+  const S=M.map(s=>Object.assign({s}, btPersonStats(s)));
+  // this week's board
+  const cell=(s,a)=>{ const t=btDoneLog(s.id,a,logsBy[s.id]); return t ? `<td class="bt-c ok" title="${esc(fmtLong(t.sec)+' \u00B7 '+btPaceTxt(btPace(t.sec,t.dist)))}"><b class="mono">${fmtLong(t.sec)}</b><small>${btPaceTxt(btPace(t.sec,t.dist))}</small></td>` : a.day<today ? '<td class="bt-c miss">missed</td>' : '<td class="bt-c"></td>'; };
+  const wkLogs=s=>logsBy[s.id].filter(t=>t.date>=B.week && t.date<=wkEnd);
+  const extraN=s=>{ const used=new Set(wkA.map(a=>(btDoneLog(s.id,a,logsBy[s.id])||{}).id).filter(Boolean)); return wkLogs(s).filter(t=>!used.has(t.id)).length; };
+  const board = !M.length ? '' : `<div class="scroll"><table class="bt-board"><thead><tr><th>Name</th>${wkA.map(a=>`<th class="num"><span class="bt-h-day">${calDayLabel(a.day,{weekday:'short'})}</span>${esc(wkText(a.e.wk))}</th>`).join('')}<th class="num">Extra</th><th class="num">Miles</th><th class="num">Done</th></tr></thead>
+    <tbody>${M.map(s=>{ const dueA=wkA.filter(a=>a.day<=today), d=dueA.filter(a=>btDoneLog(s.id,a,logsBy[s.id])).length;
+      return `<tr><td><button class="linkish" data-btwho="${s.id}">${esc(s.name)}</button></td>${wkA.map(a=>cell(s,a)).join('')}<td class="num">${extraN(s)||''}</td><td class="num">${fmt1(btMiles(wkLogs(s)))}</td><td class="num">${dueA.length?`${d}/${dueA.length}`:'\u2013'}</td></tr>`; }).join('')}</tbody></table></div>`;
+  // trends across the weeks
+  const weeks=btWeeks(), wl=w=>calDayLabel(w,{month:'short',day:'numeric'});
+  const allL=[].concat(...M.map(s=>logsBy[s.id]));
+  const teamMiles=weeks.map(w=>Math.round(btMiles(allL.filter(t=>btMon(t.date)===w))*10)/10);
+  const avgPaceWk=k=>weeks.map(w=>{ const x=allL.filter(t=>t.kind===k && btMon(t.date)===w); return x.length?btAvgPace(x):null; });
+  const compWk=weeks.map(w=>{ const A=btAssignments(w, addDays(w,6)).filter(a=>a.day<=today); if(!A.length||!M.length) return null; let d=0; A.forEach(a=>M.forEach(s=>{ if(btDoneLog(s.id,a,logsBy[s.id])) d++; })); return Math.round(d/(A.length*M.length)*100); });
+  const pick=B.pick && M.find(s=>s.id===B.pick), P=pick?S.find(x=>x.s.id===pick.id):null;
+  const pickChart = P ? (()=>{ const days=[...new Set(P.L.map(t=>t.date))].sort(); const on=(k,d)=>{ const x=P.L.filter(t=>t.kind===k&&t.date===d); return x.length?btAvgPace(x):null; };
+    return `<div class="bt-pick"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${esc(pick.name)}</h3><button class="btn sm" data-btwho="">Close</button></div>
+      <div class="bt-tiles"><div><span>Miles</span><b>${fmt1(P.miles)}</b></div><div><span>Done</span><b>${P.pct==null?'\u2013':Math.round(P.pct)+'%'}</b><small>${P.due?`${P.done} of ${P.due}`:''}</small></div><div><span>Run pace</span><b>${P.runPace?btPaceTxt(P.runPace):'\u2013'}</b><small>${esc(btChangeTxt(P.runCh))}</small></div><div><span>Ruck pace</span><b>${P.rukPace?btPaceTxt(P.rukPace):'\u2013'}</b><small>${esc(btChangeTxt(P.rukCh))}</small></div><div><span>Heaviest pack</span><b>${P.maxLb?P.maxLb+' lb':'\u2013'}</b><small>${P.longRuck?'longest ruck '+fmt1(P.longRuck)+' mi':''}</small></div></div>
+      ${days.length>1?lineChart(days.map(tlDate), [{label:'Run', data:days.map(d=>on('run',d))},{label:'Ruck', data:days.map(d=>on('ruck',d))}].filter(x=>x.data.some(v=>v!=null)), {y:'time', label:'Pace per mile', legend:true}):'<p class="sub" style="margin:8px 0 0">Their pace chart shows after two days of logs.</p>'}
+      ${barChart(weeks.map(wl), weeks.map(w=>Math.round(btMiles(P.L.filter(t=>btMon(t.date)===w))*10)/10), {label:'Miles', short:true})}
+      <div class="row" style="margin-top:10px"><button class="btn sm" data-btlogfor="${pick.id}">Log a run or ruck for them</button></div>
+      ${B.form && B.form.sid===pick.id ? btFormHtml(B.form) : ''}
+    </div>`; })() : '';
+  c.innerHTML=`<div class="stack bataan">
+    ${btMeterHtml(false)}
+    ${sys?`<div class="panel"><details class="bt-set" ${B.set||!cfg.race?'open':''} id="btSetBox"><summary><b>Race day settings</b></summary>
+      <div class="grid" style="margin-top:10px">
+        <label class="field"><span>Race name</span><input class="input" id="bs_name" value="${esc(cfg.name)}"></label>
+        <label class="field"><span>Race day</span><input class="input" type="date" id="bs_race" value="${esc(cfg.race)}"></label>
+        <label class="field"><span>Training started</span><input class="input" type="date" id="bs_start" value="${esc(cfg.start)}"></label>
+      </div><p class="sub" style="margin:8px 0 0;font-size:13px">The meter fills from the training start to race day. Runs and rucks before the training start don't count here.</p>
+      <div class="row" style="margin-top:10px"><button class="btn primary sm" id="bs_save">Save</button><span id="bs_msg" class="sub" style="margin:0"></span></div></details></div>`:''}
+    <div class="panel"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0">Week plan</h2>${btWeekNav(B)}</div>
+      ${wkA.length?`<ol class="bt-list">${wkA.map(a=>`<li class="bt-as"><div><div class="bt-as-day">${calDayLabel(a.day)}</div><b>${esc(wkText(a.e.wk))}</b>${a.e.title&&a.e.title!==wkText(a.e.wk)?` <span class="soft">\u00B7 ${esc(a.e.title)}</span>`:''}${a.e.repeat&&a.e.repeat.days&&a.e.repeat.days.length?' <span class="soft" style="font-size:12.5px">(repeats)</span>':''}</div><div class="bt-as-st"><button class="btn sm" data-btedit="${a.e.id}|${a.day}">Edit</button></div></li>`).join('')}</ol>`:'<p class="sub" style="margin:0">Nothing assigned this week yet.</p>'}
+      <div class="row" style="margin-top:12px"><button class="btn primary" id="btAssign">+ Assign a run or ruck</button>${btAssignments(addDays(B.week,-7), addDays(B.week,-1)).some(a=>!(a.e.repeat&&a.e.repeat.days&&a.e.repeat.days.length))?'<button class="btn" id="btCopy">Copy last week\'s plan</button>':''}</div>
+      <div id="btCopyMsg"></div>
+    </div>
+    <div class="panel"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Team this week</h2><button class="btn sm" id="btXl">Export to Excel (.xlsx)</button></div>
+      <p class="sub" style="margin:4px 0 10px">${M.length?`${M.length} on the Bataan team. Times show when someone logs an assigned workout; "missed" means the day passed with nothing logged.`:`No one is on the Bataan team yet. ${sys?'Open someone in People, then Manage \u2192 Bataan team.':'The system admin adds people from their page in People.'}`}</p>
+      ${wkA.length?board:M.length?'<p class="sub" style="margin:0">Assign a workout to see the board.</p>':''}
+      ${B.form && !B.form.asg && B.form.sid && !pick ? btFormHtml(B.form) : ''}
+    </div>
+    ${M.length?`<div class="panel"><h2>Trends</h2>
+      ${weeks.length&&teamMiles.some(Boolean)?`<h3 class="chart-h">Team miles each week</h3>${barChart(weeks.map(wl), teamMiles, {label:'Miles', short:true})}`:'<p class="sub">Charts fill in as people log runs and rucks.</p>'}
+      ${avgPaceWk('run').some(v=>v!=null)||avgPaceWk('ruck').some(v=>v!=null)?`<h3 class="chart-h">Average pace each week <span style="font-weight:400">(lower is faster)</span></h3>${lineChart(weeks.map(wl), [{label:'Run', data:avgPaceWk('run')},{label:'Ruck', data:avgPaceWk('ruck')}].filter(x=>x.data.some(v=>v!=null)), {y:'time', label:'Pace per mile', legend:true})}`:''}
+      ${compWk.some(v=>v!=null)?`<h3 class="chart-h">Assignments done each week</h3>${barChart(weeks.map(wl), compWk, {label:'Done', y:'pct', good:v=>v==null?null:goodPct(v), short:true})}`:''}
+    </div>
+    <div class="panel"><h2>People</h2><p class="sub" style="margin:0 0 8px">Since ${esc(calDayLabel(btFirstDay(),{month:'short',day:'numeric',year:'numeric'}))}. Change compares their first week with their latest. Tap a name for their charts.</p>
+      <div class="scroll"><table class="bt-people"><thead><tr><th>Name</th><th class="num">Workouts</th><th class="num">Miles</th><th class="num">Done</th><th class="num">Avg run</th><th>Run change</th><th class="num">Avg ruck</th><th>Ruck change</th><th class="num">Heaviest pack</th><th>Last</th></tr></thead>
+      <tbody>${S.map(x=>`<tr ${pick&&pick.id===x.s.id?'class="sel"':''}><td><button class="linkish" data-btwho="${x.s.id}">${esc(x.s.name)}</button></td><td class="num">${x.L.length}</td><td class="num">${fmt1(x.miles)}</td><td class="num">${x.pct==null?'\u2013':Math.round(x.pct)+'%'}</td><td class="num">${btPaceTxt(x.runPace)||'\u2013'}</td><td class="${x.runCh!=null&&x.runCh<0?'bt-up':x.runCh>0?'bt-down':''}">${esc(btChangeTxt(x.runCh))}</td><td class="num">${btPaceTxt(x.rukPace)||'\u2013'}</td><td class="${x.rukCh!=null&&x.rukCh<0?'bt-up':x.rukCh>0?'bt-down':''}">${esc(btChangeTxt(x.rukCh))}</td><td class="num">${x.maxLb?x.maxLb+' lb':''}</td><td>${x.last?esc(tlDate(x.last)):'<span class="soft">none yet</span>'}</td></tr>`).join('')}</tbody></table></div>
+      ${pickChart}
+      ${btLogTable(allL, false)}
+    </div>`:''}
+    ${btUpcomingHtml()}
+  </div>`;
+  wireBtWeek(c, B); wireBtUpcoming(c); wireBtLogTable(c);
+  c.querySelectorAll('[data-btwho]').forEach(b=>b.onclick=()=>{ B.pick=b.dataset.btwho||null; if(B.form && B.form.sid!==B.pick) B.form=null; render(); if(B.pick){ const p=c.querySelector('.bt-pick'); if(p) p.scrollIntoView({block:'start'}); } });
+  c.querySelectorAll('[data-btlogfor]').forEach(b=>b.onclick=()=>btOpenForm({sid:b.dataset.btlogfor, kind:'run'}));
+  c.querySelectorAll('[data-btedit]').forEach(b=>b.onclick=()=>{ const [id,day]=b.dataset.btedit.split('|'), e=calList().find(x=>x.id===id); if(!e) return;
+    if(e.repeat&&e.repeat.days&&e.repeat.days.length){ STATE.cal=STATE.cal||{}; STATE.cal.show='bataan'; STATE.cal.day=day; STATE.cal.month=day.slice(0,7); STATE.tab='cal'; render(); window.scrollTo(0,0); toast('Repeating workout: change it here in the calendar.'); return; }
+    calEdit(e); });
+  $('btAssign').onclick=()=>{ const d=B.week<=today && today<=wkEnd ? today : B.week; calEdit(null, d, false, null, {cal:'bataan', wk:{kind:'run'}}); };
+  const cp=c.querySelector('#btCopy'); if(cp) cp.onclick=()=>{
+    const prev=btAssignments(addDays(B.week,-7), addDays(B.week,-1)).filter(a=>!(a.e.repeat&&a.e.repeat.days&&a.e.repeat.days.length));
+    const have=new Set(wkA.map(a=>a.day+'|'+wkText(a.e.wk)));
+    let n=0; prev.forEach(a=>{ const day=addDays(a.day,7); if(have.has(day+'|'+wkText(a.e.wk))) return;
+      calList().push(Object.assign(clone(a.e), {id:uid(), start:day, end:null, repeat:null, skip:null, of:null, on:null, updated:new Date().toISOString(), by:calMe()})); n++; });
+    if(n){ save(); toast(`Copied ${n} workout${n===1?'':'s'} from last week.`); render(); }
+    else $('btCopyMsg').innerHTML='<p class="sub" style="margin:8px 0 0">Last week\'s workouts are already on this week.</p>';
+  };
+  $('btXl').onclick=exportBataanXlsx;
+  const bs=c.querySelector('#bs_save'); if(bs){
+    const d=c.querySelector('#btSetBox'); if(d) d.ontoggle=()=>{ B.set=d.open; };
+    bs.onclick=()=>{ const name=$('bs_name').value.trim()||'Bataan Memorial Death March', race=$('bs_race').value, start=$('bs_start').value;
+      if(!race) return $('bs_msg').innerHTML='<span style="color:var(--alert)">Pick race day.</span>';
+      if(start && start>=race) return $('bs_msg').innerHTML='<span style="color:var(--alert)">Training has to start before race day.</span>';
+      DATA.settings.bataan={name, race, start:start||''}; B.set=false; save(); toast('Race day saved.'); render(); };
+  }
+}
+
+/* ---------- Excel ---------- */
+function exportBataanXlsx(){
+  const M=bataanMembers(), cfg=btCfg(), today=todayISO(), first=btFirstDay(), weeks=btWeeks(), byId={}; M.forEach(s=>byId[s.id]=s);
+  const L=btLogs().filter(t=>byId[t.sid]).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:String(byId[a.sid].name).localeCompare(String(byId[b.sid].name)));
+  const asgOf=t=>{ if(t.asg){ const e=calList().find(x=>x.id===t.asg); return e?wkText(e.wk):'(removed)'; } return ''; };
+  const pace=(s,d)=>btPaceTxt(btPace(s,d)).replace('/mi','');
+  const work=[['Date','Week of','Name','Type','Assigned workout','Miles','Time','Pace (min/mi)','Pack (lb)','Logged by','Note']];
+  L.forEach(t=>work.push([t.date, btMon(t.date), byId[t.sid].name, BT_KINDS[t.kind], asgOf(t)||'Extra', +t.dist, fmtLong(t.sec), pace(t.sec,t.dist), t.lb||'', t.self?'Self':'Leadership', t.note||'']));
+  const wkRows=[['Week of','Name','Workouts','Miles','Runs','Run miles','Avg run pace','Rucks','Ruck miles','Avg ruck pace','Assigned (due)','Done','Done (%)']];
+  weeks.forEach(w=>{ const A=btAssignments(w, addDays(w,6)).filter(a=>a.day<=today);
+    M.forEach(s=>{ const x=L.filter(t=>t.sid===s.id && btMon(t.date)===w), r=x.filter(t=>t.kind==='run'), k=x.filter(t=>t.kind==='ruck'), all=btLogsOf(s.id), d=A.filter(a=>btDoneLog(s.id,a,all)).length;
+      wkRows.push([w, s.name, x.length, +fmt1(btMiles(x)), r.length, +fmt1(btMiles(r)), btAvgPace(r)?pace(btAvgPace(r),1):'', k.length, +fmt1(btMiles(k)), btAvgPace(k)?pace(btAvgPace(k),1):'', A.length, d, A.length?Math.round(d/A.length*100):'']); }); });
+  const asRows=[['Date','Workout','Type','Miles','Pack (lb)','Name on calendar','Done','Not done']];
+  btAssignments(first, cfg.race && cfg.race>today ? cfg.race : today).forEach(a=>{ const done=M.filter(s=>btDoneLog(s.id,a)), not=M.filter(s=>!done.includes(s));
+    asRows.push([a.day, wkText(a.e.wk), BT_KINDS[a.e.wk.kind], +a.e.wk.dist||'', a.e.wk.lb||'', a.e.title||'', a.day>today?'(upcoming)':`${done.length} of ${M.length}`, a.day>today?'':not.map(s=>s.name).join(', ')]); });
+  const pRows=[['Name','Workouts','Miles','Assignments due','Done','Done (%)','Runs','Avg run pace','Run change (first \u2192 latest week)','Rucks','Avg ruck pace','Ruck change (first \u2192 latest week)','Heaviest pack (lb)','Longest ruck (mi)','Last workout']];
+  M.forEach(s=>{ const x=btPersonStats(s); pRows.push([s.name, x.L.length, +fmt1(x.miles), x.due, x.done, x.pct==null?'':Math.round(x.pct), x.runs.length, x.runPace?pace(x.runPace,1):'', btChangeTxt(x.runCh), x.rucks.length, x.rukPace?pace(x.rukPace,1):'', btChangeTxt(x.rukCh), x.maxLb||'', x.longRuck||'', x.last]); });
+  const info=[['Setting','Value'],['Race',cfg.name],['Race day',cfg.race||'Not set'],['Training started',cfg.start||'Not set'],['Days to go',cfg.race?Math.max(0,btDays(today,cfg.race)):''],['On the team',M.length],['Counted from',first],['Exported',new Date().toLocaleString()]];
+  const bytes=buildXlsx([{name:'Workouts', rows:work, widths:[11,11,24,7,20,7,9,12,9,11,30]}, {name:'Weekly', rows:wkRows, widths:[11,24,10,8,6,9,12,7,10,13,13,7,9]}, {name:'Assignments', rows:asRows, widths:[11,22,7,7,9,24,12,40]}, {name:'People', rows:pRows, widths:[24,10,8,15,7,9,6,12,30,7,13,30,16,15,13]}, {name:'Race', rows:info, widths:[18,32]}]);
+  offerFile(`Rusty_Anvil_Bataan_${stamp()}.xlsx`, bytes, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+}
+
+/* ============================== dashboards (leadership Home and soldier Home) ============================== */
+// Compact cards on a 12-column grid: a row of colored stat cards, then smaller cards. Rings and sparklines are plain SVG.
+function dbRing(pct, o){
+  o=o||{}; const r=o.r||20, sw=o.sw||6, c=r+sw/2+1, C=2*Math.PI*r, p=pct==null||isNaN(pct)?0:Math.max(0,Math.min(100,pct));
+  return `<svg class="db-ring" viewBox="0 0 ${2*c} ${2*c}" width="${o.size||2*c}" height="${o.size||2*c}" aria-hidden="true">
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke-width="${sw}" class="db-ring-bg"/>
+    <circle cx="${c}" cy="${c}" r="${r}" fill="none" stroke-width="${sw}" stroke-linecap="round" class="db-ring-fg" stroke-dasharray="${(C*p/100).toFixed(1)} ${C.toFixed(1)}" transform="rotate(-90 ${c} ${c})"/>
+    ${o.text!=null?`<text x="${c}" y="${c}" dy=".35em" text-anchor="middle" class="db-ring-t">${o.text}</text>`:''}</svg>`;
+}
+// A small trend line. Gaps (null) are skipped.
+function dbSpark(vals, o){
+  o=o||{};
+  if(o.bars){ const n=vals.length, hi=Math.max(...vals.map(v=>+v||0))||1, W=100, H=30, bw=W/n;
+    if(!vals.some(v=>+v>0)) return '';
+    return `<svg class="db-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true">${vals.map((v,i)=>{ const h=Math.max(1.5,(+v||0)/hi*(H-2)); return `<rect x="${(i*bw+bw*.18).toFixed(1)}" y="${(H-h).toFixed(1)}" width="${(bw*.64).toFixed(1)}" height="${h.toFixed(1)}" rx="1.2" class="db-spark-b${i===n-1?' now':''}"/>`; }).join('')}</svg>`; }
+  const pts=vals.map((v,i)=>[i,v]).filter(p=>p[1]!=null && !isNaN(p[1]));
+  if(pts.length<2) return '';
+  const W=100, H=30, xs=vals.length-1||1, lo=Math.min(...pts.map(p=>p[1])), hi=Math.max(...pts.map(p=>p[1])), span=hi-lo||1;
+  const xy=pts.map(([i,v])=>[i/xs*W, (o.invert ? (v-lo)/span : 1-(v-lo)/span)*(H-6)+3]);
+  const line=xy.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ');
+  return `<svg class="db-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-hidden="true"><polygon points="${xy[0][0].toFixed(1)},${H} ${line} ${xy[xy.length-1][0].toFixed(1)},${H}" class="db-spark-a"/><polyline points="${line}" fill="none" class="db-spark-l"/></svg>`;
+}
+// A colored stat card. go = a data-dbgo target that opens a screen.
+function dbKpi(k){
+  const tag=k.go?'button':'div';
+  return `<${tag} class="db-kpi t-${k.tone} ${k.cls||''}" ${k.go?`data-dbgo="${k.go}" type="button"`:''}>
+    <div class="db-kpi-txt"><span class="db-kpi-l">${k.label}</span><b class="db-kpi-v">${k.value}</b>${k.sub?`<span class="db-kpi-s">${k.sub}</span>`:''}</div>
+    ${k.viz?`<div class="db-kpi-viz">${k.viz}</div>`:''}</${tag}>`;
+}
+function dbCard(title, body, o){
+  o=o||{};
+  return `<section class="db-card ${o.cls||''}" style="--span:${o.span||4}" ${o.id?`id="${o.id}"`:''}>
+    <div class="db-card-h"><h3>${title}</h3>${o.action||''}</div>${body}</section>`;
+}
+const dbBtn = (go, label) => `<button class="db-link" data-dbgo="${go}" type="button">${label} \u203A</button>`;
+function dbWireGo(c){
+  const go=k=>{
+    if(k==='rank'){ STATE.tab='people'; STATE.personId=null; STATE.pView='rank'; }
+    else if(k==='practice'){ STATE.tab='people'; STATE.personId=null; STATE.pView='practice'; }
+    else if(k==='health'){ STATE.tab='people'; STATE.personId=null; STATE.pView='health'; }
+    else if(k==='tryout'){ STATE.tab='people'; STATE.personId=null; STATE.pView='all'; }
+    else if(k==='results'){ goGrade('results'); return; }
+    else if(k==='mytimes'||k==='mypractice'||k==='myhealth'||k==='bataan'||k==='cal'){ if(k==='mypractice') STATE.practiceMode='progress'; STATE.tab=k; }
+    render(); window.scrollTo(0,0);
+  };
+  c.querySelectorAll('[data-dbgo]').forEach(b=>b.onclick=()=>go(b.dataset.dbgo));
+}
+// The next few calendar entries this person can see, as compact date rows.
+function dbUpcomingHtml(n){
+  const today=isoOf(new Date()), occ=calExpand(today, addDays(today,20)), seen=new Set(), rows=[];
+  Object.keys(occ).sort().forEach(d=>occ[d].forEach(e=>{ if(seen.has(e.id) && e.end>e.start) return; seen.add(e.id); rows.push({d,e}); }));
+  if(!rows.length) return '<p class="sub" style="margin:0">Nothing in the next three weeks.</p>';
+  const tag=e=>calBothVisible()?`<span class="cal-tag ${calOf(e)}">${CAL_TAG[calOf(e)]}</span>`:'';
+  return `<ol class="db-up">${rows.slice(0,n||5).map(({d,e})=>{ const dt=dateOf(d);
+    return `<li><button class="db-up-b" data-calgo="${d}" type="button"><span class="db-date"><small>${dt.toLocaleDateString([], {month:'short'})}</small><b>${dt.getDate()}</b></span>
+      <span class="db-up-t"><b>${tag(e)}${esc(e.title)}</b><small>${d===today?'Today':d===addDays(today,1)?'Tomorrow':calDayLabel(d,{weekday:'long'})}${e.from?' \u00B7 '+fmtClock(e.from):''}${e.where?' \u00B7 '+esc(e.where):''}</small></span></button></li>`; }).join('')}</ol>`;
+}
+function dbWireCal(c){ c.querySelectorAll('[data-calgo]').forEach(b=>b.onclick=()=>{ STATE.cal=STATE.cal||{}; STATE.cal.day=b.dataset.calgo; STATE.cal.month=b.dataset.calgo.slice(0,7); STATE.tab='cal'; render(); window.scrollTo(0,0); }); }
+
+/* ---------- leadership Home: admin, battalion leadership, Team Captain ---------- */
+function renderHome(c){
+  tlInit();
+  const T=tryoutSoldiers(), R=ranked('overall'), top=R.slice(0,5), kind=STATE.homeKind||'rope', role=myRole();
+  const empty = !DATA.soldiers.length ? `<section class="db-card" style="--span:12;text-align:center"><h3>Add your team</h3><p class="sub" style="margin:4px auto 12px">Type or paste your roster, or import a .json file.</p><div class="row" style="justify-content:center"><button class="btn primary" id="goTeam">Add your team</button>${SYNC.on?'':'<button class="btn" id="sample">Load example team</button>'}</div></section>` : '';
+  // stat cards
+  const done=T.filter(s=>!score(s).missing.length).length;
+  let gos=0, tested=0; SKILLS_ON().forEach(sk=>T.forEach(s=>{ const r=skillResult(s,sk.k); if(r){ tested++; if(r==='go') gos++; } }));
+  const goPct=tested?gos/tested*100:null;
+  const scans=withScans(), ready=scans.length?readinessIndex(scans):null;
+  const wkAgo=Date.now()-7*864e5, pr=[]; rosterAll().forEach(s=>(s.practice||[]).forEach(e=>{ if(e.t>=wkAgo) pr.push(e); }));
+  const prPct=pr.length?pr.filter(e=>e.ok).length/pr.length*100:null;
+  const daily=[...Array(7)].map((_,i)=>{ const a=Date.now()-(7-i)*864e5, b=a+864e5, L=pr.filter(e=>e.t>=a&&e.t<b); return L.length?L.filter(e=>e.ok).length/L.length*100:null; });
+  const kpis=[
+    dbKpi({tone:'a', label:'In the tryout', value:T.length, sub:T.length?`${done} fully tested`:'No one yet', viz:dbRing(T.length?done/T.length*100:0), go:'tryout'}),
+    dbKpi({tone:'b', label:'Go rate', value:goPct==null?'\u2013':Math.round(goPct)+'%', sub:tested?`${gos} of ${tested} events`:'No Go/No-Go results yet', viz:dbRing(goPct), go:'results'}),
+    dbKpi({tone:'c', label:'Readiness', value:ready==null?'\u2013':ready+'%', sub:scans.length?`${scans.length} with an InBody scan`:'No scans yet', viz:dbRing(ready), go:'health'}),
+    dbKpi({tone:'d', label:'Practice, 7 days', value:prPct==null?'\u2013':Math.round(prPct)+'%', sub:pr.length?`right, across ${pr.length} tries`:'No practice this week', viz:dbSpark(daily), go:'practice'}),
+  ].join('');
+  // Top 5
+  const top5=top.length?`<ol class="top5 db-top">${top.map((r,i)=>`<li><span class="t5n">${i+1}</span><span class="t5who"><button class="linkish" data-open="${r.s.id}">${esc(r.s.name)}</button><small>${SKILLS_ON().length?`${r.sc.gos} Go${r.sc.gos===1?'':'s'}`:''}${isCut(r.sc)?' \u00B7 <span style="color:var(--alert)">PT fail</span>':''}</small></span><b>${fmt1(r.sc.total)}</b></li>`).join('')}</ol>`:'<p class="sub" style="margin:0">No one is in the tryout yet.</p>';
+  // Go rate by event, as thin bars
+  const rows=SKILLS_ON().map(sk=>{ const t=T.filter(s=>skillResult(s,sk.k)), g=t.filter(s=>skillResult(s,sk.k)==='go').length; return {name:sk.name, n:t.length, go:g, p:t.length?g/t.length*100:null}; }).filter(r=>r.n);
+  if(isOn('aft')){ const L=T.map(s=>score(s)).filter(sc=>sc.aftTotal!=null); if(L.length){ const g=L.filter(sc=>sc.aftPass).length; rows.unshift({name:'AFT (meets standard)', n:L.length, go:g, p:g/L.length*100}); } }
+  const goBars=rows.length?`<ul class="db-bars">${rows.map(r=>`<li><div class="db-bars-h"><span>${esc(r.name)}</span><b>${Math.round(r.p)}%</b></div><div class="db-bar ${goodPct(r.p)}"><i style="width:${Math.max(2,r.p).toFixed(1)}%"></i></div><small>${r.go} of ${r.n} tested</small></li>`).join('')}</ul>`:'<p class="sub" style="margin:0">No results yet.</p>';
+  // Bataan (admin and leadership)
+  let bt='';
+  if(role==='admin'||role==='leader'){
+    const M=bataanMembers(), cfg=btCfg();
+    if(M.length || cfg.race){
+      const today=todayISO(), wk=btMon(today), A=btAssignments(wk, addDays(wk,6)).filter(a=>a.day<=today);
+      let d=0; A.forEach(a=>M.forEach(s=>{ if(btDoneLog(s.id,a)) d++; }));
+      const L=btLogs(), weeks=btWeeks().slice(-8), wm=weeks.map(w=>btMiles(L.filter(t=>btMon(t.date)===w)));
+      bt=dbCard('Bataan', `${btMeterHtml(false).replace('class="bt-meter"','class="bt-meter flat"')}
+        <div class="db-mini3"><div><span>On the team</span><b>${M.length}</b></div><div><span>Done this week</span><b>${A.length&&M.length?Math.round(d/(A.length*M.length)*100)+'%':'\u2013'}</b></div><div><span>Miles this week</span><b>${fmt1(btMiles(L.filter(t=>t.date>=wk)))}</b></div></div>
+        ${wm.some(Boolean)?`<div class="db-sparkbox"><span class="soft">Team miles, last ${weeks.length} weeks</span>${dbSpark(wm,{bars:true})}</div>`:''}`,
+        {span:6, action:dbBtn('bataan','Open')});
+    }
+  }
+  const teamTimes=tlTeamPanel(kind, segHtml('homekind', ['rope','ruck','run'].map(k=>[k, TL_KINDS[k].label]), kind, 'Team event'));
+  c.innerHTML=`${backupBannerHtml()}<div class="db-grid">
+    ${empty}
+    <div class="db-kpis" style="--span:12">${kpis}</div>
+    ${dbCard('Top 5', top5, {span:4, action:`<button class="db-link" id="dashRank" type="button">Rankings \u203A</button>`})}
+    ${dbCard('Go rate by event', goBars, {span:4, action:dbBtn('results','Results')})}
+    <div class="db-cell" style="--span:4">${recentPracticeHtml(5)}</div>
+    <div class="db-cell" style="--span:8">${teamTimes}</div>
+    ${dbCard('Coming up', dbUpcomingHtml(5), {span:4, action:dbBtn('cal','Calendar')})}
+    <div class="db-cell" style="--span:${bt?6:12}">${healthSnapHtml()}</div>
+    ${bt}
+  </div>`;
+  $('dashRank').onclick=()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='rank'; render(); window.scrollTo(0,0); };
+  c.querySelectorAll('[data-homekind]').forEach(b=>b.onclick=()=>{ STATE.homeKind=b.dataset.homekind; if(STATE.tl.open && STATE.tl.open.startsWith('team:')) STATE.tl.open=null; render(); });
+  c.querySelectorAll('[data-gohealth]').forEach(b=>b.onclick=()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='health'; render(); window.scrollTo(0,0); });
+  c.querySelectorAll('[data-tlphoto]').forEach(b=>b.onclick=()=>showPhoto(b.dataset.tlphoto));
+  const ap=$('dashPrac'); if(ap) ap.onclick=()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='practice'; render(); window.scrollTo(0,0); };
+  const iw=$('dashWk'); if(iw) iw.onclick=()=>goGrade('times');
+  wireBackupBanner();
+  const gt=$('goTeam'); if(gt) gt.onclick=()=>goGrade('results', {gMode:'team'});
+  const sm=$('sample'); if(sm) sm.onclick=loadSample;
+  c.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPerson(b.dataset.open));
+  dbWireGo(c); dbWireCal(c);
+  tlWire(c);
+}
+
+/* ---------- soldier Home ---------- */
+function renderSoldierHome(c, s){
+  const today=isoOf(new Date()), tom=addDays(today,1), occ=calExpand(today, tom);
+  const first = s.name.split(',').length>1 ? s.name.split(',')[1].trim().split(' ')[0] : s.name.split(' ')[0];
+  const wk=weekStartIso(), weeks=[...Array(8)].map((_,i)=>addDays(wk,-7*(7-i)));
+  const mine=k=>timeLogs().filter(e=>e.kind===k && e.sid===s.id && e.dist>0 && e.sec>0);
+  const kindKpi=(k,tone)=>{ const all=mine(k), W=mileStats(all.filter(e=>e.date>=wk && e.date<=today)), A=mileStats(all);
+    const wm=weeks.map(w=>mileStats(all.filter(e=>e.date>=w && e.date<addDays(w,7))).mi);
+    return dbKpi({tone, cls:'sh-kind', label:`${k==='run'?'Running':'Rucking'} this week`, value:fmtMi(W.mi),
+      sub:A.n?`${A.pace?fmtTime(A.pace)+'/mi avg':''} \u00B7 ${fmtMi(A.mi)} overall`:`No ${k}s logged yet`, viz:dbSpark(wm,{bars:true}), go:'mytimes'}); };
+  const pr=(s.practice||[]).slice(-20), prPct=pr.length?pr.filter(e=>e.ok).length/pr.length*100:null;
+  const W8=weighIns(s.id), lastW=W8[W8.length-1], firstW=W8[0];
+  const fourth = lastW ? dbKpi({tone:'d', label:'Weight', value:`${fmt1(lastW.lb)} lb`, sub:W8.length>1?`${lastW.lb-firstW.lb>0?'+':''}${fmt1(lastW.lb-firstW.lb)} lb since ${calDayLabel(firstW.date,{month:'short',day:'numeric'})}`:calDayLabel(lastW.date,{month:'short',day:'numeric'}), viz:dbSpark(W8.slice(-12).map(e=>e.lb)), go:'myhealth'})
+    : (()=>{ const up=calExpand(today, addDays(today,20)), d=Object.keys(up).sort()[0], e=d&&up[d][0];
+        return dbKpi({tone:'d', label:'Next up', value:e?esc(e.title):'\u2013', sub:e?`${d===today?'Today':d===tom?'Tomorrow':calDayLabel(d)}${e.from?' \u00B7 '+fmtClock(e.from):''}`:'Nothing on the calendar', go:'cal'}); })();
+  const kpis=[kindKpi('run','a'), kindKpi('ruck','b'),
+    dbKpi({tone:'c', label:'Practice', value:prPct==null?'\u2013':Math.round(prPct)+'%', sub:pr.length?`right in your last ${pr.length}`:'Not started yet', viz:dbRing(prPct), go:'mypractice'}), fourth].join('');
+  const dayBlock=(d,label)=>{ const L=occ[d]||[];
+    return `<div class="sh-day"><h4>${label} <span class="soft">${calDayLabel(d,{weekday:'short',month:'short',day:'numeric'})}</span></h4>
+      ${L.length?L.map(e=>`<button class="sh-ev" data-calgo="${d}" type="button"><b>${esc(e.title)}</b><span>${[e.from?fmtClock(e.from)+(e.to?'\u2013'+fmtClock(e.to):''):(e.end&&e.end>e.start?calWhen(e):'All day'), e.where, e.uniform].filter(Boolean).map(esc).join(' \u00B7 ')}</span></button>`).join('')
+        :'<p class="sub" style="margin:2px 0 0;font-size:13.5px">Nothing scheduled.</p>'}</div>`; };
+  const P=soldierWeakest(s);
+  tlInit();
+  const qk = STATE.shKind = STATE.shKind || 'run';
+  const flash = STATE.tl.flash; STATE.tl.flash=''; const wflash=STATE.wFlash; STATE.wFlash='';
+  const runs=mine('run'), rucks=mine('ruck'), wkMi=k=>weeks.map(w=>Math.round(mileStats((k==='run'?runs:rucks).filter(e=>e.date>=w && e.date<addDays(w,7))).mi*10)/10);
+  const anyMiles=runs.length||rucks.length;
+  const practice=`${P.weak.length?`<ol class="sh-weak db-bars">${P.weak.map(w=>`<li><div class="db-bars-h"><span>${esc(w.label)}</span><b>${Math.round(w.r*100)}%</b></div><div class="db-bar ${goodPct(w.r*100)}"><i style="width:${Math.max(4,Math.round(w.r*100))}%"></i></div><div class="row" style="justify-content:space-between"><small>right in your last ${w.n}</small><button class="db-link" data-shprac="${w.k}" type="button">Practice \u203A</button></div></li>`).join('')}</ol>`
+      : `<p class="sub" style="margin:0 0 8px">${P.any?'Nothing below 80% right now. Nice work.':'You haven\'t practiced yet. Start anywhere.'}</p>`}
+    ${P.untried.length?`<p class="sub" style="margin:10px 0 6px;font-size:13px">Not tried yet</p><div class="row" style="gap:6px">${P.untried.slice(0,4).map(t=>`<button class="chip-btn" data-shprac="${t.k}">${esc(t.label)}</button>`).join('')}</div>`:''}`;
+  c.innerHTML=`<div class="db-hello"><span class="soft">${new Date().toLocaleDateString([], {weekday:'long', month:'long', day:'numeric'})}</span><h2>Hey ${esc(first)}</h2></div>
+  <div class="db-grid">
+    <div class="db-kpis" style="--span:12">${kpis}</div>
+    ${dbCard('Today and tomorrow', dayBlock(today,'Today')+dayBlock(tom,'Tomorrow'), {span:5, action:`<button class="db-link" id="shCal" type="button">Calendar \u203A</button>`})}
+    <section class="db-card sh-log" style="--span:7" id="shLogBox"><div class="db-card-h"><h3>Log it</h3>
+        <div class="seg" role="group" aria-label="What to log">${['run','ruck','weight'].map(k=>`<button data-shkind="${k}" aria-pressed="${k===qk}">${k==='weight'?'Weight':TL_KINDS[k].label}</button>`).join('')}</div></div>
+      ${flash||wflash?`<div class="note ok" style="margin-bottom:10px">${esc(flash||wflash)}</div>`:''}
+      ${qk==='weight'?weightFormHtml()+`<p class="sub" style="margin:10px 0 0;font-size:13px">Your weight chart is in <button class="linkish" id="shWt">My health</button>.</p>`:tlFormHtml(qk, s.id)}</section>
+    ${dbCard('Miles by week', anyMiles?barChart(weeks.map(w=>calDayLabel(w,{month:'short',day:'numeric'})), weeks.map((w,i)=>Math.round((wkMi('run')[i]+wkMi('ruck')[i])*10)/10), {label:'Miles', after:i=>`Run ${wkMi('run')[i]} mi \u00B7 Ruck ${wkMi('ruck')[i]} mi`}):'<p class="sub" style="margin:0">Log a run or ruck and your weeks show up here.</p>', {span:7, action:`<button class="db-link" id="shAll" type="button">All my times \u203A</button>`})}
+    ${dbCard('Practice next', practice, {span:5, action:`<button class="db-link" id="shProg" type="button">My progress \u203A</button>`})}
+  </div>`;
+  const box=$('shLogBox'), cancel=box.querySelector('#tl_cancel');
+  if(cancel) cancel.remove();
+  if(qk==='weight'){ wireWeightForm(s.id); $('shWt').onclick=()=>{ STATE.tab='myhealth'; render(); window.scrollTo(0,0); }; }
+  else box.querySelector('#tl_save').onclick=()=>tlSave(qk, s.id);
+  if(qk!=='weight') box.querySelectorAll('.tl-form .input').forEach(el=>el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); tlSave(qk, s.id); } }));
+  box.querySelectorAll('[data-shkind]').forEach(b=>b.onclick=()=>{ STATE.shKind=b.dataset.shkind; render(); });
+  $('shAll').onclick=()=>{ STATE.tab='mytimes'; render(); window.scrollTo(0,0); };
+  $('shCal').onclick=()=>{ STATE.tab='cal'; render(); window.scrollTo(0,0); };
+  $('shProg').onclick=()=>{ STATE.practiceMode='progress'; STATE.tab='mypractice'; render(); window.scrollTo(0,0); };
+  c.querySelectorAll('[data-shprac]').forEach(b=>b.onclick=()=>{ STATE.practiceMode=PRACTICE_MODE[b.dataset.shprac]||'medevac'; STATE.tab='mypractice'; render(); window.scrollTo(0,0); });
+  dbWireGo(c); dbWireCal(c);
 }
 
 /* ============================== soldier Home ============================== */
@@ -6390,62 +7092,7 @@ function soldierWeakest(s){
   const untried=Drill.PTASKS.filter(([k])=>!tried.has(k)).map(([k,l])=>({k,label:l}));
   return {weak, untried, any:L.length>0};
 }
-function renderSoldierHome(c, s){
-  const today=isoOf(new Date()), tom=addDays(today,1), occ=calExpand(today, tom);
-  const first = s.name.split(',').length>1 ? s.name.split(',')[1].trim().split(' ')[0] : s.name.split(' ')[0];
-  const dayBlock=(d,label)=>{ const L=occ[d]||[];
-    return `<div class="sh-day"><h3>${label} <span class="soft" style="font-weight:400;font-size:13px">${calDayLabel(d,{weekday:'short',month:'short',day:'numeric'})}</span></h3>
-      ${L.length?L.map(e=>`<button class="sh-ev" data-calgo="${d}"><b>${esc(e.title)}</b><span>${[e.from?fmtClock(e.from)+(e.to?'\u2013'+fmtClock(e.to):''):(e.end&&e.end>e.start?calWhen(e):'All day'), e.where, e.uniform].filter(Boolean).map(esc).join(' \u00B7 ')}</span></button>`).join('')
-        :'<p class="sub" style="margin:4px 0 0">Nothing scheduled.</p>'}</div>`; };
-  const wk=weekStartIso(), mo=today.slice(0,7)+'-01';
-  const kindPanel=kind=>{
-    const all=timeLogs().filter(e=>e.kind===kind && e.sid===s.id && e.dist>0 && e.sec>0);
-    const W=mileStats(all.filter(e=>e.date>=wk && e.date<=today)), M=mileStats(all.filter(e=>e.date>=mo && e.date<=today)), A=mileStats(all);
-    const last=[...all].sort(tlNewest)[0];
-    return `<div class="sh-kind"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${kind==='run'?'Running':'Rucking'}</h3>${last?`<span class="soft" style="font-size:12.5px">Last: ${tlDist(last.dist)} mi, ${calDayLabel(last.date,{month:'short',day:'numeric'})}</span>`:''}</div>
-      ${A.n?`<div class="tiles sh-tiles">
-        <div><b>${A.pace?fmtTime(A.pace):'\u2013'}</b><span>average pace /mi</span></div>
-        <div><b>${fmtMi(W.mi)}</b><span>this week</span></div>
-        <div><b>${fmtMi(M.mi)}</b><span>this month</span></div>
-        <div><b>${fmtMi(A.mi)}</b><span>overall (${A.n} ${kind}${A.n===1?'':'s'})</span></div>
-      </div>`:`<p class="sub" style="margin:6px 0 0">No ${kind}s logged yet.</p>`}</div>`;
-  };
-  const P=soldierWeakest(s);
-  const pBtn=(k,label)=>`<button class="btn sm" data-shprac="${k}">Practice ${esc(label)}</button>`;
-  tlInit();
-  const qk = STATE.shKind = STATE.shKind || 'run';
-  const flash = STATE.tl.flash; STATE.tl.flash=''; const wflash=STATE.wFlash; STATE.wFlash='';
-  c.innerHTML=`<div class="stack">
-    <div class="sh-hello"><h2>Hey ${esc(first)}</h2></div>
-    <div class="two">
-      <div class="panel"><div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:6px"><h2 style="margin:0">Calendar</h2><button class="btn sm" id="shCal">Full calendar</button></div>
-        ${dayBlock(today,'Today')}${dayBlock(tom,'Tomorrow')}</div>
-      <div class="panel sh-log" id="shLogBox"><div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:10px"><h2 style="margin:0">Log it</h2>
-          <div class="seg" role="group" aria-label="What to log">${['run','ruck','weight'].map(k=>`<button data-shkind="${k}" aria-pressed="${k===qk}">${k==='weight'?'Weight':TL_KINDS[k].label}</button>`).join('')}</div></div>
-        ${flash||wflash?`<div class="note ok" style="margin-bottom:10px">${esc(flash||wflash)}</div>`:''}
-        ${qk==='weight'?weightFormHtml()+`<p class="sub" style="margin:10px 0 0;font-size:13px">Your weight chart is in <button class="linkish" id="shWt">My health</button>.</p>`:tlFormHtml(qk, s.id)}</div>
-    </div>
-    <div class="panel"><div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:6px"><div><h2 style="margin:0">Runs and rucks</h2><p class="sub" style="margin:2px 0 0">Weeks start Monday. Includes times you log and times leadership logs for you.</p></div><button class="btn sm" id="shAll">All my times</button></div>
-      ${kindPanel('run')}${kindPanel('ruck')}</div>
-    <div class="panel"><div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:6px"><h2 style="margin:0">Practice next</h2><button class="btn sm" id="shProg">My progress</button></div>
-      ${P.weak.length?`<p class="sub" style="margin:0 0 8px">Your weakest skills, from your last 10 tries at each.</p><ol class="sh-weak">${P.weak.map(w=>`<li><div><b>${esc(w.label)}</b><div class="sh-bar" role="img" aria-label="${Math.round(w.r*100)}% right"><i style="width:${Math.max(4,Math.round(w.r*100))}%"></i></div><span class="soft" style="font-size:12.5px">${Math.round(w.r*100)}% right in your last ${w.n}</span></div>${pBtn(w.k,'')}</li>`).join('')}</ol>`
-        : P.any ? `<p class="sub" style="margin:0 0 8px">Nothing below 80% right now. Nice work.</p>` : `<p class="sub" style="margin:0 0 8px">You haven't practiced yet. Start anywhere.</p>`}
-      ${P.untried.length?`<p class="sub" style="margin:10px 0 6px;font-size:13px">Not tried yet:</p><div class="row" style="gap:6px">${P.untried.slice(0,4).map(t=>`<button class="chip-btn" data-shprac="${t.k}">${esc(t.label)}</button>`).join('')}</div>`:''}
-    </div>
-  </div>`;
-  // quick log: same form and rules as My times
-  const box=$('shLogBox'), cancel=box.querySelector('#tl_cancel');
-  if(cancel) cancel.remove();
-  if(qk==='weight'){ wireWeightForm(s.id); $('shWt').onclick=()=>{ STATE.tab='myhealth'; render(); window.scrollTo(0,0); }; }
-  else box.querySelector('#tl_save').onclick=()=>tlSave(qk, s.id);
-  if(qk!=='weight') box.querySelectorAll('.tl-form .input').forEach(el=>el.addEventListener('keydown',ev=>{ if(ev.key==='Enter'){ ev.preventDefault(); tlSave(qk, s.id); } }));
-  box.querySelectorAll('[data-shkind]').forEach(b=>b.onclick=()=>{ STATE.shKind=b.dataset.shkind; render(); });
-  $('shAll').onclick=()=>{ STATE.tab='mytimes'; render(); window.scrollTo(0,0); };
-  c.querySelectorAll('[data-calgo]').forEach(b=>b.onclick=()=>{ STATE.cal=STATE.cal||{}; STATE.cal.day=b.dataset.calgo; STATE.cal.month=b.dataset.calgo.slice(0,7); STATE.tab='cal'; render(); window.scrollTo(0,0); });
-  $('shCal').onclick=()=>{ STATE.tab='cal'; render(); window.scrollTo(0,0); };
-  $('shProg').onclick=()=>{ STATE.practiceMode='progress'; STATE.tab='mypractice'; render(); window.scrollTo(0,0); };
-  c.querySelectorAll('[data-shprac]').forEach(b=>b.onclick=()=>{ STATE.practiceMode=PRACTICE_MODE[b.dataset.shprac]||'medevac'; STATE.tab='mypractice'; render(); window.scrollTo(0,0); });
-}
+// renderSoldierHome lives in dash.js.
 
 /* ============================== admin and grader layout: Home, People, Grade ============================== */
 // Old tab names (saved sessions, older links in the code) map onto the new ones.
@@ -6531,37 +7178,6 @@ function healthSnapHtml(){
       <div><b class="${fl?'flag':''}">${fl}</b><span>flagged for follow-up</span></div>
     </div>${helpBox('ready','Readiness is the share of soldiers with a scan who are in (or just above) their body-fat target and below the elevated visceral-fat level, from each soldier\'s latest scan.')}</div>`;
 }
-function renderHome(c){
-  tlInit();
-  const top=ranked('overall').slice(0,5), kind=STATE.homeKind||'rope';
-  const empty = !DATA.soldiers.length ? `<div class="panel" style="text-align:center;padding:26px 16px"><h2>Add your team</h2><p class="sub" style="margin:0 auto 12px">Type or paste your roster, or import a .json file.</p><div class="row" style="justify-content:center"><button class="btn primary" id="goTeam">Add your team</button>${SYNC.on?'':'<button class="btn" id="sample">Load example team</button>'}</div></div>` : '';
-  c.innerHTML=`<div class="stack">
-    ${backupBannerHtml()}
-    ${empty}
-    <div class="two">
-      <div class="panel">
-        <div class="row" style="justify-content:space-between;align-items:flex-start;margin-bottom:8px"><h2 style="margin:0">Top 5</h2><button class="btn sm" id="dashRank">Rankings</button></div>
-        ${top.length?`<ol class="top5">${top.map((r,i)=>`<li><span class="t5n">${i+1}</span><span class="t5who"><button class="linkish" data-open="${r.s.id}">${esc(r.s.name)}</button><small>${SKILLS_ON().length?`${r.sc.gos} Go${r.sc.gos===1?'':'s'}`:''}${isCut(r.sc)?' \u00B7 <span style="color:var(--alert)">PT fail</span>':''}</small></span><b>${fmt1(r.sc.total)}</b></li>`).join('')}</ol>`
-          :`<p class="sub" style="margin:6px 0 0">No one is in the tryout yet.</p>`}
-      </div>
-      ${goRateHtml()}
-    </div>
-    ${tlTeamPanel(kind, segHtml('homekind', ['rope','ruck','run'].map(k=>[k, TL_KINDS[k].label]), kind, 'Team event'))}
-    <div class="two">${healthSnapHtml()}${recentPracticeHtml()}</div>
-  </div>`;
-  $('dashRank').onclick=()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='rank'; render(); window.scrollTo(0,0); };
-  c.querySelectorAll('[data-homekind]').forEach(b=>b.onclick=()=>{ STATE.homeKind=b.dataset.homekind; if(STATE.tl.open && STATE.tl.open.startsWith('team:')) STATE.tl.open=null; render(); });
-  c.querySelectorAll('[data-gohealth]').forEach(b=>b.onclick=()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='health'; render(); window.scrollTo(0,0); });
-  c.querySelectorAll('[data-tlphoto]').forEach(b=>b.onclick=()=>showPhoto(b.dataset.tlphoto));
-  const ap=$('dashPrac'); if(ap) ap.onclick=()=>{ STATE.tab='people'; STATE.personId=null; STATE.pView='practice'; render(); window.scrollTo(0,0); };
-  const iw=$('dashWk'); if(iw) iw.onclick=()=>goGrade('times');
-  wireBackupBanner();
-  const gt=$('goTeam'); if(gt) gt.onclick=()=>goGrade('results', {gMode:'team'});
-  const sm=$('sample'); if(sm) sm.onclick=loadSample;
-  c.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openPerson(b.dataset.open));
-  tlWire(c);
-}
-
 /* ============================== People ============================== */
 const PVIEWS=[['rank','Rankings'],['all','Everyone'],['health','Health'],['practice','Practice']];
 function renderPeople(c){
@@ -6572,7 +7188,7 @@ function renderPeople(c){
   const v=STATE.pView;
   const grp = !isCaptain() && v!=='rank';   // leadership and the admin pick Ranger Challenge, battalion, or everyone
   c.innerHTML=`<div class="subtabs seg no-print" role="group" aria-label="People">${PVIEWS.map(([k,l])=>`<button data-pview="${k}" aria-pressed="${k===v}">${l}</button>`).join('')}</div>
-    ${grp?`<div class="row no-print" style="margin:-6px 0 14px;gap:8px"><span class="soft" style="font-size:13.5px">Show</span>${segHtml('pgroup', [['all','Everyone'],['rc','Ranger Challenge'],['bn','Battalion']], STATE.pGroup||'all', 'Group')}</div>`:''}
+    ${grp?`<div class="row no-print" style="margin:-6px 0 14px;gap:8px"><span class="soft" style="font-size:13.5px">Show</span>${segHtml('pgroup', [['all','Everyone'],['rc','Ranger Challenge'],['bn','Battalion'],['bt','Bataan']], STATE.pGroup||'all', 'Group')}</div>`:''}
     <div id="pBody"></div>`;
   c.querySelectorAll('[data-pview]').forEach(b=>b.onclick=()=>{ STATE.pView=b.dataset.pview; render(); });
   c.querySelectorAll('[data-pgroup]').forEach(b=>b.onclick=()=>{ STATE.pGroup=b.dataset.pgroup; render(); });
@@ -6640,7 +7256,7 @@ function renderPerson(c, s){
     <div class="row no-print"><button class="btn sm" id="pBack">\u2190 People</button></div>
     <div class="panel person-head">
       <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px">
-        <div><h2 style="margin:0 0 2px">${esc(s.name)}</h2><p class="soft" style="margin:0">${[s.sex==='F'?'Female':s.sex==='M'?'Male':'', s.age?'Age '+s.age:''].filter(Boolean).join(' \u00B7 ')} \u00B7 <span class="badge ${isRCs(s)?'b-brass':'b-none'}">${isRCs(s)?'Ranger Challenge':'Battalion'}</span>${isRCs(s)&&!inT?' <span class="badge b-none">Not in tryout</span>':''}</p></div>
+        <div><h2 style="margin:0 0 2px">${esc(s.name)}</h2><p class="soft" style="margin:0">${[s.sex==='F'?'Female':s.sex==='M'?'Male':'', s.age?'Age '+s.age:''].filter(Boolean).join(' \u00B7 ')} \u00B7 <span class="badge ${isRCs(s)?'b-brass':'b-none'}">${isRCs(s)?'Ranger Challenge':'Battalion'}</span>${isRCs(s)&&!inT?' <span class="badge b-none">Not in tryout</span>':''}${isBataan(s)&&!isCaptain()?' <span class="badge b-bt">Bataan</span>':''}</p></div>
         ${inT?`<div class="person-score"><b>${fmt1(sc.total)}</b><small>Rank ${idx+1} of ${ov.length}${isCut(sc)?' \u00B7 cut':idx<cutIndex(ov)?' \u00B7 above the line':' \u00B7 below the line'}</small></div>`:''}
       </div>
       <div class="row" style="margin-top:12px;gap:8px">${inT?`<button class="btn primary sm" id="pGrade">Enter results</button>`:''}${scan?statusBadge(pbfStatus(genderOf(s), numv(scan.pbf))):''}</div>
