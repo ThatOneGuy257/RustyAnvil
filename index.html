@@ -804,6 +804,7 @@ const ALL_SKILLS = [
 const PHYS_EVENTS = [{k:'aft',short:'AFT',name:'Army Fitness Test (AFT)'},{k:'cft',short:'CFT',name:'Combat Field Test (CFT)'}];
 const WEAPON_KEYS = ['m249','m240b','m4'];
 const REPORT_KEYS = ['medevac','spot','salute'];
+const OTHER_TIMED = ['cff','grenade','throw','tccc','fracture','burn'];   // every other skill can be timed too
 const FIELDS = [
   {k:'mdl', ev:'aft', label:'Deadlift', hint:'lb', type:'int', min:0, max:1000, w:'w-s'},
   {k:'hrp', ev:'aft', label:'Push-ups', hint:'reps', type:'int', min:0, max:200, w:'w-s'},
@@ -933,7 +934,7 @@ const DEFAULT_SETTINGS = {
   weights:{mdl:1,hrp:1,sdc:1,plk:1,run:1}, goPoints:50, physWeights:{aft:70, cft:30}, customTests:[],
   cftBest:1200, cftZero:1801, cutLine:14, minFemale:3, grenadeTotal:6, grenadeGo:6,
   grenadeList:DEFAULT_GRENADES, circleBonus:25, aftFailCut:true,
-  enabled:Object.assign({}, DEFAULT_ENABLED), timeLimits:{m249:150, m240b:150, m4:150},
+  enabled:Object.assign({}, DEFAULT_ENABLED), timeLimits:{m249:150, m240b:150, m4:150, cff:300, tccc:600},
   avgTimes:{run:{dist:2, best:720, zero:1080}, ruck:{dist:12, best:9000, zero:12600}},
   settingsVersion:5, adminPinHash:null, testerPinHash:null,
 };
@@ -972,7 +973,7 @@ function migrateSettings(S){
   S.physWeights = Object.assign({aft:70, cft:30, avgrun:20, avgruck:20}, S.physWeights||{});
   const av=S.avgTimes||{}; S.avgTimes={run:Object.assign({dist:2, best:720, zero:1080}, av.run||{}), ruck:Object.assign({dist:12, best:9000, zero:12600}, av.ruck||{})};
   S.enabled = Object.assign({}, DEFAULT_ENABLED, S.enabled||{});
-  S.timeLimits = Object.assign({m249:150, m240b:150, m4:150}, S.timeLimits||{});
+  S.timeLimits = Object.assign({m249:150, m240b:150, m4:150, cff:300, tccc:600}, S.timeLimits||{});
   // Numbers stay numbers, whatever arrives from a file or the sheet (they're written straight into the page).
   const num=(v,d)=>{ const n=Number(v); return isFinite(n)?n:d; }, D=DEFAULT_SETTINGS;
   ['goPoints','cutLine','minFemale','grenadeGo','grenadeTotal','circleBonus','cftBest','cftZero'].forEach(k=>{ if(k in S) S[k]=num(S[k], D[k]); });
@@ -1099,7 +1100,7 @@ function isActive(k){ return activeKeys().includes(k); }
 function visFields(){ const a=activeKeys(); return FIELDS.filter(f=>a.includes(f.ev)); }
 function eventName(k){ const e=[...PHYS_EVENTS, ...TIME_EVENTS, ...ALL_SKILLS].find(x=>x.k===k); return e?e.name:k; }
 function eventShort(k){ const e=[...PHYS_EVENTS, ...TIME_EVENTS, ...ALL_SKILLS].find(x=>x.k===k); return e?e.short:k; }
-function grenadeGo(s){ return s.grenade==null ? null : (s.grenade>=DATA.settings.grenadeGo ? 'go':'nogo'); }
+function grenadeGo(s){ return s.grenade==null ? null : s.grenadeTime==='over' ? 'nogo' : (s.grenade>=DATA.settings.grenadeGo ? 'go':'nogo'); }
 function skillResult(s,k){ return k==='grenade' ? grenadeGo(s) : (s[k]||null); }
 function score(s){
   const S=DATA.settings, ev={}; let n=0;
@@ -1298,7 +1299,7 @@ function exportXlsx(){
   if(aftOn) settingsRows.push(['AFT failure is an automatic cut',S.aftFailCut?'Yes':'No'], ...(physPointsMode()?[]:EVENTS).map(e=>[`Weight: ${e.name}`, `${S.weights[e.k]} (${fmt1(S.weights[e.k]/wsum*100)}%)`]));
   if(isOn('grenade')) settingsRows.push(['Grenade ID Go standard',`${S.grenadeGo}/${S.grenadeTotal}`]);
   if(isOn('throw')) settingsRows.push(['Bonus for grenade in the circle',S.circleBonus]);
-  [...WEAPON_KEYS, ...REPORT_KEYS].filter(isOn).forEach(k=>settingsRows.push([`${eventShort(k)} time limit`, S.timeLimits[k]?fmtTime(S.timeLimits[k]):'None set']));
+  [...WEAPON_KEYS, ...REPORT_KEYS, ...OTHER_TIMED].filter(isOn).forEach(k=>settingsRows.push([`${eventShort(k)} time limit`, S.timeLimits[k]?fmtTime(S.timeLimits[k]):'None set']));
   settingsRows.push(['Exported',new Date().toLocaleString()]);
   const hRows=[['Name','In tryout','Scan date','Weight (lb)','BMI','SMM (lb)','Body fat mass (lb)','PBF (%)','Visceral fat','BMR','TDEE','Status','Practice tries','Practice right (%)']];
   DATA.soldiers.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(x=>{ const sc=latestScan(x), t=sc?calcTargets(sc):null, P=practiceSummary(x), n=v=>v===''||v==null?'':+v;
@@ -1492,6 +1493,8 @@ function renderLines(title,rows,scriptTitle,script){
 /* ============================== Fire mission trainer (successive bracketing + MTO) ============================== */
 /* Needs from the host page: TARGETS, OBS, pick, ri, pad, mgrs, unitCS, stationCS, otFactor, esc */
 const Bracket = (function(){
+  // The initial call for fire's limit (Settings → Time limits → Call for fire); null = no limit.
+  const cffLim = () => { try{ const v=DATA.settings.timeLimits.cff; return v>0 ? v : null; }catch(e){ return 300; } };
   const WORDS = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
   const norm = s => String(s||'').toLowerCase().replace(/[\u2018\u2019]/g,"'").replace(/\s+/g,' ').trim();
   const sq = s => String(s||'').toLowerCase().replace(/[^a-z0-9]/g,'');
@@ -1673,7 +1676,7 @@ const Bracket = (function(){
       else need(!/danger close/.test(t), 'Not danger close: no friendlies within 600m.');
       if(M.atMy) need(/at my command/.test(t), 'The scenario says you control the timing: "At my command".');
       need(endsOver(t), 'End with "Over".');
-      if(secs!=null && secs>300) e.push(`Initial call for fire took ${mmss(secs)}. The limit is 5:00.`);
+      const lim=cffLim(); if(secs!=null && lim && secs>lim) e.push(`Initial call for fire took ${mmss(secs)}. The limit is ${mmss(lim)}.`);
     } else if(st.k==='mto'){
       need(/\bmto\b|message to observer/.test(t), 'Start the read-back with "MTO".');
       need(new RegExp('\\b'+M.unit.toLowerCase()+'\\b').test(t), `Unit firing is ${M.unit}.`);
@@ -1899,6 +1902,16 @@ const Bracket = (function(){
       }
     }
     I.start = ()=>{ I.started=true; I.startedAt=Date.now(); advance(); I.draw(); };
+    // Skip the initial call for fire + MTO: fill them in as given and jump to the first shot/splash.
+    I.skip = ()=>{
+      const M=I.M, first=M.steps.findIndex(st=>st.k==='shot'); if(first<0) return I.start();
+      I.started=true; I.skipped=true; I.startedAt=I.t3At=Date.now();
+      I.log.push({who:'note', text:'Skipped to adjusting fire. The call for fire and MTO below were filled in for you.'});
+      for(let i=0;i<first;i++){ const st=M.steps[i];
+        (st.fdcs||(st.fdc?[st.fdc]:[])).forEach(l=>I.log.push({who:'FDC', text:l})); st._said=true;
+        I.log.push({who:'FO', text:expected(M,st), errs:[], expect:expected(M,st), why:why(M,st), label:st.label, given:true}); }
+      I.pos=first; advance(); I.draw(true);
+    };
     I.send = (text)=>{
       if(I.done) return;
       const st=I.M.steps[I.pos];
@@ -1949,25 +1962,25 @@ const Bracket = (function(){
       el.innerHTML = `<div class="bk">
         <div class="bk-head">
           <p class="bk-scn">${esc(M.text)}</p>
-          <div class="bk-clockbox">${status}<div class="bk-clock" id="bkClock" aria-live="off">5:00</div><div class="bk-small">initial call for fire</div></div>
+          <div class="bk-clockbox">${status}<div class="bk-clock" id="bkClock" aria-live="off">${I.skipped?'\u2014':cffLim()?mmss(cffLim()):'0:00'}</div><div class="bk-small">${I.skipped?'skipped to adjusting fire':'initial call for fire'}</div></div>
         </div>
         ${!I.started ? `<div class="bk-row">
             <div class="bk-seg" role="group" aria-label="Bracketing">
               <button type="button" data-bkm="standard" aria-pressed="${I.mode==='standard'}">Standard: 400, 200, 100, 50</button>
               <button type="button" data-bkm="advanced" aria-pressed="${I.mode==='advanced'}">Advanced: any corrections</button>
             </div>
-            <button class="bk-btn primary" id="bkStart">Start mission (starts the 5:00 clock)</button></div>
+            <button class="bk-btn primary" id="bkStart">Start mission (starts the ${cffLim()?mmss(cffLim())+' ':''}clock)</button><button class="bk-btn" id="bkSkip" title="Fill in the call for fire and MTO and go straight to shot, splash and corrections">Skip to adjusting fire</button></div>
             <p class="bk-small" style="margin:0">${I.mode==='standard'?'Successive bracketing: Add/Drop 400, 200, 100, then 50 with fire for effect.':'Make whatever corrections you judge best, but call fire for effect before you run out of the rounds given in the MTO.'}</p>` : `
         ${res==='nogo' ? `<div class="bk-nogo"><b>No-Go.</b> Mission ended at: ${esc(I.failedAt)}.</div>`:''}
-        ${res==='go' ? `<div class="bk-go"><b>Go.</b> Mission complete.</div>`:''}
+        ${res==='go' ? `<div class="bk-go"><b>Go.</b> Mission complete${I.skipped?' (adjust only: the call for fire and MTO were skipped)':''}.</div>`:''}
         <div class="bk-grid">
           <div class="bk-view">
-            <div class="bk-status"><span>${M.mode==='standard'?'Standard bracketing':'Advanced adjustment'}</span><span>${(()=>{ const fired=M.bursts.filter((b,i)=>!b.ffe && I.burstIdx!=null && i<=I.burstIdx).length; return I.burstIdx==null?'No rounds fired yet':M.bursts[I.burstIdx]&&M.bursts[I.burstIdx].ffe?'<b>Fire for effect</b>':`Adjusting round <b>${fired}</b>`; })()}</span></div>
+            <div class="bk-status"><span>${M.mode==='standard'?'Standard bracketing':'Advanced adjustment'}${I.skipped?' \u00B7 adjust only':''}</span><span>${(()=>{ const fired=M.bursts.filter((b,i)=>!b.ffe && I.burstIdx!=null && i<=I.burstIdx).length; return I.burstIdx==null?'No rounds fired yet':M.bursts[I.burstIdx]&&M.bursts[I.burstIdx].ffe?'<b>Fire for effect</b>':`Adjusting round <b>${fired}</b>`; })()}</span></div>
             ${view(M, I.burstIdx, I.hint)}
           </div>
           <div class="bk-radio"><div class="bk-radio-h"><span><span class="dot"></span>Radio \u00B7 ${esc(M.fdc)}</span><span>${esc(M.obs)}</span></div>
             <ol class="bk-log" id="bkLog">${I.log.map(m=> m.who==='note' ? `<li class="bk-note">${esc(m.text)}</li>` :
-              `<li class="bk-msg ${m.who==='FO'?'fo':'fdc'}"><span class="bk-who">${m.who==='FO'?'You':'FDC'}</span><span>${esc(m.text)}</span></li>`).join('')}</ol>
+              `<li class="bk-msg ${m.who==='FO'?'fo':'fdc'}"><span class="bk-who">${m.who==='FO'?(m.given?'Given':'You'):'FDC'}</span><span>${esc(m.text)}</span></li>`).join('')}</ol>
             ${I.done ? `<div class="bk-row"><button class="bk-btn" id="bkSol">Grader review</button><button class="bk-btn" id="bkNew">New mission</button></div><div id="bkSolBox" hidden></div>` : `
             <div class="bk-send" id="bkForm">
               <label class="bk-small" for="bkIn">Your transmission: ${esc(st.label)}</label>
@@ -1978,6 +1991,7 @@ const Bracket = (function(){
         </div>`}
       </div>`;
       const s=el.querySelector('#bkStart'); if(s) s.onclick=I.start;
+      const sk=el.querySelector('#bkSkip'); if(sk) sk.onclick=I.skip;
       el.querySelectorAll('[data-bkm]').forEach(b=>b.onclick=()=>I.setMode(b.dataset.bkm));
       const f=el.querySelector('#bkForm'); if(f){ const inp=el.querySelector('#bkIn'); inp.oninput=()=>{ I.draft=inp.value; };
         // Plain button + Enter key, not a <form>: Claude's sandbox blocks form submission.
@@ -1990,7 +2004,7 @@ const Bracket = (function(){
       const lg=el.querySelector('#bkLog'); if(lg) lg.scrollTop=lg.scrollHeight;
       const sb=el.querySelector('#bkSol'); if(sb) sb.onclick=()=>{ const box=el.querySelector('#bkSolBox'); box.hidden=!box.hidden;
         if(!box.hidden){
-          const fo=I.log.filter(m=>m.who==='FO');
+          const fo=I.log.filter(m=>m.who==='FO' && !m.given);
           box.innerHTML=`<div class="bk-review">${fo.map(m=>`<div class="bk-rv ${m.errs.length?'bad':''}"><div class="bk-small">${esc(m.label)}</div><div>Sent: ${esc(m.text)}</div>${m.errs.length?`<div class="bk-fb bad">${m.errs.map(esc).join('<br>')}<div class="bk-exp">Correct: ${esc(m.expect)}</div>${m.why?`<div class="bk-small">${esc(m.why)}</div>`:''}</div>`:`<div class="bk-fb good">Correct</div>`}</div>`).join('')}
             <p class="bk-small">OT factor ${M.ot} (${M.dist}m). Full correct mission:</p>
             <ol class="bk-log">${M.steps.map(st=>`${(st.fdcs||(st.fdc?[st.fdc]:[])).map(l=>`<li class="bk-msg fdc"><span class="bk-who">FDC</span><span>${esc(l)}</span></li>`).join('')}<li class="bk-msg fo"><span class="bk-who">FO</span><span>${esc(expected(M,st))}</span>${st.k==='corr'?`<div class="bk-small">${esc(why(M,st))}</div>`:''}</li>`).join('')}</ol></div>`;
@@ -2001,7 +2015,10 @@ const Bracket = (function(){
     };
     I.tick = ()=>{
       const c=I.el && I.el.querySelector('#bkClock'); if(!c) return;
-      const used = I.startedAt ? ((I.t3At||Date.now())-I.startedAt)/1000 : 0, left=300-Math.floor(used);
+      if(I.skipped){ c.textContent='\u2014'; c.classList.remove('over'); return; }
+      const used = I.startedAt ? ((I.t3At||Date.now())-I.startedAt)/1000 : 0, lim=cffLim();
+      if(!lim){ c.textContent=mmss(Math.floor(used)); c.classList.remove('over'); return; }
+      const left=lim-Math.floor(used);
       c.textContent = left>=0 ? mmss(left) : '-'+mmss(-left);
       c.classList.toggle('over', left<0);
     };
@@ -2183,11 +2200,12 @@ function testMed(el, k){
   const expected=sc.steps.map((s,i)=>s.applies?i:null).filter(i=>i!=null), done=seq.filter(i=>sc.steps[i].applies);
   let firstBad=-1; for(let i=0;i<done.length;i++){ if(done[i]!==expected[i]){ firstBad=i; break; } }
   const maxDone = done.length?Math.max(...done):-1, missed=new Set(firstBad>=0?expected.filter(i=>!done.includes(i)&&i<maxDone):[]);
-  const complete = firstBad<0 && done.length===expected.length, verdict = firstBad>=0 ? 'nogo' : complete ? 'go' : null;
+  const complete = firstBad<0 && done.length===expected.length, verdict = firstBad>=0 || skOver(k) ? 'nogo' : complete && !skClock(k).startedAt ? 'go' : null;
   el.innerHTML=`<div class="stack">
     <div class="panel"><h2>${esc(M.title)}</h2>
       <p class="sub">${esc(M.setup)} Read the scenario, say "Go," and tap each step as the soldier does it. Steps that don't apply to this casualty are dimmed. Go means every step that applies, in order, with no harm to the casualty. Standard: ${esc(M.task)}.</p>
       <p class="scenario">${esc(sc.text)}</p>
+      ${skClockHtml(k)}
       <div class="row"><button class="btn" id="mdNew">New scenario</button><button class="btn" id="mdShow" aria-expanded="${R.show}">${R.show?'Hide':'Show'} what right looks like</button></div>
     </div>
     <div class="two">
@@ -2208,7 +2226,8 @@ function testMed(el, k){
   </div>`;
   el.querySelectorAll('[data-mstep]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.mstep, at=seq.indexOf(i); if(at>=0) seq.splice(at,1); else seq.push(i); render(); });
   $('mdClear').onclick=()=>{ R.seq=[]; render(); };
-  $('mdNew').onclick=()=>{ STATE.med[k]={sc:M.gen(!STATE.randomCalls), seq:[], show:false}; render(); };
+  $('mdNew').onclick=()=>{ STATE.med[k]={sc:M.gen(!STATE.randomCalls), seq:[], show:false}; skReset(k); render(); };
+  wireSkClock(el);
   $('mdShow').onclick=()=>{ R.show=!R.show; render(); };
   wireRecorder(k, wireGoButtons(el.querySelector('.recorder')));
   if(verdict){ const b=el.querySelector(`.recorder [data-go="${verdict}"]`); if(b) b.click(); }
@@ -2681,6 +2700,9 @@ function wStudyHtml(key){
   const wp=WEAPONS[key];
   return `<h2>${esc(wp.name)}: disassembly and assembly</h2>` + wp.phases.map((ph,pi)=>`<h3 class="wp-h">${pi+1}. ${esc(ph.t)}</h3>${ph.note?`<p class="wp-note">${esc(ph.note)}</p>`:''}${ph.type==='set'?`<ul class="wp-list">${ph.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ul>`:ph.type==='note'?`<p>${esc(ph.steps[0])}</p>`:`<ol class="wp-list">${ph.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>`}`).join('') + (wp.end?`<p class="wp-note"><b>Timing:</b> ${esc(wp.end)}</p>`:'');
 }
+// The weapon's time limit from Settings (null = none).
+const wLim = () => typeof rptLimitFor==='function' ? rptLimitFor(W.w) : null;
+const wMss = s => Math.floor(s/60)+':'+String(Math.round(s)%60).padStart(2,'0');
 function swText(){ const t=W.sw.elapsed+(W.sw.start?Date.now()-W.sw.start:0); const s=Math.floor(t/1000); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+'.'+Math.floor((t%1000)/100); }
 function renderWeapons(){
   const host=$('scenario'); if(!W.prog[W.w]) wResetProgress();
@@ -2706,7 +2728,7 @@ function renderWeapons(){
       <div class="wp-seg" role="group" aria-label="Weapon">${Object.keys(WEAPONS).map(k=>`<button data-w="${k}" aria-pressed="${W.w===k}">${WEAPONS[k].name}</button>`).join('')}</div>
       <div class="wp-seg" role="group" aria-label="View"><button data-v="study" aria-pressed="${W.view==='study'}">Study</button><button data-v="practice" aria-pressed="${W.view==='practice'}">Practice the order</button></div>
     </div>
-    <div class="wp-sw"><span class="wp-time" id="wpTime">${swText()}</span><button class="btn" id="wpSw">${W.sw.start?'Stop':'Start stopwatch'}</button><button class="btn" id="wpSwR">Reset</button><span class="wp-note" style="margin:0">Time a hands-on run on the real weapon.</span></div>
+    <div class="wp-sw"><span class="wp-time" id="wpTime">${swText()}</span>${wLim()?`<span class="wp-note" style="margin:0">limit ${wMss(wLim())}</span>`:''}<button class="btn" id="wpSw">${W.sw.start?'Stop':'Start stopwatch'}</button><button class="btn" id="wpSwR">Reset</button><span class="wp-note" style="margin:0">Time a hands-on run on the real weapon.</span></div>
     ${body}
     ${W.view==='practice'?`<div class="actions" style="margin-top:14px"><button class="btn primary" id="wpShuffle">Start over (reshuffle)</button></div>`:''}
   </div>`;
@@ -2718,7 +2740,8 @@ function renderWeapons(){
     else if(!st.picked.includes(i)){ if(i===st.picked.length){ st.picked.push(i); st.wrong=null; } else { st.misses++; st.wrong=i; } }
     const allDone = wp.phases.every((ph,k)=>ph.type!=='seq' || P[k].picked.length===ph.steps.length);
     if(allDone && !W.done[W.w]){ W.done[W.w]=true; const miss=P.reduce((a,x)=>a+x.misses,0), secs=Math.floor((W.sw.elapsed+(W.sw.start?Date.now()-W.sw.start:0))/1000);
-      precord(W.w, miss===0, `${miss} wrong pick${miss===1?'':'s'}${secs?`, ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')} on the stopwatch`:''}`); }
+      const wl=wLim(), wOver=!!(wl && secs>wl);
+      precord(W.w, miss===0 && !wOver, `${miss} wrong pick${miss===1?'':'s'}${secs?`, ${Math.floor(secs/60)}:${String(secs%60).padStart(2,'0')} on the stopwatch${wOver?` (over the ${wMss(wl)} limit)`:''}`:''}`); }
     renderWeapons();
   });
   const sh=$('wpShuffle'); if(sh) sh.onclick=()=>{ wResetProgress(); renderWeapons(); };
@@ -2748,6 +2771,7 @@ function genWeapons(){ wResetProgress(); return {text:'', quiz:'<div></div>', wi
   <label class="opts" id="rangeOpt" hidden><input type="checkbox" id="rangeChk" checked> <span>Include a range estimate (mil relation)</span></label>
 
   <section class="card" aria-live="polite">
+    <div id="pClockBox"></div>
     <p class="scenario" id="scenario"></p>
     <div id="scnView"></div>
     <div id="rptBox"></div>
@@ -2781,6 +2805,8 @@ function generate(){
   root.__cur=cur;
   $('scnView').innerHTML = cur.range ? cur.view + (typedRpt?'':rangeCheckHtml()) : '';
   $('rptBox').innerHTML=''; if(typedRpt){ cur.rpt={typed:{}, marks:{}, checked:false, t0:Date.now(), lim:rptLim(mode), used:null}; drawRpt(); }
+  // Every other skill gets the same clock: it starts with the scenario and stops when the result is saved.
+  cur.clk = CLK_MODES.includes(mode) ? {t0:Date.now(), lim:rptLim(mode), used:null} : null; drawClk();
   if(cur.range && !typedRpt){ const go=()=>{ const ok=rangeOk($('rgIn').value, cur.range.exact), res=$('rgRes');
       res.innerHTML = !$('rgIn').value.trim() ? '<span class="flag">Type your range in meters first.</span>' : ok ? `<b style="color:var(--good,#62C0A6)">Correct: about ${cur.range.dist} m.</b>` : `<b class="flag">Not quite.</b> Count the dots again, then use (height in inches \u00D7 25.4) \u00F7 mils.`; };
     $('rgChk').onclick=go; $('rgIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } }); }
@@ -2803,21 +2829,30 @@ function wireGrenadeQuiz(){
   $('gqCheck').onclick=()=>{ let right=0; const sels=[...root.querySelectorAll('.gq-sel')];
     sels.forEach(s=>{ const ok=grenadeMatch(s.value, s.dataset.id); if(ok) right++; const m=s.nextElementSibling; m.textContent=ok?'Correct':(s.value.trim()?'Wrong':'No answer'); m.className='gq-mark '+(ok?'ok':'bad'); });
     $('gqResult').innerHTML=`<b class="${right===sels.length?'':'flag'}">${right} of ${sels.length} correct: ${right===sels.length?'Go':'No-Go'}.</b> Open "Show answer" to see the key.`;
-    if(!cur.checked){ cur.checked=true; precord('grenade', right===sels.length, `${right} of ${sels.length}`); } };
+    if(!cur.checked){ cur.checked=true; const [ok, det]=clkResult(right===sels.length, `${right} of ${sels.length}`); precord('grenade', ok, det); if(!ok && right===sels.length) $('gqResult').innerHTML+=' <b class="flag">Over the time limit: No-Go.</b>'; } };
 }
 // 9-line, SPOT, SALUTE: type each line, the tool checks what it can, you mark the wording lines yourself.
 // Countdown from the report's time limit (Settings \u2192 Time limits). It starts with each new scenario; going over is a No-Go.
 const rptLim = m => typeof rptLimitFor==='function' ? rptLimitFor(m) : null;
 const mss = s => { s=Math.max(0,Math.round(s)); return Math.floor(s/60)+':'+String(s%60).padStart(2,'0'); };
 const rptUsed = R => R.used!=null ? R.used : (Date.now()-R.t0)/1000;
-function rptClockText(R){ const left=R.lim-rptUsed(R); return left>=0 ? mss(left)+' left' : 'Time\u2019s up (+'+mss(-left)+')'; }
-clearInterval(window.__rptTick); window.__rptTick=setInterval(()=>{ const el=document.getElementById('rptClock'); if(!el || !cur || !cur.rpt || cur.rpt.checked) return; el.textContent=rptClockText(cur.rpt); el.classList.toggle('over', rptUsed(cur.rpt)>cur.rpt.lim); }, 250);
+function rptClockText(R){ if(!R.lim) return mss(rptUsed(R)); const left=R.lim-rptUsed(R); return left>=0 ? mss(left)+' left' : 'Time\u2019s up (+'+mss(-left)+')'; }
+clearInterval(window.__rptTick); window.__rptTick=setInterval(()=>{ const el=document.getElementById('rptClock'); if(!el || !cur || !cur.rpt || cur.rpt.checked) return; el.textContent=rptClockText(cur.rpt); el.classList.toggle('over', !!(cur.rpt.lim && rptUsed(cur.rpt)>cur.rpt.lim)); }, 250);
+const CLK_MODES=['cff','tccc','fracture','burn','grenade'];
+function clkText(K){ const u=K.used!=null?K.used:(Date.now()-K.t0)/1000; if(!K.lim) return mss(u); const left=K.lim-u; return left>=0 ? mss(left)+' left' : 'Time\u2019s up (+'+mss(-left)+')'; }
+function drawClk(){ const box=$('pClockBox'); if(!box) return; const K=cur&&cur.clk; if(!K){ box.innerHTML=''; return; }
+  const u=K.used!=null?K.used:(Date.now()-K.t0)/1000, over=!!(K.lim&&u>K.lim);
+  box.innerHTML=`<div class="rpt-clock ${over?'over':''}" id="pClock" role="timer">${clkText(K)}</div>${K.lim?'':'<span class="soft" style="font-size:.85rem;margin-left:8px">no time limit set</span>'}`; }
+// Saving a practice result stops the clock; over the limit counts as a miss.
+function clkResult(ok, detail){ const K=cur&&cur.clk; if(!K) return [ok, detail]; if(K.used==null) K.used=(Date.now()-K.t0)/1000; drawClk();
+  const over=!!(K.lim && K.used>K.lim); return [ok && !over, detail+(K.lim?`, ${mss(K.used)} of ${mss(K.lim)}${over?' (over time)':''}`:`, ${mss(K.used)}`)]; }
+clearInterval(window.__clkTick); window.__clkTick=setInterval(()=>{ const el=document.getElementById('pClock'); if(!el || !cur || !cur.clk || cur.clk.used!=null) return; el.textContent=clkText(cur.clk); el.classList.toggle('over', !!(cur.clk.lim && (Date.now()-cur.clk.t0)/1000>cur.clk.lim)); }, 250);
 const rptAuto=(l,v)=>{ const a=autoCheck(l,v); if(a!==null) return a; return String(v||'').trim() && typeof normRpt==='function' && normRpt(v)===normRpt(l.ans) ? true : null; };
 function drawRpt(){
   const R=cur.rpt, key=cur.key, box=$('rptBox');
   if(!R.checked){
     box.innerHTML=`<h3 class="pg-h" style="margin-top:4px">Send your report</h3><p class="sub" style="margin:0 0 10px;font-size:.95rem">Type each line as you'd say it on the radio, then check it.${R.lim?` You have ${mss(R.lim)}.`:''}</p>
-      ${R.lim?`<div class="rpt-clock ${rptUsed(R)>R.lim?'over':''}" id="rptClock" role="timer">${rptClockText(R)}</div>`:''}
+      <div class="rpt-clock ${R.lim&&rptUsed(R)>R.lim?'over':''}" id="rptClock" role="timer">${rptClockText(R)}</div>
       <ol class="rpt-lines">${key.map((l,i)=>`<li><span class="rn">${esc(String(l.n))}</span><label><span>${esc(l.label)}</span><input class="rpt-in" data-ri="${i}" value="${esc(R.typed[i]||'')}" autocomplete="off" autocorrect="off" spellcheck="false"></label></li>`).join('')}</ol>
       <div class="actions" style="margin:12px 0 14px"><button class="btn primary" id="rptCheck">Check my report</button></div>`;
     const ins=[...box.querySelectorAll('.rpt-in')];
@@ -2834,7 +2869,7 @@ function drawRpt(){
         ${m==='ok'&&auto!==null?'':`<div class="ra"><b>Answer:</b> ${esc(l.ans)}</div>${l.why&&m==='bad'?`<div class="rw">${l.why}</div>`:''}`}
         ${auto===null&&String(R.typed[i]||'').trim()?`<div class="rself"><span>${m?'You marked this':'Does yours match?'}</span><button class="btn sm" data-rm="${i}" data-v="ok" aria-pressed="${m==='ok'}">Right</button><button class="btn sm" data-rm="${i}" data-v="bad" aria-pressed="${m==='bad'}">Wrong</button></div>`:''}</div>
         <span class="rmark">${m==='ok'?'\u2713':m==='bad'?'\u2717':''}</span></li>`; }).join('')}</ol>
-    ${R.lim?`<p class="rpt-time ${over?'flag':''}">${over?overTxt+'.':`Time: ${mss(R.used)} of ${mss(R.lim)}.`}</p>`:''}
+    <p class="rpt-time ${over?'flag':''}">${over?overTxt+'.':R.lim?`Time: ${mss(R.used)} of ${mss(R.lim)}.`:`Time: ${mss(R.used)}.`}</p>
     <p class="rpt-sum">${left?`Mark the ${left} line${left===1?'':'s'} the tool can't check (the wording lines), then your result is saved.`:bad||over?`<b class="flag">${[bad?`${bad} line${bad===1?'':'s'} wrong`:'', over?(bad?'over time':'Over time'):''].filter(Boolean).join(' and ')}: No-Go.</b> Saved to My progress.`:'<b style="color:var(--good)">Every line right: Go.</b> Saved to My progress.'}</p>
     ${cur.recorded?'':'<div class="actions" style="margin-bottom:14px"><button class="btn" id="rptEdit">Fix my answers</button></div>'}`;
   box.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{ if(cur.recorded) return; R.marks[+b.dataset.rm]=b.dataset.v; drawRpt(); maybeRecordRpt(); });
@@ -2845,7 +2880,7 @@ function maybeRecordRpt(){
   const miss=key.filter((_,i)=>R.marks[i]==='bad').map(l=>String(l.n)), right=key.length-miss.length;
   cur.recorded=true; cur.checked=true;
   const over=!!(R.lim && R.used>R.lim);
-  precord(mode, !miss.length && !over, `${right} of ${key.length} lines`+(R.lim?`, ${mss(R.used)} of ${mss(R.lim)}${over?' (over time)':''}`:''), {miss, of:key.length});
+  precord(mode, !miss.length && !over, `${right} of ${key.length} lines`+(R.lim?`, ${mss(R.used)} of ${mss(R.lim)}${over?' (over time)':''}`:`, ${mss(R.used)}`), {miss, of:key.length});
   drawRpt();
 }
 const modeBtns=root.querySelectorAll('.modes button');
@@ -2864,7 +2899,7 @@ function showProgress(){ const c=$('progressCard'); c.innerHTML=progressHtml(); 
     $('pgYes').onclick=()=>{ pSave({log:[]}); showProgress(); }; $('pgNo').onclick=()=>{ $('pgMsg').innerHTML=''; }; }; }
 let mission=null;
 function startMission(){ mission=Bracket.create({fixed:!$('rand').checked, practice:true, onNew:startMission,
-  onResult:(r,I)=>precord('mission', r==='go', r==='go' ? (I.M.mode==='advanced'?'advanced':'standard') : 'missed at '+String(I.errors[0]||'').split(':')[0].toLowerCase()) }); mission.mount($('bkHost')); }
+  onResult:(r,I)=>precord('mission', r==='go', r==='go' ? (I.M.mode==='advanced'?'advanced':'standard')+(I.skipped?', adjust only':'') : (I.skipped?'adjust only, ':'')+'missed at '+String(I.errors[0]||'').split(':')[0].toLowerCase()) }); mission.mount($('bkHost')); }
 function showMission(on){ $('missionCard').hidden=!on; root.querySelector('section.card:not(#missionCard)').hidden=on; root.querySelector('main').classList.toggle('wide',on); if(on) startMission(); }
 $('mission').onclick=()=>showMission(true);
 $('backScn').onclick=()=>showMission(false);
@@ -2874,7 +2909,7 @@ $('rangeChk').onchange=generate;
 $('new').onclick=generate;
 $('show').onclick=()=>{const a=$('answer');a.hidden=!a.hidden;$('show').textContent=a.hidden?'Show answer':'Hide answer';$('show').setAttribute('aria-expanded',String(!a.hidden));
   $('selfCheck').hidden = a.hidden || !['cff','tccc','fracture','burn'].includes(mode) || cur.checked; };
-root.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{ if(cur.checked) return; cur.checked=true; precord(mode, b.dataset.sc==='1', 'self-checked'); $('selfCheck').hidden=true; $('dToast').textContent='Saved to My progress.'; });
+root.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{ if(cur.checked) return; cur.checked=true; const [ok, det]=clkResult(b.dataset.sc==='1', 'self-checked'); precord(mode, ok, det); if(b.dataset.sc==='1' && !ok) $('dToast').textContent='Over the time limit, so this one counts as a miss.'; $('selfCheck').hidden=true; $('dToast').textContent='Saved to My progress.'; });
 $('copy').onclick=async()=>{
   try{await navigator.clipboard.writeText(cur.text);$('dToast').textContent='Scenario copied.';}
   catch(e){const r=document.createRange();r.selectNodeContents($('scenario'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('dToast').textContent='Scenario selected. Press Ctrl+C (or \u2318C) to copy.';}
@@ -3633,8 +3668,9 @@ function wireRecorder(kind, getVal){
     const s=soldierById(sel.value); const v=getVal();
     if(!s){ toast('Choose the soldier being tested first.'); return; }
     if(v==null){ toast('Pick a result first.'); return; }
-    s[kind]=v; s.updated=new Date().toISOString(); save();
-    const label = kind==='grenade' ? `${v}/${DATA.settings.grenadeTotal} (${v>=DATA.settings.grenadeGo?'Go':'No-Go'})` : (v==='go'?'Go':'No-Go');
+    s[kind]=v; if(kind==='grenade') s.grenadeTime = skOver('grenade') ? 'over' : null;   // over the time limit = No-Go, whatever the count
+    s.updated=new Date().toISOString(); save();
+    const label = kind==='grenade' ? `${v}/${DATA.settings.grenadeTotal} (${grenadeGo(s)==='go'?'Go':'No-Go'}${s.grenadeTime==='over'?', over time':''})` : (v==='go'?'Go':'No-Go');
     toast(`Recorded ${label} for ${s.name}.`); showExisting(kind);
   };
 }
@@ -3668,7 +3704,7 @@ function testCff(el){
   {
     if(!STATE.mission) newMissionFor();
     el.innerHTML = `<div class="stack"><div class="panel"><h2>Call for fire: full fire mission</h2>
-      <p class="sub">Seat the soldier with the written scenario. They either type each transmission, or read it aloud while you type exactly what they say. They have 5:00 for the three-part call for fire, then the MTO read-back, shot and splash, bracketing from the binocular view, fire for effect, and end of mission. The first mistake ends the mission as a No-Go. The grader review opens after the mission ends.</p>
+      <p class="sub">Seat the soldier with the written scenario. They either type each transmission, or read it aloud while you type exactly what they say. They have 5:00 for the three-part call for fire, then the MTO read-back, shot and splash, bracketing from the binocular view, fire for effect, and end of mission. Use Skip to adjusting fire to grade only the corrections. The first mistake ends the mission as a No-Go. The grader review opens after the mission ends.</p>
       ${cffModeBar()}<div id="bkHost"></div>
       ${recorder('cff', goButtons('cff'))}</div></div>`;
     wireCffModeBar(el);
@@ -3713,13 +3749,16 @@ function tickClock(){
   el.classList.toggle('over', left<0);
   el.setAttribute('aria-label', left>=0?`${fmtTime(left)} left`:`Time is up, ${fmtTime(-left)} over`);
 }
-setInterval(()=>{ if(STATE.cffTimer.startedAt) tickClock(); if(STATE.tcTimer.startedAt) tickTcClock(); if(STATE.wt && Object.values(STATE.wt).some(w=>w.T.startedAt)) tickWtClock(); if(STATE.rp && Object.values(STATE.rp).some(r=>r.T&&r.T.startedAt)) tickRpClock(); }, 250);
+setInterval(()=>{ if(STATE.cffTimer.startedAt) tickClock(); if(STATE.tcTimer.startedAt) tickTcClock(); if(STATE.wt && Object.values(STATE.wt).some(w=>w.T.startedAt)) tickWtClock(); if(STATE.rp && Object.values(STATE.rp).some(r=>r.T&&r.T.startedAt)) tickRpClock(); if(STATE.sk && Object.values(STATE.sk).some(t=>t.startedAt)) tickSkClocks(); }, 250);
 function tickTcClock(){
   const el=$('tcClock'); if(!el) return; const T=STATE.tcTimer;
-  const used=T.elapsed+(T.startedAt?Date.now()-T.startedAt:0), left=600-Math.floor(used/1000);
+  const lim=skillLimit('tccc'), used=Math.floor((T.elapsed+(T.startedAt?Date.now()-T.startedAt:0))/1000);
+  if(!lim){ el.textContent=fmtTime(used); el.classList.remove('over'); return; }
+  const left=lim-used;
+  if(left<0 && !T.timeUp){ T.timeUp=true; render(); return; }
   el.textContent = left>=0 ? fmtTime(left) : '-'+fmtTime(-left);
   el.classList.toggle('over', left<0);
-  el.setAttribute('aria-label', left>=0?`${fmtTime(left)} left`:`Over the 10:00 limit by ${fmtTime(-left)}: No-Go`);
+  el.setAttribute('aria-label', left>=0?`${fmtTime(left)} left`:`Over the ${fmtTime(lim)} limit by ${fmtTime(-left)}: No-Go`);
 }
 /* generic "do the steps in order" tracker: flags skipped and out-of-order steps */
 function orderTracker(steps, seq){
@@ -3743,6 +3782,7 @@ function testGrenade(el){
   el.innerHTML = `<div class="stack">
     <div class="panel" ${idOn?'':'hidden'}><h2>Grenade ID</h2>
       <p class="sub">Show the soldier each grenade and record how many they identify correctly. ${S.grenadeGo} of ${S.grenadeTotal} is a Go.</p>
+      ${skClockHtml('grenade')}
       <div class="two">
         <div><h3>Grenades on this test</h3>
           <p class="sub">Soldiers name all ${S.grenadeTotal} from memory, so the list stays hidden while testing.</p>
@@ -3766,12 +3806,13 @@ function testGrenade(el){
     </div>
     <div class="panel" ${thOn?'':'hidden'}><h2>Grenade deployment</h2>
       <p class="sub">Tap each step as the soldier does it. Go means all ${GRENADE_STEPS.length} steps, in order. The grenade doesn't have to land in the circle, but if it does, it earns ${S.circleBonus} bonus points.</p>
+      ${skClockHtml('throw')}
       <div class="two">
         <div>${T.list}<div class="row" style="margin-top:10px;justify-content:space-between"><span>${T.status}</span><button class="btn sm" id="gtClear">Clear</button></div></div>
         <div>
           <div class="stack" style="gap:12px" id="thrRec">
             <label class="field"><span>Soldier being tested</span><select class="input" id="rec-throw"><option value="">Choose a soldier</option>${sortedByName().map(x=>`<option value="${x.id}" ${STATE.rec.throw===x.id?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>
-            <div class="field"><span>Deployment</span><div class="seg" role="group" aria-label="Deployment result"><button data-go="go" aria-pressed="${T.complete}">Go</button><button data-go="nogo" aria-pressed="${T.bad}">No-Go</button></div></div>
+            <div class="field"><span>Deployment</span><div class="seg" role="group" aria-label="Deployment result"><button data-go="go" aria-pressed="${T.complete && !skOver('throw')}">Go</button><button data-go="nogo" aria-pressed="${T.bad || skOver('throw')}">No-Go</button></div></div>
             <label class="field"><span>Landed in the circle?</span>${yesnoSelect('thrCircle', null)}</label>
             <button class="btn primary" id="thrSave">Save deployment result</button>
             <div id="recMsg-throw"></div>
@@ -3785,8 +3826,9 @@ function testGrenade(el){
   $('gpShuffle').onclick=()=>{ const o=GRENADE_PHOTOS.map((_,i)=>i); for(let i=o.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [o[i],o[j]]=[o[j],o[i]]; } STATE.gpOrder=o; render(); };
   const gs=$('gListSave'); if(gs) gs.onclick=()=>{ S.grenadeList=$('gList').value; save(); toast('Grenade list saved.'); render(); };
   el.querySelectorAll('[data-os]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.os, q=STATE.gthrow.seq, at=q.indexOf(i); if(at>=0) q.splice(at,1); else q.push(i); render(); });
-  $('gtClear').onclick=()=>{ STATE.gthrow.seq=[]; render(); };
-  let v = T.complete ? 'go' : T.bad ? 'nogo' : null;
+  $('gtClear').onclick=()=>{ STATE.gthrow.seq=[]; skReset('throw'); render(); };
+  let v = T.bad || skOver('throw') ? 'nogo' : T.complete ? 'go' : null;
+  wireSkClock(el);
   const rec=$('thrRec');
   rec.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{ v=b.dataset.go; rec.querySelectorAll('[data-go]').forEach(x=>x.setAttribute('aria-pressed', String(x===b))); });
   const sel=$('rec-throw');
@@ -3818,8 +3860,9 @@ function testTccc(el){
       <div class="row" style="justify-content:space-between;align-items:flex-start;gap:18px">
         <p class="scenario">${esc(sc.text)}</p>
         <div class="stack" style="gap:8px;align-items:flex-start;min-width:170px">
-          <div class="timer" id="tcClock">10:00</div>
-          <div class="row"><button class="btn sm primary" id="tcStart">${STATE.tcTimer.startedAt?'Stop (line 5 sent)':'Start 10:00'}</button><button class="btn sm" id="tcReset">Reset</button></div>
+          <div class="soft" style="font-size:13px">${skillLimit('tccc')?`Limit ${fmtTime(skillLimit('tccc'))}`:'No limit set'}</div>
+          <div class="timer" id="tcClock">${skillLimit('tccc')?fmtTime(skillLimit('tccc')):'0:00'}</div>
+          <div class="row"><button class="btn sm primary" id="tcStart">${STATE.tcTimer.startedAt?'Stop (line 5 sent)':skillLimit('tccc')?`Start ${fmtTime(skillLimit('tccc'))}`:'Start clock'}</button><button class="btn sm" id="tcReset">Reset</button></div>
         </div>
       </div>
       <div class="row">
@@ -3863,12 +3906,13 @@ function testTccc(el){
   $('tcClear').onclick=()=>{ STATE.tccc.seq=[]; render(); };
   const TT=STATE.tcTimer;
   $('tcStart').onclick=()=>{ if(TT.startedAt){ TT.elapsed+=Date.now()-TT.startedAt; TT.startedAt=null; } else TT.startedAt=Date.now(); render(); };
-  $('tcReset').onclick=()=>{ TT.startedAt=null; TT.elapsed=0; render(); };
+  $('tcReset').onclick=()=>{ TT.startedAt=null; TT.elapsed=0; TT.timeUp=false; render(); };
   tickTcClock();
   $('tcNew').onclick=()=>{ STATE.tcTimer={startedAt:null, elapsed:0}; STATE.tccc={sc:genTCCC(!STATE.randomCalls), seq:[]}; STATE.tcccShow=false; render(); };
   $('tcShow').onclick=()=>{ STATE.tcccShow=!STATE.tcccShow; render(); };
   $('tcRand').onchange=e=>{ STATE.randomCalls=e.target.checked; STATE.tccc={sc:genTCCC(!STATE.randomCalls), seq:[]}; render(); };
   wireRecorder('tccc', wireGoButtons(el.querySelector('.recorder')));
+  const tl=skillLimit('tccc'); if(tl && (TT.elapsed+(TT.startedAt?Date.now()-TT.startedAt:0))/1000>tl){ const b=el.querySelector('.recorder [data-go="nogo"]'); if(b) b.click(); }
 }
 
 /* ============================== weapons: steps in order, timed ============================== */
@@ -3958,10 +4002,30 @@ function autoCheck(line, typed){
 function newReport(k){ return {sc:REPORT_GEN[k](!STATE.randomCalls), marks:{}, typed:{}, submitted:false, T:{startedAt:null, elapsed:0}}; }
 // Report time limits (m:ss in Settings \u2192 Time limits). Blank means no timer.
 function rptLimitFor(k){ const v=(DATA.settings.timeLimits||{})[k]; return v>0 ? v : null; }
+const skillLimit = rptLimitFor;   // any skill's limit in seconds, or null for none
+// A clock for any graded skill: counts down from its limit (over = No-Go), or counts up with no limit.
+function skClock(k){ STATE.sk=STATE.sk||{}; return STATE.sk[k]||(STATE.sk[k]={startedAt:null, elapsed:0}); }
+function skOver(k){ const l=skillLimit(k); return !!(l && wtElapsed(skClock(k))>l); }
+function skReset(k){ STATE.sk=STATE.sk||{}; STATE.sk[k]={startedAt:null, elapsed:0}; }
+function skClockHtml(k, startLabel){
+  const T=skClock(k), lim=skillLimit(k), used=wtElapsed(T), over=!!(lim&&used>lim), running=!!T.startedAt;
+  return `<div class="rp-clock"><div><div class="soft" style="font-size:13px">${lim?`Time left (limit ${fmtTime(lim)})`:'Time (no limit set)'}</div><div class="timer ${over?'over':''}" data-skclock="${k}">${wtClockText(used, lim)}</div></div>
+    <div class="row"><button class="btn ${running?'':'primary'}" data-skstart="${k}">${running?'Stop':used?'Resume':lim?`Start ${fmtTime(lim)}`:(startLabel||'Start clock')}</button><button class="btn" data-skreset="${k}">Reset clock</button></div>
+    ${over?'<span class="flag">Over the time limit: No-Go</span>':''}</div>`;
+}
+function wireSkClock(el){
+  el.querySelectorAll('[data-skstart]').forEach(b=>b.onclick=()=>{ const T=skClock(b.dataset.skstart); if(T.startedAt){ T.elapsed+=Date.now()-T.startedAt; T.startedAt=null; } else T.startedAt=Date.now(); render(); });
+  el.querySelectorAll('[data-skreset]').forEach(b=>b.onclick=()=>{ skReset(b.dataset.skreset); render(); });
+}
+function tickSkClocks(){
+  document.querySelectorAll('[data-skclock]').forEach(el=>{ const k=el.dataset.skclock, T=skClock(k), lim=skillLimit(k), used=wtElapsed(T), over=!!(lim&&used>lim);
+    el.textContent=wtClockText(used, lim); el.classList.toggle('over', over);
+    if(over && !T.timeUp){ T.timeUp=true; const a=document.activeElement, sel=a&&a.id; render(); if(sel){ const n=document.getElementById(sel); if(n) n.focus(); } } });
+}
 function rpStop(R){ if(R.T && R.T.startedAt){ R.T.elapsed+=Date.now()-R.T.startedAt; R.T.startedAt=null; } }
 function tickRpClock(){
-  const el=$('rpClock'); if(!el) return; const k=el.dataset.k, R=STATE.rp[k], lim=rptLimitFor(k); if(!R||!lim) return;
-  const used=wtElapsed(R.T), over=used>lim; el.textContent=wtClockText(used, lim); el.classList.toggle('over', over);
+  const el=$('rpClock'); if(!el) return; const k=el.dataset.k, R=STATE.rp[k], lim=rptLimitFor(k); if(!R) return;
+  const used=wtElapsed(R.T), over=!!(lim && used>lim); el.textContent=wtClockText(used, lim); el.classList.toggle('over', over);
   if(over && !R.timeUp){ R.timeUp=true;
     const a=document.activeElement, i=a && a.dataset ? a.dataset.ty : null, pos=a && a.selectionStart;
     render();
@@ -3975,10 +4039,9 @@ function testReport(el, k){
   const lim=rptLimitFor(k), used=wtElapsed(R.T), over=!!(lim && used>lim), running=!!R.T.startedAt;
   const allMarked = key.every((_,i)=>R.marks[i]), anyBad = key.some((_,i)=>R.marks[i]==='bad');
   const verdict = anyBad || over ? 'nogo' : allMarked ? 'go' : null;
-  const clock = lim ? `<div class="rp-clock"><div><div class="soft" style="font-size:13px">Time left (limit ${fmtTime(lim)})</div><div class="timer ${over?'over':''}" id="rpClock" data-k="${k}">${wtClockText(used, lim)}</div></div>
-      <div class="row"><button class="btn ${running?'':'primary'}" id="rpStart">${running?'Stop':used?'Resume':`Start ${fmtTime(lim)}`}</button><button class="btn" id="rpReset">Reset clock</button></div>
-      ${over?'<span class="flag">Over the time limit: No-Go</span>':''}</div>`
-    : `<p class="soft" style="font-size:13px;margin:0 0 10px">No time limit is set for this report. ${isAdmin()?'Set one in Settings \u2192 Time limits.':'The admin sets it in Settings.'}</p>`;
+  const clock = `<div class="rp-clock"><div><div class="soft" style="font-size:13px">${lim?`Time left (limit ${fmtTime(lim)})`:'Time (no limit set)'}</div><div class="timer ${over?'over':''}" id="rpClock" data-k="${k}">${wtClockText(used, lim)}</div></div>
+      <div class="row"><button class="btn ${running?'':'primary'}" id="rpStart">${running?'Stop':used?'Resume':lim?`Start ${fmtTime(lim)}`:'Start clock'}</button><button class="btn" id="rpReset">Reset clock</button></div>
+      ${over?'<span class="flag">Over the time limit: No-Go</span>':''}</div>`;
   const okN = key.filter((_,i)=>R.marks[i]==='ok').length;
   const markBtns = i => `<div class="seg" role="group" aria-label="Line ${esc(key[i].n)}"><button data-mk="${i}" data-v="ok" aria-pressed="${R.marks[i]==='ok'}">Correct</button><button data-mk="${i}" data-v="bad" aria-pressed="${R.marks[i]==='bad'}">Wrong</button></div>`;
   let body='';
@@ -4288,13 +4351,16 @@ function renderSettings(c){
         <label class="field"><span>${L.label} average for 0 points (${L.fmt})</span><input class="input" id="av-${k}-zero" inputmode="numeric" data-time="long" value="${fmtLong(a.zero)}"></label>
       </div>`; }).join('')}
       ${saveRow()}`)}
-    ${sec('weapons','Time limits','Time allowed for each weapon and each report (9-line, SPOT, SALUTE).', `
+    ${sec('weapons','Time limits','Time allowed for every skill, on the test and in Practice.', `
+      <p class="sub">Every skill shows a clock when it's graded and when it's practiced. With a limit it counts down and going over is a No-Go; leave a box blank and it just counts up.</p>
       <h3>Weapons</h3>
       <p class="sub">From "Go" through clearing, disassembly, assembly, and the functions check. The standard is 2:30 for each weapon. Leave a box blank for no limit.</p>
       <div class="grid">${WEAPON_KEYS.map(k=>`<label class="field"><span>${eventShort(k)} (m:ss)</span><input class="input" id="tl-${k}" inputmode="numeric" data-time="short" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
       <h3>Reports</h3>
-      <p class="sub">A countdown shows on the test and in Practice. Going over the limit is a No-Go. Leave a box blank for no timer.</p>
       <div class="grid">${REPORT_KEYS.map(k=>`<label class="field"><span>${esc(eventName(k))} (m:ss)</span><input class="input" id="tl-${k}" inputmode="numeric" data-time="short" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
+      <h3>Other skills</h3>
+      <p class="sub">Call for fire counts the initial call (the standard is 5:00). TCCC runs until line 5 of the 9-line is sent (the standard is 10:00).</p>
+      <div class="grid">${OTHER_TIMED.map(k=>`<label class="field"><span>${esc(eventName(k).split(':')[0])} (m:ss)</span><input class="input" id="tl-${k}" inputmode="numeric" data-time="short" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
       ${saveRow()}`)}
     ${!showAccess?'':sec('access', syncActive()?(isCaptain()?'Grader sign-ins':'Sign-in access'):'PINs', syncActive()?(isCaptain()?'Add graders, reset their PINs, and change the shared grader PIN.':'Who can sign in, what each person can do, and resetting someone\'s PIN.'):'The admin and grader PINs on this device.', `${syncActive()?syncAccessHtml():`<div>
       <p class="sub">Both PINs are saved in the .json, so they carry over to any device that imports your roster fresh. They keep casual users out of the admin view; they don't encrypt the data.</p>
@@ -4331,7 +4397,7 @@ function renderSettings(c){
       avgT[k]={dist:Math.round(d*100)/100, best:b, zero:z}; });
     const en={}; c.querySelectorAll('[data-en]').forEach(b=>en[b.dataset.en]=b.checked);
     if(!Object.values(en).some(Boolean)) msgs.push('Turn on at least one event.');
-    const tl={}; [...WEAPON_KEYS, ...REPORT_KEYS].forEach(k=>{ const raw=$('tl-'+k).value.trim(); if(!raw){ tl[k]=null; return; } const v=parseTime(raw); if(!(v>0)) msgs.push(`${eventName(k).split(' clear,')[0]} time limit must be m:ss, or blank for none.`); tl[k]=v; });
+    const tl={}; [...WEAPON_KEYS, ...REPORT_KEYS, ...OTHER_TIMED].forEach(k=>{ const raw=$('tl-'+k).value.trim(); if(!raw){ tl[k]=null; return; } const v=parseTime(raw); if(!(v>0)) msgs.push(`${eventName(k).split(' clear,')[0]} time limit must be m:ss, or blank for none.`); tl[k]=v; });
     if(msgs.length){ $('setMsg').innerHTML=`<div class="note warn"><ul class="plain">${msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`; $('setMsg').scrollIntoView({block:'center'}); return; }
     Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, physMode:(c.querySelector('input[name=physMode]:checked')||{}).value==='points'?'points':'mix', cftBest:best, cftZero:zero, avgTimes:avgT, countSelfTimes:$('av-self').checked, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
     rebuildRegistry(); STATE.grid=null; save(); toast('Settings saved. Rankings updated.'); render();
@@ -5298,8 +5364,16 @@ function wireShare(c){
 
 /* ---------- updates: a pop-up once per new version, and the full list under More \u2192 Updates ---------- */
 // Newest first. Add an entry with each release; the pop-up shows it once on each device.
-const APP_VERSION='1.3';
+const APP_VERSION='1.5';
 const UPDATES = [
+  {v:'1.5', date:'2026-11-02', items:[
+    'Call for fire full mission: new Skip to adjusting fire button, on the test and in Practice. It fills in the call for fire and MTO and starts at shot and splash.',
+    'Skipped missions are marked "adjust only" in the result and history, and the initial-call clock does not run.',
+  ]},
+  {v:'1.4', date:'2026-11-02', items:[
+    'Every skill now has a clock, on the test and in Practice: call for fire, grenade ID and deployment, TCCC, fractures, burns, weapons, and the reports.',
+    'Set each skill\'s time limit in Settings \u2192 Time limits. Going over is a No-Go; leave it blank and the clock just counts up.',
+  ]},
   {v:'1.3', date:'2026-10-26', items:[
     'Bataan: a Latest runs and rucks list shows every new log right away, assigned or extra.',
     'Bataan: the team board shows everyone even in weeks with nothing assigned.',
