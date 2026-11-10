@@ -215,6 +215,22 @@ a{color:var(--navy)}
 .bk-fb.bad{color:var(--bk-bad)}
 .bk-fb.good{color:var(--bk-good)}
 .bk-exp{color:var(--bk-ink);margin-top:3px}
+.bk-map{margin-top:12px;background:var(--bk-alt);border:1px solid var(--bk-line);border-radius:12px;padding:8px}
+.bk-mapsvg{width:100%;height:auto;display:block;border-radius:8px;max-height:72vh}
+.bk-mapsvg{touch-action:none;cursor:grab;background:#F4F0E2}
+.bk-mapsvg.live{cursor:crosshair;box-shadow:0 0 0 2px var(--bk-accent)}
+.miss-box{margin:10px 0;padding:10px 12px;border-radius:8px;border:1px solid #C0392B;background:rgba(192,57,43,.08);font-size:.95rem;line-height:1.45}
+.miss-box ul{margin:6px 0 0;padding-left:18px}.miss-box li{margin:3px 0}
+.bk-map,.bk-view{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.bk-mapbar{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:0 0 8px}
+.bk-mapgrp{display:inline-flex;gap:4px;align-items:center}
+.bk-tool{padding:5px 10px;font-size:13px}
+.bk-tool[aria-pressed="true"]{background:var(--bk-accent);border-color:var(--bk-accent);color:var(--bk-accent-ink)}
+.bk-armread{font:600 13px/1 ui-monospace,Menlo,Consolas,monospace;padding:0 6px;color:var(--bk-ink)}
+.bk-scn p{margin:0}
+.bk-facts{display:grid;grid-template-columns:max-content 1fr;gap:3px 14px;margin:10px 0 0;padding-top:10px;border-top:1px solid var(--bk-line);font-size:.95em}
+.bk-facts dt{color:var(--bk-soft)}
+.bk-facts dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
 .bk-warn{font-size:13.5px;border:1px solid var(--bk-accent);background:var(--bk-alt);color:var(--bk-ink);border-radius:6px;padding:7px 10px}
 .bk-seg{display:inline-flex;flex-wrap:wrap;gap:6px}
 .bk-seg button{font:inherit;font-size:13.5px;padding:8px 12px;border-radius:6px;border:1px solid var(--bk-line);background:var(--bk-field);color:var(--bk-soft);cursor:pointer}
@@ -451,6 +467,11 @@ tr.editing td{background:var(--panelAlt)}
 .drill .modes{display:inline-flex;flex-wrap:wrap;border:2px solid var(--accent);border-radius:6px;overflow:hidden;margin-bottom:16px}
 .drill .modes button{font:600 1.15rem/1 "Barlow Condensed","Arial Narrow",sans-serif;padding:11px 18px;border:0;background:transparent;color:var(--accent);cursor:pointer}
 .drill .modes button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
+.drill .cff-hub{margin:-4px 0 14px}
+.drill .cff-levels{display:inline-flex;flex-wrap:wrap;gap:6px}
+.drill .cff-levels button{font:600 1rem/1 "Barlow Condensed","Arial Narrow",sans-serif;padding:9px 14px;border-radius:6px;border:1px solid var(--line);background:transparent;color:var(--ink);cursor:pointer}
+.drill .cff-levels button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.drill .cff-note{margin:8px 0 0;font-size:14px;opacity:.8;max-width:70ch}
 .drill .opts{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:.95rem;margin-bottom:18px}
 .drill .opts input{width:18px;height:18px;accent-color:var(--accent)}
 .drill .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:22px 22px 18px}
@@ -934,7 +955,7 @@ const DEFAULT_SETTINGS = {
   weights:{mdl:1,hrp:1,sdc:1,plk:1,run:1}, goPoints:50, physWeights:{aft:70, cft:30}, customTests:[],
   cftBest:1200, cftZero:1801, cutLine:14, minFemale:3, grenadeTotal:6, grenadeGo:6,
   grenadeList:DEFAULT_GRENADES, circleBonus:25, aftFailCut:true,
-  enabled:Object.assign({}, DEFAULT_ENABLED), timeLimits:{m249:150, m240b:150, m4:150, cff:300, tccc:600},
+  enabled:Object.assign({}, DEFAULT_ENABLED), timeLimits:{m249:150, m240b:150, m4:150, cff:300, tccc:600}, cffTol:250,
   avgTimes:{run:{dist:2, best:720, zero:1080}, ruck:{dist:12, best:9000, zero:12600}},
   settingsVersion:5, adminPinHash:null, testerPinHash:null,
 };
@@ -976,7 +997,8 @@ function migrateSettings(S){
   S.timeLimits = Object.assign({m249:150, m240b:150, m4:150, cff:300, tccc:600}, S.timeLimits||{});
   // Numbers stay numbers, whatever arrives from a file or the sheet (they're written straight into the page).
   const num=(v,d)=>{ const n=Number(v); return isFinite(n)?n:d; }, D=DEFAULT_SETTINGS;
-  ['goPoints','cutLine','minFemale','grenadeGo','grenadeTotal','circleBonus','cftBest','cftZero'].forEach(k=>{ if(k in S) S[k]=num(S[k], D[k]); });
+  ['goPoints','cutLine','minFemale','grenadeGo','grenadeTotal','circleBonus','cftBest','cftZero','cffTol'].forEach(k=>{ if(k in S) S[k]=num(S[k], D[k]); });
+  if(!(S.cffTol>0)) S.cffTol=250;
   ['weights','physWeights','timeLimits'].forEach(g=>{ const o=S[g]||{}; Object.keys(o).forEach(k=>{ o[k] = o[k]==null ? null : num(o[k], null); }); });
   if(S.physMode!=='points') S.physMode='mix';
   if(Array.isArray(S.customTests)) S.customTests.forEach(t=>{ ['name','short'].forEach(k=>{ if(t[k]!=null) t[k]=plainText(t[k]); }); (t.events||[]).forEach(e=>{ ['name','unit'].forEach(k=>{ if(e[k]!=null) e[k]=plainText(e[k]); }); }); });
@@ -1300,6 +1322,7 @@ function exportXlsx(){
   if(isOn('grenade')) settingsRows.push(['Grenade ID Go standard',`${S.grenadeGo}/${S.grenadeTotal}`]);
   if(isOn('throw')) settingsRows.push(['Bonus for grenade in the circle',S.circleBonus]);
   [...WEAPON_KEYS, ...REPORT_KEYS, ...OTHER_TIMED].filter(isOn).forEach(k=>settingsRows.push([`${eventShort(k)} time limit`, S.timeLimits[k]?fmtTime(S.timeLimits[k]):'None set']));
+  if(isOn('cff')) settingsRows.push(['Call for fire grid tolerance (Levels 2 and 3)', `${S.cffTol||250} m`]);
   settingsRows.push(['Exported',new Date().toLocaleString()]);
   const hRows=[['Name','In tryout','Scan date','Weight (lb)','BMI','SMM (lb)','Body fat mass (lb)','PBF (%)','Visceral fat','BMR','TDEE','Status','Practice tries','Practice right (%)']];
   DATA.soldiers.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(x=>{ const sc=latestScan(x), t=sc?calcTargets(sc):null, P=practiceSummary(x), n=v=>v===''||v==null?'':+v;
@@ -1494,6 +1517,7 @@ function renderLines(title,rows,scriptTitle,script){
 /* Needs from the host page: TARGETS, OBS, pick, ri, pad, mgrs, unitCS, stationCS, otFactor, esc */
 const Bracket = (function(){
   // The initial call for fire's limit (Settings → Time limits → Call for fire); null = no limit.
+  const cffTol = () => { try{ const v=+DATA.settings.cffTol; return v>0 ? v : 250; }catch(e){ return 250; } };
   const cffLim = () => { try{ const v=DATA.settings.timeLimits.cff; return v>0 ? v : null; }catch(e){ return 300; } };
   const WORDS = {one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10};
   const norm = s => String(s||'').toLowerCase().replace(/[\u2018\u2019]/g,"'").replace(/\s+/g,' ').trim();
@@ -1559,12 +1583,35 @@ const Bracket = (function(){
     return `${e.ffe?'':'Adjust fire, '}${e.dev?cap(e.dev.dir)+' '+e.dev.m+', ':''}${cap(e.rng.dir)} ${e.rng.m}${e.ffe?', Fire for effect':''}, Over.`;
   }
 
-  function newMission(fixed, mode){
-    mode = mode==='advanced' ? 'advanced' : 'standard';
-    const tg=pick(TARGETS), grid=mgrs(), alt=ri(5,99)*10, dir=pad(ri(1,63)*100,4);
+  // What a Level 3 soldier measures through the binoculars, and its real width in meters.
+  function rangeObj(tg){
+    const d=tg.draw;
+    if(d==='bmp'||d==='refuel') return {kind:'bmp', name:'BMP', w:6.7, dim:'6.7 m long, side-on (hull only, not the gun barrel)'};
+    if(d==='btr') return {kind:'btr', name:'BTR', w:7.6, dim:'7.6 m long, side-on'};
+    if(d==='zsu') return {kind:'zsu', name:'ZSU-23-4', w:6.5, dim:'6.5 m long, side-on (hull only, not the guns)'};
+    if(['trucks','technicals','cp','roadblock'].includes(d)) return {kind:'truck', name:'truck', w:7, dim:'7 m long, side-on'};
+    const b=pick([{n:'shed',w:8},{n:'barn',w:15},{n:'small house',w:10},{n:'storage building',w:12}]);
+    return {kind:'bldg', name:b.n, w:b.w, dim:`${b.w} m wide`, story:`The enemy are right next to a ${b.n}.`};
+  }
+  function newMission(fixed, mode, level){
+    mode = mode==='advanced' ? 'advanced' : 'standard'; level = [1,2,3].includes(+level) ? +level : 1;
+    const tg=pick(TARGETS), alt=ri(5,99)*10;
+    let grid=mgrs(), dir=pad(ri(1,63)*100,4), dist=ri(8,55)*100, geo=null, ro=null, rN=null;
+    if(level>=2){
+      const g=mgrs().split(' '), gzd=g[0], sqid=g[1];
+      const oE=ri(2000,8000)*10, oN=ri(2000,8000)*10;
+      dir=pad(ri(1,639)*10,4);
+      if(level===3){ ro=rangeObj(tg); const lo=Math.ceil(ro.w*1000/4000), hi=Math.floor(ro.w*1000/700); rN=ri(Math.max(5,lo), Math.max(5,Math.min(25,hi))); dist=Math.round(ro.w*1000/rN); }
+      else dist=ri(10,40)*100;
+      const th=+dir*2*Math.PI/6400, dE=Math.round(dist*Math.sin(th)), dN=Math.round(dist*Math.cos(th));
+      const tE=oE+dE, tN=oN+dN, g8=(e,n)=>`${gzd} ${sqid} ${pad(Math.floor(e/10),4)} ${pad(Math.floor(n/10),4)}`;
+      grid=g8(tE,tN);
+      geo={gzd, sqid, oE, oN, tE, tN, dE, dN, obsGrid:g8(oE,oN)};
+    }
+    void 0;
     const scene=pick(SCENES), light=pick(LIGHT), seed=Math.floor(Math.random()*1e9);
     const obs=fixed?'Pony 1-6':unitCS(), fdc=fixed?'Ripley 40':stationCS();
-    const dist=ri(8,55)*100, ot=otFactor(dist);
+    const ot=otFactor(dist);
     const friend=null, dc=false, atMy=false;   // bare-bones version: no danger close or timing control
     const unit=pick(['R','G']), rounds=mode==='advanced'?ri(5,6):5, tgt=pick(['AA','AB','AC','AD','AF'])+pad(ri(1000,9999),4);
     const [lo,hi]=CAS[tg.S]||[3,6], cas=ri(lo,hi);
@@ -1583,13 +1630,19 @@ const Bracket = (function(){
     }
     bursts.push({dev:0, r:0, ffe:true});
     if(mode==='advanced'){ bursts.length=0; expect.length=0; bursts.push({dev:dev0, r:r0}); }
-    const loc=pick([`You plot the target at grid ${grid} at an altitude of ${alt}m.`,`You laser the target and determine it is at grid ${grid}, altitude ${alt}m.`,`You pull out your map and plot the target at grid ${grid}, altitude ${alt}m.`]);
-    const text=[`${pick(OBS)} ${tg.t}.`, scene.say, light.say, loc, `The target is about ${dist} meters from your position.`,
-      pick([`The direction from your position to the target is ${dir} mils.`,`Your compass reads ${dir} mils.`]),
+    const task = level===1 ? 'Call for fire, adjust the rounds onto the target, and end the mission.'
+      : level===2 ? 'Plot the target on your map, call for fire, adjust the rounds onto the target, and end the mission.'
+      : 'Range the target with your binoculars, plot it on your map, call for fire, adjust the rounds onto the target, and end the mission.';
+    const story=[`${pick(OBS)} ${tg.t}.`, scene.say, light.say, level===3&&ro.story?ro.story:'',
       friend?`A friendly squad is maneuvering about ${friend} meters from the target.`:'',
-      atMy?pick(['You want to control exactly when the guns fire.','You want to hold the rounds until you give the word.']):'',
-      `You are ${obs}, and your FDC is ${fdc}.`, 'Call for fire, adjust the rounds onto the target, and end the mission.'].filter(Boolean).join(' ');
-    const M={mode,tg,grid,alt,dir,obs,fdc,dist,ot,friend,dc,atMy,unit,rounds,tgt,cas,bursts,expect,text,scene:scene.k,light:light.k,seed};
+      atMy?pick(['You want to control exactly when the guns fire.','You want to hold the rounds until you give the word.']):'', task].filter(Boolean).join(' ');
+    const facts = level===1 ? [['Target grid', grid], ['Target altitude', `${alt} m`], ['Direction to target', `${dir} mils`], ['Distance to target', `${dist} m`]]
+      : level===2 ? [['Your grid', geo.obsGrid], ['Direction to target', `${dir} mils (grid)`], ['Distance to target', `${dist} m (laser range finder)`], ['Target altitude', `${alt} m (from the map)`]]
+      : [['Your grid', geo.obsGrid], ['Direction to target', `${dir} mils (grid)`], ['Distance to target', 'Unknown: no range finder'], [`Size of the ${ro.name}`, ro.dim],
+         ['Range formula', 'distance (m) = width (m) × 1000 ÷ width (mils)'], ['Target altitude', `${alt} m (from the map)`]];
+    facts.push(['Your call sign', obs], ['FDC call sign', fdc]);
+    const text=story+' '+facts.map(f=>f.join(': ')).join('. ')+'.';
+    const M={mode,level,geo,ro,rN,tg,grid,alt,dir,obs,fdc,dist,ot,friend,dc,atMy,unit,rounds,tgt,cas,bursts,expect,text,story,facts,scene:scene.k,light:light.k,seed};
     M.solution = {
       t1:`${fdc}, this is ${obs}, Adjust Fire, Over.`,
       t2:`Grid ${grid}, Altitude ${alt}m, Direction ${dir} Mils, Over.`,
@@ -1665,7 +1718,13 @@ const Bracket = (function(){
       need(/adjust fire/.test(t), 'Missing "Adjust fire" (grid mission).');
       need(endsOver(t), 'End with "Over".');
     } else if(st.k==='t2'){
-      need(sq(t).includes(sq(M.grid)), `Grid should be ${M.grid}.`);
+      if(M.level>=2){
+        const g=M.geo, tol=cffTol(), m=t.match(new RegExp(g.sqid.toLowerCase()+'\\s*(\\d{4})\\s*(\\d{4})(?!\\d)'));
+        need(sq(t).includes(sq(g.gzd+g.sqid)), `Include the grid zone and 100 km square (${g.gzd} ${g.sqid}).`);
+        if(!m) e.push(`Send an 8-digit grid (4 easting, 4 northing) after ${g.gzd} ${g.sqid}.`);
+        else { const off=Math.round(Math.hypot(+m[1]*10+5-g.tE, +m[2]*10+5-g.tN));
+          need(off<=tol, `Your grid is about ${off} m from the target. It has to be within ${tol} m. The target is at ${M.grid}.`); }
+      } else need(sq(t).includes(sq(M.grid)), `Grid should be ${M.grid}.`);
       const a=t.match(/alt(?:itude)?\D{0,4}(\d+)/); need(a && +a[1]===M.alt, `Altitude should be ${M.alt}m.`);
       const d=t.match(/dir(?:ection)?\D{0,4}(\d+)/); need(d && +d[1]===+M.dir, `Direction should be ${M.dir} mils.`);
       need(endsOver(t), 'End with "Over".');
@@ -1695,10 +1754,10 @@ const Bracket = (function(){
       const x=M.expect[st.i];
       const dv=t.match(/\b(left|right)\s*(\d+)/), rg=t.match(/\b(add|drop)\s*(\d+)/);
       const ffe=/fire\s*for\s*effect|\bffe\b/.test(t);
-      if(x.dev){ if(!dv) e.push(`Missing deviation: ${cap(x.dev.dir)} ${x.dev.m}.`); else if(dv[1]!==x.dev.dir||+dv[2]!==x.dev.m) e.push(`Deviation should be ${cap(x.dev.dir)} ${x.dev.m}.`); }
+      if(x.dev){ if(!dv) e.push(`Missing deviation: ${cap(x.dev.dir)} ${x.dev.m}.`); else if(dv[1]!==x.dev.dir||Math.abs(+dv[2]-x.dev.m)>10) e.push(`Deviation should be ${cap(x.dev.dir)} ${x.dev.m}.`); }
       else if(dv){
         if(x.spot.dev===0) e.push('The round was on line, so no left/right correction.');
-        else { const wd=x.spot.dev>0?'left':'right'; if(dv[1]!==wd||+dv[2]!==x.spot.m) e.push(`Deviation should be ${cap(wd)} ${x.spot.m} (optional here: ${Math.abs(x.spot.dev)} mils \u00D7 OT ${x.spot.ot} = ${x.spot.m}m is under the 30m minimum).`); }
+        else { const wd=x.spot.dev>0?'left':'right'; if(dv[1]!==wd||Math.abs(+dv[2]-x.spot.m)>10) e.push(`Deviation should be ${cap(wd)} ${x.spot.m} (optional here: ${Math.abs(x.spot.dev)} mils \u00D7 OT ${x.spot.ot} = ${x.spot.m}m is under the 30m minimum).`); }
       }
       if(!rg) e.push(`Missing range: ${cap(x.rng.dir)} ${x.rng.m}.`); else if(rg[1]!==x.rng.dir||+rg[2]!==x.rng.m) e.push(`Range should be ${cap(x.rng.dir)} ${x.rng.m}.`);
       if(dv && rg && dv.index>rg.index) e.push('Send deviation (left/right) before range (add/drop).');
@@ -1716,7 +1775,13 @@ const Bracket = (function(){
     return e;
   }
 
+  function plotWhy(M){
+    const g=M.geo; if(!g) return '';
+    const deg=Math.round(+M.dir*360/6400), ew=g.dE>=0?'east':'west', ns=g.dN>=0?'north':'south';
+    return `${M.level===3?`Distance = ${M.ro.w} m × 1000 ÷ ${M.rN} mils = ${M.dist} m. `:''}From your grid ${g.obsGrid}, ${M.dir} mils (${deg}°) for ${M.dist} m is ${Math.abs(g.dE)} m ${ew} and ${Math.abs(g.dN)} m ${ns}: ${M.grid}.`;
+  }
   function why(M,st){
+    if(st.k==='t2') return plotWhy(M);
     if(st.k!=='corr') return '';
     if(M.mode==='advanced') return advWhy(M,st.i);
     const x=M.expect[st.i], s=x.spot;
@@ -1858,15 +1923,17 @@ const Bracket = (function(){
     const ctx=M.tg.ctx, attached = ctx==='berm'||ctx==='wall'||ctx==='gully';
     const back=drawContext(M,cx,cy,r,L,'back'), target=big(drawTarget(M,cx,cy,r)), frontRaw=drawContext(M,cx,cy,r,L,'front'), front=attached?big(frontRaw):frontRaw, fore=drawFore(M,r,L);
     let ticks='';
-    for(let m=-100;m<=100;m+=10){ const x=cx+m*px, big=m%50===0;
-      ticks+=`<line x1="${x}" y1="${cy-(big?9:5)}" x2="${x}" y2="${cy+(big?9:5)}" stroke="#101109" stroke-width="${big?1.6:1.1}"/>`;
+    ticks+=`<line x1="${cx}" y1="${cy-110}" x2="${cx}" y2="${cy+110}" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="3"/><line x1="${cx}" y1="${cy-110}" x2="${cx}" y2="${cy+110}" stroke="#101109" stroke-width="1.1"/>`;
+    for(let m=-50;m<=50;m+=5){ if(!m) continue; const y=cy+m*px, ten=m%10===0; ticks+=`<line x1="${cx-(ten?6:3.5)}" y1="${y}" x2="${cx+(ten?6:3.5)}" y2="${y}" stroke="#101109" stroke-width="${ten?1.3:.9}"/>`; }
+    for(let m=-100;m<=100;m+=5){ const x=cx+m*px, big=m%50===0, ten=m%10===0;
+      ticks+=`<line x1="${x}" y1="${cy-(big?9:ten?5:3)}" x2="${x}" y2="${cy+(big?9:ten?5:3)}" stroke="#101109" stroke-width="${big?1.6:ten?1.1:.8}"/>`;
       if(big&&m) ticks+=`<text x="${x}" y="${cy-13}" font-size="10" text-anchor="middle" fill="#101109" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="2.4" paint-order="stroke" font-family="Arial,sans-serif" font-weight="700">${Math.abs(m)}</text>`; }
     let burst='', inFront=false;
     if(b){
       if(b.ffe){ burst=[-16,15,0].map((o,i)=>boom(cx+o, cy-2-(i===2?0:3), 15+i*2)).join(''); inFront=true; }
       else { const x=cx+b.dev*px, off=Math.sign(b.r)*(16+Math.abs(b.r)*0.09), y=cy-off, over=b.r>0, rr=over?13:19; burst=boom(x,y,rr); inFront=!over; }
     }
-    const caption = !b ? 'Binoculars centered on the target. Each tick is 10 mils.' : b.ffe ? 'Fire for effect: rounds impact on the target.' : `Round ${idx+1} impact.`;
+    const caption = !b ? 'Binoculars centered on the target. Long ticks are 10 mils, short ticks 5.' : b.ffe ? 'Fire for effect: rounds impact on the target.' : `Round ${idx+1} impact.`;
     // Outline of both eyepieces together (no line through the middle), with a soft dark edge inside it.
     const rim = 'M320 36.6 A146 146 0 1 0 320 263.4 A146 146 0 1 0 320 36.6Z';
     return `<svg viewBox="72 4 496 292" role="img" aria-label="${esc(caption)}" style="width:100%;height:auto;display:block">
@@ -1884,11 +1951,165 @@ const Bracket = (function(){
   }
 
 
+  /* ---------- Level 3: binoculars on the ranging object. The reticle is a "+": 0 in the middle, a long tick every 10 mils, a short one every 5. ---------- */
+  const RV_PPM=9, RV_CX=320, RV_CY=150, RV_BASE=178;
+  function reticle(ppm, span, labelEvery){
+    let s=`<line x1="${-span*ppm}" y1="0" x2="${span*ppm}" y2="0" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="3"/><line x1="${-span*ppm}" y1="0" x2="${span*ppm}" y2="0" stroke="#101109" stroke-width="1.1"/>
+      <line x1="0" y1="${-span*ppm*0.6}" x2="0" y2="${span*ppm*0.6}" stroke="#FFFFFF" stroke-opacity=".35" stroke-width="3"/><line x1="0" y1="${-span*ppm*0.6}" x2="0" y2="${span*ppm*0.6}" stroke="#101109" stroke-width="1.1"/>`;
+    for(let m=-span;m<=span;m+=5){ if(!m) continue; const x=m*ppm, big=m%10===0, len=big?7:4;
+      s+=`<line x1="${x}" y1="${-len}" x2="${x}" y2="${len}" stroke="#101109" stroke-width="${big?1.5:1}"/>`;
+      if(Math.abs(m)<=span*0.6) s+=`<line x1="${-len}" y1="${x}" x2="${len}" y2="${x}" stroke="#101109" stroke-width="${big?1.5:1}"/>`;
+      if(big && m%labelEvery===0) s+=`<text x="${x}" y="-11" font-size="10" text-anchor="middle" fill="#101109" stroke="#FFFFFF" stroke-opacity=".55" stroke-width="2.4" paint-order="stroke" font-family="Arial,sans-serif" font-weight="700">${Math.abs(m)}</text>`; }
+    return s;
+  }
+  function rangeView(M, ret){
+    const r=rng(M.seed+7), id='rv'+M.seed, land=drawLand(M, r, id), L=land.L, ppm=RV_PPM, base=RV_BASE, N=M.rN, ro=M.ro;
+    const w=N*ppm, x0=Math.round(RV_CX - w/2 + (r()-.5)*90);
+    let obj='';
+    const unit={truck:[-13,10], bmp:[-12,12.5], btr:[-13,13], zsu:[-12.5,12.5]}[ro.kind];
+    if(unit){ const sc=w/(unit[1]-unit[0]), X=x0-unit[0]*sc;
+      const draw = ro.kind==='truck'?truck(0,0,1):ro.kind==='bmp'?bmp(0,0,1):ro.kind==='btr'?btr(0,0,1):zsu(0,0);
+      obj=`<g transform="translate(${X} ${base}) scale(${sc})">${draw}</g>`;
+      if(ro.kind==='truck'){ for(let i=0;i<2;i++) obj+=`<g transform="translate(${x0+w+12+i*12} ${base}) scale(${sc*0.55})">${man(0,0,'stand')}</g>`; }
+    } else {
+      const h=Math.round(w*0.45), roof=Math.round(w*0.22);
+      obj=`<rect x="${x0}" y="${base-h}" width="${w}" height="${h}" fill="#857B6A"/><path d="M${x0-2} ${base-h} L${x0+w/2} ${base-h-roof} L${x0+w+2} ${base-h}Z" fill="#5E4A3A"/>
+        <rect x="${x0+w*0.18}" y="${base-h*0.6}" width="${Math.max(3,w*0.12)}" height="${h*0.6}" fill="#2B2A24"/><rect x="${x0+w*0.6}" y="${base-h*0.75}" width="${Math.max(3,w*0.14)}" height="${h*0.3}" fill="#2B2A24"/>`;
+      const pxPerM=w/ro.w; for(let i=0;i<3;i++){ const sc=pxPerM*1.8/10; obj+=`<g transform="translate(${x0+w+8+i*Math.max(7,pxPerM*1.4)} ${base}) scale(${sc})">${man(0,0,i===1?'kneel':'stand')}</g>`; }
+    }
+    const tint = {dawn:['#F2A65A',.10], dusk:['#2B2440',.24], overcast:['#6B7275',.12]}[M.light];
+    const rim='M320 36.6 A146 146 0 1 0 320 263.4 A146 146 0 1 0 320 36.6Z', p=ret||{x:0,y:0};
+    const cap=`The ${ro.name}. Drag to move the reticle: put the center of the + on one edge and read the other edge. Long ticks are 10 mils, short ticks 5.`;
+    return `<svg class="bk-rv" viewBox="72 4 496 292" role="img" aria-label="${esc(cap)}" style="width:100%;height:auto;display:block;touch-action:none;cursor:grab">
+      <defs><clipPath id="${id}clip"><circle cx="228" cy="150" r="146"/><circle cx="412" cy="150" r="146"/></clipPath></defs>
+      <rect x="0" y="0" width="640" height="300" fill="#0B0C0A"/>
+      <g clip-path="url(#${id}clip)">${land.s}<rect x="0" y="${base}" width="640" height="${300-base}" fill="${L[2]}"/>${obj}
+        ${tint?`<rect width="640" height="300" fill="${tint[0]}" opacity="${tint[1]}"/>`:''}
+        <g class="bk-ret" transform="translate(${RV_CX+p.x} ${RV_CY+p.y})">${reticle(ppm, 40, 10)}</g>
+        <path d="${rim}" fill="none" stroke="#000" stroke-opacity=".6" stroke-width="40" filter="url(#${id}blur)"/>
+      </g><path d="${rim}" fill="none" stroke="#2A2C26" stroke-width="3"/>
+    </svg><p class="bk-cap">${esc(cap)} <button type="button" class="bk-btn" id="bkRetC" style="padding:3px 9px;font-size:12px">Re-center</button></p>`;
+  }
+  function wireRange(I, el){
+    const sv=el.querySelector('svg.bk-rv'); if(!sv) return;
+    const g=sv.querySelector('.bk-ret'); let st=null;
+    const put=()=>g.setAttribute('transform', `translate(${RV_CX+I.ret.x} ${RV_CY+I.ret.y})`);
+    sv.onpointerdown=ev=>{ ev.preventDefault(); st={x:ev.clientX, y:ev.clientY, rx:I.ret.x, ry:I.ret.y, k:496/sv.getBoundingClientRect().width}; sv.setPointerCapture(ev.pointerId); sv.style.cursor='grabbing'; };
+    sv.onpointermove=ev=>{ if(!st) return; I.ret.x=Math.max(-240,Math.min(240, st.rx+(ev.clientX-st.x)*st.k)); I.ret.y=Math.max(-130,Math.min(130, st.ry+(ev.clientY-st.y)*st.k)); put(); };
+    sv.onpointerup=sv.onpointercancel=()=>{ st=null; sv.style.cursor='grab'; };
+    const c=el.querySelector('#bkRetC'); if(c) c.onclick=()=>{ I.ret={x:0,y:0}; put(); };
+  }
+
+  /* ---------- Levels 2 and 3: a gridded map with an army-style protractor and a coordinate scale ---------- */
+  function mapBox(M){
+    const g=M.geo, half=Math.max(Math.abs(g.dE), Math.abs(g.dN))/2+1300, cE=g.oE+g.dE/2, cN=g.oN+g.dN/2;
+    const n=Math.max(4, Math.ceil(half*2/1000)), x0=Math.floor((cE-n*500)/1000)*1000, y0=Math.floor((cN-n*500)/1000)*1000;
+    return {x0, y0, n:n+1, S:(n+1)*1000};
+  }
+  const PROT=2400, NS='stroke-linecap="round" vector-effect="non-scaling-stroke"';
+  function mapState(I){
+    if(I.mp && I.mp.seed===I.M.seed) return I.mp;
+    const B=mapBox(I.M);
+    return I.mp={seed:I.M.seed, B, z:1, cx:B.S/2, cy:B.S/2, prot:{on:true, x:B.S*0.3, y:B.S*0.3, mils:0}, cs:{on:false, x:B.S*0.6, y:B.S*0.6}};
+  }
+  function protractorSvg(){
+    const h=PROT/2, i=h-360;   // only the printed frame grabs the pointer; the clear middle lets you pan and plot through it
+    let s=`<path class="mp-body" d="M${-h} ${-h}H${h}V${h}H${-h}Z M${-i} ${-i}V${i}H${i}V${-i}Z" fill="#FFFFFF" fill-opacity=".55" fill-rule="evenodd" stroke="#1B1B1B" stroke-width="1.4" ${NS} style="cursor:move"/><rect x="${-i}" y="${-i}" width="${2*i}" height="${2*i}" fill="#FFFFFF" fill-opacity=".12" pointer-events="none"/>`;
+    s+=`<line x1="${-h}" y1="0" x2="${h}" y2="0" stroke="#1B1B1B" stroke-width=".9" ${NS} pointer-events="none"/><line x1="0" y1="${-h}" x2="0" y2="${h}" stroke="#1B1B1B" stroke-width=".9" ${NS} pointer-events="none"/>`;
+    s+=`<circle r="34" fill="none" stroke="#1B1B1B" stroke-width="1" ${NS} pointer-events="none"/>`;
+    for(let m=0;m<6400;m+=10){ const a=m*2*Math.PI/6400, sx=Math.sin(a), cy=-Math.cos(a), t=h/Math.max(Math.abs(sx),Math.abs(cy)), ex=sx*t, ey=cy*t;
+      const len = m%100===0 ? 150 : m%50===0 ? 95 : 55; const ix=ex-sx*len*(t/h)*0+(-sx*len), iy=ey-cy*len;
+      s+=`<line x1="${ex}" y1="${ey}" x2="${ix}" y2="${iy}" stroke="#1B1B1B" stroke-width="${m%100===0?1.2:.7}" ${NS} pointer-events="none"/>`;
+      if(m%200===0){ const lx=ex-sx*255, ly=ey-cy*255; s+=`<text x="${lx}" y="${ly+22}" font-size="64" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" fill="#1B1B1B" pointer-events="none">${m}</text>`; } }
+    s+=`<text x="${-h+60}" y="${h-60}" font-size="62" font-family="Arial,sans-serif" font-weight="700" fill="#1B1B1B" pointer-events="none">MILS</text>`;
+    return s;
+  }
+  function armSvg(){
+    let s=`<line x1="0" y1="0" x2="0" y2="-7000" stroke="#B3261E" stroke-width="2" ${NS} pointer-events="none"/>`;
+    for(let d=100; d<=7000; d+=100){ const big=d%1000===0, mid=d%500===0, len=big?110:mid?75:40;
+      s+=`<line x1="${-len}" y1="${-d}" x2="${len}" y2="${-d}" stroke="#B3261E" stroke-width="${big?1.6:1}" ${NS} pointer-events="none"/>`;
+      if(big) s+=`<text x="130" y="${-d+22}" font-size="72" font-family="Arial,sans-serif" font-weight="700" fill="#B3261E" stroke="#FFFFFF" stroke-width="10" paint-order="stroke" pointer-events="none">${d/1000} km</text>`; }
+    s+=`<circle class="mp-handle" cx="0" cy="-1650" r="150" fill="#B3261E" fill-opacity=".85" stroke="#FFFFFF" stroke-width="2" ${NS}/><text x="0" y="-1628" font-size="70" text-anchor="middle" fill="#FFF" font-family="Arial,sans-serif" font-weight="700" pointer-events="none">↻</text>`;
+    return s;
+  }
+  function coordScaleSvg(){
+    let s=`<path class="mp-csb" d="M-1000 0 H0 V-1000 H170 V170 H-1000Z" fill="#FFFFFF" fill-opacity=".7" stroke="#1B1B1B" stroke-width="1.2" ${NS} style="cursor:move"/>`;
+    s+=`<line x1="-1000" y1="0" x2="0" y2="0" stroke="#1B1B1B" stroke-width="1.4" ${NS} pointer-events="none"/><line x1="0" y1="0" x2="0" y2="-1000" stroke="#1B1B1B" stroke-width="1.4" ${NS} pointer-events="none"/>`;
+    for(let d=0; d<=1000; d+=50){ const big=d%100===0, len=big?80:40;
+      s+=`<line x1="${-d}" y1="0" x2="${-d}" y2="${len}" stroke="#1B1B1B" stroke-width="${big?1.1:.7}" ${NS} pointer-events="none"/><line x1="0" y1="${-d}" x2="${len}" y2="${-d}" stroke="#1B1B1B" stroke-width="${big?1.1:.7}" ${NS} pointer-events="none"/>`;
+      if(big && d) s+=`<text x="${-d}" y="150" font-size="56" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" fill="#1B1B1B" pointer-events="none">${d/100}</text><text x="95" y="${-d+20}" font-size="56" font-family="Arial,sans-serif" font-weight="700" fill="#1B1B1B" pointer-events="none">${d/100}</text>`; }
+    return s;
+  }
+  function mapBlock(I){
+    const M=I.M, g=M.geo, P=mapState(I), B=P.B, S=B.S, r=rng(M.seed+3), k=S/560, X=e=>e-B.x0, Y=nn=>B.y0+S-nn, live=I.canPlot();
+    let s=`<rect x="0" y="0" width="${S}" height="${S}" fill="#F4F0E2"/>`;
+    for(let i=0;i<7;i++){ const x=r()*S, y=r()*S, rx=300+r()*700, ry=250+r()*600; s+=`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}" fill="#CFE3BE"/>`; }
+    for(let i=0;i<3;i++){ const x=r()*S, y=r()*S; for(let c=1;c<=3;c++) s+=`<ellipse cx="${x}" cy="${y}" rx="${c*260}" ry="${c*190}" fill="none" stroke="#C49A6C" stroke-width="1" ${NS} opacity=".7"/>`; }
+    const wav=(y,a)=>{ let d=`M0 ${y}`; for(let x=0;x<=S;x+=S/6) d+=` Q${x+S/12} ${y+(r()-.5)*a} ${x+S/6} ${y+(r()-.5)*a*0.6}`; return d; };
+    s+=`<path d="${wav(S*(0.2+r()*0.6),1600)}" fill="none" stroke="#6FA8DC" stroke-width="2.4" ${NS}/>`;
+    s+=`<path d="${wav(S*(0.2+r()*0.6),900)}" fill="none" stroke="#C0392B" stroke-width="2.2" ${NS} opacity=".75"/>`;
+    for(let i=0;i<=B.n;i++){ const p=i*1000;
+      s+=`<line x1="${p}" y1="0" x2="${p}" y2="${S}" stroke="#2E6DA4" stroke-width="1.1" ${NS}/><line x1="0" y1="${S-p}" x2="${S}" y2="${S-p}" stroke="#2E6DA4" stroke-width="1.1" ${NS}/>`;
+      if(i<B.n){ s+=`<text x="${p+40}" y="${k*14}" font-size="${k*12}" fill="#1E4E7A" font-family="Arial,sans-serif" font-weight="700">${pad(Math.floor((B.x0+p)/1000)%100,2)}</text>`;
+        s+=`<text x="40" y="${S-p-40}" font-size="${k*12}" fill="#1E4E7A" font-family="Arial,sans-serif" font-weight="700">${pad(Math.floor((B.y0+p)/1000)%100,2)}</text>`; } }
+    const ox=X(g.oE), oy=Y(g.oN);
+    s+=`<circle cx="${ox}" cy="${oy}" r="${k*6}" fill="#1F5FBF" stroke="#fff" stroke-width="2" ${NS}/><text x="${ox+k*9}" y="${oy-k*8}" font-size="${k*12}" fill="#123E7C" font-family="Arial,sans-serif" font-weight="700" stroke="#F4F0E2" stroke-width="${k*3}" paint-order="stroke">You</text>`;
+    s+=`<g transform="translate(${S-k*26} ${S-k*60})"><path d="M0 ${-k*22} L${k*8} ${k*6} L0 0 L${-k*8} ${k*6}Z" fill="#222"/><text x="0" y="${k*22}" font-size="${k*13}" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" fill="#222">GN</text></g>`;
+    let truth='';
+    if(I.done){ const tx=X(g.tE), ty=Y(g.tN); truth=`<circle cx="${tx}" cy="${ty}" r="${cffTol()}" fill="#2E9E5B" fill-opacity=".14" stroke="#2E9E5B" stroke-width="1.5" stroke-dasharray="6 5" ${NS}/><circle cx="${tx}" cy="${ty}" r="${k*5}" fill="#2E9E5B"/>`; }
+    const plot = I.plot ? (()=>{ const px=X(I.plot.e), py=Y(I.plot.n), a=k*8; return `<g stroke="#D21F1F" stroke-width="3" ${NS}><line x1="${px-a}" y1="${py-a}" x2="${px+a}" y2="${py+a}"/><line x1="${px-a}" y1="${py+a}" x2="${px+a}" y2="${py-a}"/></g>`; })() : '';
+    const vw=S/P.z;
+    const cap = live ? 'Tap the map to plot the target. Drag the map to move around. Drag the protractor by its edge (it snaps onto your position), and drag the red handle to swing the arm.' : I.done ? 'Red X: your plot. Green: the target and the tolerance circle.' : 'Grid squares are 1,000 m. Grid north is up. Drag to move around; the tools work before you start.';
+    const tb=(id,txt,t,pr)=>`<button type="button" class="bk-btn bk-tool" id="${id}" title="${t}"${pr!=null?` aria-pressed="${pr}"`:''}>${txt}</button>`;
+    return `<div class="bk-mapbar">${tb('mpProt','Protractor','Show or hide the protractor',P.prot.on)}${tb('mpCs','Coordinate scale','Show or hide the coordinate scale',P.cs.on)}
+        <span class="bk-mapgrp">${tb('mpZo','−','Zoom out')}${tb('mpZi','+','Zoom in')}${tb('mpZr','Fit','Show the whole map')}</span>
+        <span class="bk-mapgrp" ${P.prot.on?'':'hidden'} id="mpArmBar">${tb('mpA-10','◀ 10','Arm 10 mils left')}${tb('mpA-1','‹ 1','Arm 1 mil left')}<span class="bk-armread" id="mpArm">Arm ${pad(P.prot.mils,4)} mils</span>${tb('mpA1','1 ›','Arm 1 mil right')}${tb('mpA10','10 ▶','Arm 10 mils right')}</span></div>
+      <svg class="bk-mapsvg${live?' live':''}" viewBox="${P.cx-vw/2} ${P.cy-vw/2} ${vw} ${vw}" role="img" aria-label="${esc(cap)}" data-x0="${B.x0}" data-y0="${B.y0}" data-s="${S}">
+        <g>${s}</g>${truth}<g class="mp-plot">${plot}</g>
+        <g class="mp-cs" transform="translate(${P.cs.x} ${P.cs.y})" ${P.cs.on?'':'display="none"'}>${coordScaleSvg()}</g>
+        <g class="mp-prot" transform="translate(${P.prot.x} ${P.prot.y})" ${P.prot.on?'':'display="none"'}>${protractorSvg()}<g class="mp-arm" transform="rotate(${P.prot.mils*360/6400})">${armSvg()}</g></g>
+      </svg><p class="bk-cap" style="color:var(--bk-soft)">${esc(cap)}</p>`;
+  }
+  function wireMap(I, el){
+    const sv=el.querySelector('svg.bk-mapsvg'); if(!sv) return;
+    const P=I.mp, S=P.B.S, M=I.M, g=M.geo;
+    const setVB=()=>{ const vw=S/P.z, h=vw/2; P.cx=Math.max(h-S*0.1, Math.min(S*1.1-h, P.cx)); P.cy=Math.max(h-S*0.1, Math.min(S*1.1-h, P.cy)); sv.setAttribute('viewBox', `${P.cx-h} ${P.cy-h} ${vw} ${vw}`); };
+    const prot=sv.querySelector('.mp-prot'), arm=sv.querySelector('.mp-arm'), cs=sv.querySelector('.mp-cs'), read=el.querySelector('#mpArm');
+    const putProt=()=>{ prot.setAttribute('transform', `translate(${P.prot.x} ${P.prot.y})`); arm.setAttribute('transform', `rotate(${P.prot.mils*360/6400})`); if(read) read.textContent=`Arm ${pad(P.prot.mils,4)} mils`; };
+    const putCs=()=>cs.setAttribute('transform', `translate(${P.cs.x} ${P.cs.y})`);
+    const toMap=ev=>{ const p=sv.createSVGPoint(); p.x=ev.clientX; p.y=ev.clientY; return p.matrixTransform(sv.getScreenCTM().inverse()); };
+    const ox=g.oE-P.B.x0, oy=P.B.y0+S-g.oN;
+    let st=null;
+    sv.onpointerdown=ev=>{
+      const t=ev.target, q=toMap(ev), kind = t.closest('.mp-handle')?'arm' : t.closest('.mp-body')?'prot' : t.closest('.mp-csb')?'cs' : 'pan';
+      st={kind, x:ev.clientX, y:ev.clientY, q, moved:0, px:P.prot.x, py:P.prot.y, sx:P.cs.x, sy:P.cs.y, cx:P.cx, cy:P.cy, k:(S/P.z)/sv.getBoundingClientRect().width};
+      sv.setPointerCapture(ev.pointerId); ev.preventDefault();
+    };
+    sv.onpointermove=ev=>{ if(!st) return; const dx=(ev.clientX-st.x)*st.k, dy=(ev.clientY-st.y)*st.k; st.moved=Math.max(st.moved, Math.hypot(ev.clientX-st.x, ev.clientY-st.y));
+      if(st.kind==='pan'){ P.cx=st.cx-dx; P.cy=st.cy-dy; setVB(); }
+      else if(st.kind==='prot'){ P.prot.x=st.px+dx; P.prot.y=st.py+dy; if(Math.hypot(P.prot.x-ox, P.prot.y-oy) < S*0.012){ P.prot.x=ox; P.prot.y=oy; } putProt(); }
+      else if(st.kind==='cs'){ P.cs.x=st.sx+dx; P.cs.y=st.sy+dy; putCs(); }
+      else if(st.kind==='arm'){ const q=toMap(ev); let a=Math.atan2(q.x-P.prot.x, -(q.y-P.prot.y)); if(a<0) a+=2*Math.PI; P.prot.mils=Math.round(a*6400/(2*Math.PI))%6400; putProt(); }
+    };
+    sv.onpointerup=ev=>{ const s0=st; st=null; if(!s0) return;
+      if(s0.kind!=='arm' && s0.moved<6 && I.canPlot()){ const q=s0.q; I.plot={e:Math.round(P.B.x0+q.x), n:Math.round(P.B.y0+S-q.y)}; I.plotWarn=false; I.draw(); }
+    };
+    sv.onpointercancel=()=>{ st=null; };
+    sv.onwheel=ev=>{ ev.preventDefault(); const q=toMap(ev), z0=P.z; P.z=Math.max(1, Math.min(8, P.z*(ev.deltaY<0?1.25:0.8))); const f=z0/P.z; P.cx=q.x+(P.cx-q.x)*f; P.cy=q.y+(P.cy-q.y)*f; setVB(); };
+    const zoom=f=>{ P.z=Math.max(1, Math.min(8, P.z*f)); setVB(); };
+    const on=(id,fn)=>{ const b=el.querySelector('#'+id); if(b) b.onclick=fn; };
+    on('mpZi',()=>zoom(1.5)); on('mpZo',()=>zoom(1/1.5)); on('mpZr',()=>{ P.z=1; P.cx=S/2; P.cy=S/2; setVB(); });
+    on('mpProt',()=>{ P.prot.on=!P.prot.on; I.draw(); }); on('mpCs',()=>{ P.cs.on=!P.cs.on; I.draw(); });
+    [[-10,'mpA-10'],[-1,'mpA-1'],[1,'mpA1'],[10,'mpA10']].forEach(([d,id])=>on(id,()=>{ P.prot.mils=(P.prot.mils+d+6400)%6400; putProt(); }));
+  }
+
   /* ---------- instance ---------- */
   function create(opts){
-    const I={opts:opts||{}, mode:(opts&&opts.mode)||'standard', M:null, started:false, startedAt:null, t3At:null, pos:0, log:[], errors:[], done:false, hint:false, burstIdx:null, el:null, draft:''};
-    I.M = newMission(!!I.opts.fixed, I.mode);
-    I.setMode = m=>{ if(I.started) return; I.mode=m; I.M=newMission(!!I.opts.fixed, m); I.draw(); };
+    const I={opts:opts||{}, mode:(opts&&opts.mode)||'standard', level:(opts&&+opts.level)||1, plot:null, ret:{x:0,y:0}, mp:null, M:null, started:false, startedAt:null, t3At:null, pos:0, log:[], errors:[], done:false, hint:false, burstIdx:null, el:null, draft:''};
+    I.M = newMission(!!I.opts.fixed, I.mode, I.level);
+    I.setMode = m=>{ if(I.started) return; I.mode=m; I.M=newMission(!!I.opts.fixed, m, I.level); I.draw(); };
+    I.setLevel = l=>{ if(I.started) return; I.level=+l; I.plot=null; I.ret={x:0,y:0}; I.M=newMission(!!I.opts.fixed, I.mode, I.level); if(I.opts.onLevel) I.opts.onLevel(I.level); I.draw(); };
+    I.canPlot = ()=> I.M.level>=2 && I.started && !I.done && !I.skipped && I.M.steps[I.pos] && ['t1','t2'].includes(I.M.steps[I.pos].k);
     I.known = ()=>{ const k=new Set(VOCAB); (I.M.text+' '+I.log.filter(m=>m.who!=='FO').map(m=>m.text).join(' ')).toLowerCase().match(/[a-z]+/g).forEach(w=>k.add(w)); return k; };
     I.result = ()=> I.errors.length ? 'nogo' : (I.done ? 'go' : null);
     function advance(){
@@ -1917,7 +2138,11 @@ const Bracket = (function(){
       const st=I.M.steps[I.pos];
       const secs = st.k==='t3' && I.startedAt ? (Date.now()-I.startedAt)/1000 : null;
       if(st.k==='t3') I.t3At=Date.now();
+      if(st.k==='t2' && I.M.level>=2 && !I.skipped && !I.plot){ I.plotWarn=true; I.draft=text; I.draw(true); return; }
+      I.plotWarn=false;
       const errs=check(I.M, st, text, secs);
+      if(st.k==='t2' && I.M.level>=2 && I.plot){ const g=I.M.geo, off=Math.round(Math.hypot(I.plot.e-g.tE, I.plot.n-g.tN)), tol=cffTol(); I.plotOff=off;
+        if(off>tol) errs.push(`Your map plot was about ${off} m from the target. It has to be within ${tol} m.`); }
       I.log.push({who:'FO', text, errs, expect:expected(I.M,st), why:why(I.M,st), label:st.label});
       errs.forEach(x=>I.errors.push(`${st.label}: ${x}`));
       if(!errs.length && st.k==='corr' && I.M.mode==='standard'){
@@ -1961,10 +2186,13 @@ const Bracket = (function(){
       const status = !I.started ? '' : res==='nogo' ? `<span class="bk-badge bad">NO-GO</span>` : res==='go' ? `<span class="bk-badge good">GO</span>` : `<span class="bk-badge">In progress</span>`;
       el.innerHTML = `<div class="bk">
         <div class="bk-head">
-          <p class="bk-scn">${esc(M.text)}</p>
+          <div class="bk-scn"><p>${esc(M.story)}</p><dl class="bk-facts">${M.facts.map(([k,v])=>`<dt>${esc(k)}</dt><dd>${esc(v)}</dd>`).join('')}</dl></div>
           <div class="bk-clockbox">${status}<div class="bk-clock" id="bkClock" aria-live="off">${I.skipped?'\u2014':cffLim()?mmss(cffLim()):'0:00'}</div><div class="bk-small">${I.skipped?'skipped to adjusting fire':'initial call for fire'}</div></div>
         </div>
-        ${!I.started ? `<div class="bk-row">
+        ${!I.started ? `${I.opts.practice?'':`<div class="bk-row"><div class="bk-seg" role="group" aria-label="Level">
+              ${[[1,'Level 1: grid given'],[2,'Level 2: plot from direction and distance'],[3,'Level 3: range it with binoculars']].map(([l,t])=>`<button type="button" data-bkl="${l}" aria-pressed="${I.level===l}">${t}</button>`).join('')}</div></div>`}
+            ${M.level>=2?`<div class="bk-map">${mapBlock(I)}</div>`:''}
+            <div class="bk-row">
             <div class="bk-seg" role="group" aria-label="Bracketing">
               <button type="button" data-bkm="standard" aria-pressed="${I.mode==='standard'}">Standard: 400, 200, 100, 50</button>
               <button type="button" data-bkm="advanced" aria-pressed="${I.mode==='advanced'}">Advanced: any corrections</button>
@@ -1973,17 +2201,19 @@ const Bracket = (function(){
             <p class="bk-small" style="margin:0">${I.mode==='standard'?'Successive bracketing: Add/Drop 400, 200, 100, then 50 with fire for effect.':'Make whatever corrections you judge best, but call fire for effect before you run out of the rounds given in the MTO.'}</p>` : `
         ${res==='nogo' ? `<div class="bk-nogo"><b>No-Go.</b> Mission ended at: ${esc(I.failedAt)}.</div>`:''}
         ${res==='go' ? `<div class="bk-go"><b>Go.</b> Mission complete${I.skipped?' (adjust only: the call for fire and MTO were skipped)':''}.</div>`:''}
-        <div class="bk-grid">
+        <div class="bk-grid"><div class="bk-left">
           <div class="bk-view">
-            <div class="bk-status"><span>${M.mode==='standard'?'Standard bracketing':'Advanced adjustment'}${I.skipped?' \u00B7 adjust only':''}</span><span>${(()=>{ const fired=M.bursts.filter((b,i)=>!b.ffe && I.burstIdx!=null && i<=I.burstIdx).length; return I.burstIdx==null?'No rounds fired yet':M.bursts[I.burstIdx]&&M.bursts[I.burstIdx].ffe?'<b>Fire for effect</b>':`Adjusting round <b>${fired}</b>`; })()}</span></div>
-            ${view(M, I.burstIdx, I.hint)}
+            <div class="bk-status"><span>Level ${M.level} \u00B7 ${M.mode==='standard'?'Standard bracketing':'Advanced adjustment'}${I.skipped?' \u00B7 adjust only':''}</span><span>${(()=>{ const fired=M.bursts.filter((b,i)=>!b.ffe && I.burstIdx!=null && i<=I.burstIdx).length; return I.burstIdx==null?'No rounds fired yet':M.bursts[I.burstIdx]&&M.bursts[I.burstIdx].ffe?'<b>Fire for effect</b>':`Adjusting round <b>${fired}</b>`; })()}</span></div>
+            ${M.level===3 && I.burstIdx==null ? rangeView(M, I.ret) : view(M, I.burstIdx, I.hint)}
           </div>
+          ${M.level>=2 ? `<div class="bk-map" id="bkMapBox">${mapBlock(I)}${I.done&&I.plotOff!=null?`<p class="bk-small">Your plot was ${I.plotOff} m from the target (tolerance ${cffTol()} m).</p>`:''}</div>`:''}</div>
           <div class="bk-radio"><div class="bk-radio-h"><span><span class="dot"></span>Radio \u00B7 ${esc(M.fdc)}</span><span>${esc(M.obs)}</span></div>
             <ol class="bk-log" id="bkLog">${I.log.map(m=> m.who==='note' ? `<li class="bk-note">${esc(m.text)}</li>` :
               `<li class="bk-msg ${m.who==='FO'?'fo':'fdc'}"><span class="bk-who">${m.who==='FO'?(m.given?'Given':'You'):'FDC'}</span><span>${esc(m.text)}</span></li>`).join('')}</ol>
             ${I.done ? `<div class="bk-row"><button class="bk-btn" id="bkSol">Grader review</button><button class="bk-btn" id="bkNew">New mission</button></div><div id="bkSolBox" hidden></div>` : `
             <div class="bk-send" id="bkForm">
               <label class="bk-small" for="bkIn">Your transmission: ${esc(st.label)}</label>
+              ${I.plotWarn?`<div class="bk-warn" role="alert">Plot the target on the map first: tap where you think it is.</div>`:''}
               ${I.warn?`<div class="bk-warn" role="alert">Check spelling: ${I.warn.map(f=>`\u201C${esc(f.w)}\u201D (did you mean \u201C${esc(f.s)}\u201D?)`).join(', ')}. Fix it, or press Send again to send it as typed.</div>`:''}
               <div class="bk-row"><input class="bk-in" id="bkIn" autocomplete="off" spellcheck="false" value="${esc(I.draft)}" placeholder="Type what you would say on the radio"><button class="bk-btn primary" type="button" id="bkSend">Send</button></div>
             </div>`}
@@ -1993,6 +2223,8 @@ const Bracket = (function(){
       const s=el.querySelector('#bkStart'); if(s) s.onclick=I.start;
       const sk=el.querySelector('#bkSkip'); if(sk) sk.onclick=I.skip;
       el.querySelectorAll('[data-bkm]').forEach(b=>b.onclick=()=>I.setMode(b.dataset.bkm));
+      el.querySelectorAll('[data-bkl]').forEach(b=>b.onclick=()=>I.setLevel(b.dataset.bkl));
+      wireMap(I, el); wireRange(I, el);
       const f=el.querySelector('#bkForm'); if(f){ const inp=el.querySelector('#bkIn'); inp.oninput=()=>{ I.draft=inp.value; };
         // Plain button + Enter key, not a <form>: Claude's sandbox blocks form submission.
         const submit=()=>{ const v=inp.value; if(!v.trim()) return;
@@ -2007,7 +2239,7 @@ const Bracket = (function(){
           const fo=I.log.filter(m=>m.who==='FO' && !m.given);
           box.innerHTML=`<div class="bk-review">${fo.map(m=>`<div class="bk-rv ${m.errs.length?'bad':''}"><div class="bk-small">${esc(m.label)}</div><div>Sent: ${esc(m.text)}</div>${m.errs.length?`<div class="bk-fb bad">${m.errs.map(esc).join('<br>')}<div class="bk-exp">Correct: ${esc(m.expect)}</div>${m.why?`<div class="bk-small">${esc(m.why)}</div>`:''}</div>`:`<div class="bk-fb good">Correct</div>`}</div>`).join('')}
             <p class="bk-small">OT factor ${M.ot} (${M.dist}m). Full correct mission:</p>
-            <ol class="bk-log">${M.steps.map(st=>`${(st.fdcs||(st.fdc?[st.fdc]:[])).map(l=>`<li class="bk-msg fdc"><span class="bk-who">FDC</span><span>${esc(l)}</span></li>`).join('')}<li class="bk-msg fo"><span class="bk-who">FO</span><span>${esc(expected(M,st))}</span>${st.k==='corr'?`<div class="bk-small">${esc(why(M,st))}</div>`:''}</li>`).join('')}</ol></div>`;
+            <ol class="bk-log">${M.steps.map(st=>`${(st.fdcs||(st.fdc?[st.fdc]:[])).map(l=>`<li class="bk-msg fdc"><span class="bk-who">FDC</span><span>${esc(l)}</span></li>`).join('')}<li class="bk-msg fo"><span class="bk-who">FO</span><span>${esc(expected(M,st))}</span>${st.k==='corr'||(st.k==='t2'&&M.level>=2)?`<div class="bk-small">${esc(why(M,st))}</div>`:''}</li>`).join('')}</ol></div>`;
         }
         sb.textContent=box.hidden?'Grader review':'Hide review'; };
       const nb=el.querySelector('#bkNew'); if(nb) nb.onclick=()=>{ if(I.opts.onNew) I.opts.onNew(); };
@@ -2026,7 +2258,7 @@ const Bracket = (function(){
     return I;
   }
   setInterval(()=>{ if(Bracket._live && Bracket._live.startedAt && !Bracket._live.t3At) Bracket._live.tick(); }, 250);
-  return { create:(o)=>{ const i=create(o); Bracket._live=i; return i; } };
+  return { create:(o)=>{ const i=create(o); Bracket._live=i; return i; }, newMission, rangeView };
 })();
 
 
@@ -2462,7 +2694,7 @@ function rangeCheckHtml(){
     <button class="btn" id="rgChk">Check range</button><span id="rgRes" aria-live="polite"></span></div>`;
 }
 // Right if within 2% (rounding 25.4 to 25 still counts; misreading the mils by one does not).
-const rangeOk = (typed, exact) => { const n=parseFloat(String(typed||'').replace(/[^0-9.]/g,'')); return isFinite(n) && Math.abs(n-exact) <= Math.max(2, exact*0.02); };
+const rangeOk = (typed, exact) => { const n=parseFloat(String(typed||'').replace(/[^0-9.]/g,'')); return isFinite(n) && Math.abs(n-exact) <= Math.max(5, exact*0.05); };
 
 function genSpot(fixed, opts){
   const wantRange = !opts || opts.range!==false;
@@ -2493,7 +2725,7 @@ function genSpot(fixed, opts){
   if(R) html+=`<div class="script"><h3>Range estimate (mil relation)</h3><p>The soldier is ${R.N} mils tall on the vertical bar.</p><p>(Height in inches \u00D7 25.4) \u00F7 height in mils = range in meters</p><p><b>${esc(R.work)}</b></p></div>`;
   const ck=['dtg','free','free','free','grid','free','dtg','free','free','free','free'];
   const key=lines.map((l,i)=>({n:l[0],label:l[1],ans:l[2],why:l[3],check:ck[i]}));
-  if(R) key.push({n:'R', label:'Range to the nearest enemy (meters)', ans:`${R.dist} m`, why:`${R.N} mils tall. ${esc(R.work)}. Within 2% counts.`, check:'range', exact:R.exact});
+  if(R) key.push({n:'R', label:'Range to the nearest enemy (meters)', ans:`${R.dist} m`, why:`${R.N} mils tall. ${esc(R.work)}. Within 5% counts.`, check:'range', exact:R.exact});
   return {text,html,script,key,view:R?R.view:'',range:R};
 }
 
@@ -2719,7 +2951,7 @@ function renderWeapons(){
     const head = ph.type==='seq' ? 'Tap the steps in order.' : 'Tap each group as you lay it out. Any order.';
     return `<section class="wp-phase"><div class="wp-phead"><h3 class="wp-h">${num}. ${esc(ph.t)}</h3>
       <span class="wp-stat ${done?(st.misses?'warn':'ok'):''}">${done?(ph.type==='seq'?(st.misses?`Done with ${st.misses} wrong pick${st.misses>1?'s':''}`:'Done, no mistakes'):'All groups'):`${st.picked.length} of ${ph.steps.length}`}</span></div>
-      <p class="wp-note">${head}${ph.note?' '+esc(ph.note):''}</p>
+      <p class="wp-note">${head}${ph.note?' '+esc(ph.note):''}</p>${st.why?`<div class="miss-box" role="alert">${esc(st.why)}</div>`:''}
       <div class="wp-cards">${st.order.map(i=>{ const pos=st.picked.indexOf(i); const cls=pos>=0?'ok':st.wrong===i?'bad':'';
         return `<button class="wp-card ${cls}" data-ph="${pi}" data-i="${i}" ${pos>=0&&ph.type==='seq'?'disabled':''}><span class="wp-n">${pos>=0?(ph.type==='seq'?pos+1:'\u2713'):''}</span><span>${esc(ph.steps[i])}</span></button>`; }).join('')}</div></section>`;
   }).join('') + (wp.end?`<p class="wp-note"><b>Timing:</b> ${esc(wp.end)}</p>`:''); }
@@ -2737,7 +2969,7 @@ function renderWeapons(){
   host.querySelectorAll('.wp-card').forEach(b=>b.onclick=()=>{
     const pi=+b.dataset.ph, i=+b.dataset.i, ph=wp.phases[pi], st=P[pi];
     if(ph.type==='set'){ const at=st.picked.indexOf(i); if(at>=0) st.picked.splice(at,1); else st.picked.push(i); }
-    else if(!st.picked.includes(i)){ if(i===st.picked.length){ st.picked.push(i); st.wrong=null; } else { st.misses++; st.wrong=i; } }
+    else if(!st.picked.includes(i)){ if(i===st.picked.length){ st.picked.push(i); st.wrong=null; st.why=''; } else { st.misses++; st.wrong=i; st.why=`Out of order: that is step ${i+1} of ${ph.steps.length}. Step ${st.picked.length+1} comes first: “${ph.steps[st.picked.length]}”`; } }
     const allDone = wp.phases.every((ph,k)=>ph.type!=='seq' || P[k].picked.length===ph.steps.length);
     if(allDone && !W.done[W.w]){ W.done[W.w]=true; const miss=P.reduce((a,x)=>a+x.misses,0), secs=Math.floor((W.sw.elapsed+(W.sw.start?Date.now()-W.sw.start:0))/1000);
       const wl=wLim(), wOver=!!(wl && secs>wl);
@@ -2768,6 +3000,15 @@ function genWeapons(){ wResetProgress(); return {text:'', quiz:'<div></div>', wi
     <button data-mode="progress" aria-pressed="false">My progress</button>
   </div>
   <label class="opts"><input type="checkbox" id="rand"> <span id="randLbl">Randomize call signs and frequency</span></label>
+  <div class="cff-hub" id="cffHub" hidden>
+    <div class="cff-levels" role="group" aria-label="Call for fire level">
+      <button data-cl="drill" aria-pressed="true">Initial call</button>
+      <button data-cl="1" aria-pressed="false">Level 1</button>
+      <button data-cl="2" aria-pressed="false">Level 2</button>
+      <button data-cl="3" aria-pressed="false">Level 3</button>
+    </div>
+    <p class="cff-note" id="cffNote"></p>
+  </div>
   <label class="opts" id="rangeOpt" hidden><input type="checkbox" id="rangeChk" checked> <span>Include a range estimate (mil relation)</span></label>
 
   <section class="card" aria-live="polite">
@@ -2788,7 +3029,6 @@ function genWeapons(){ wResetProgress(); return {text:'', quiz:'<div></div>', wi
   </section>
   <section class="card" id="progressCard" hidden></section>
   <section class="card" id="missionCard" hidden>
-    <div class="actions" style="margin-bottom:14px"><button class="btn" id="backScn">Back to CFF scenarios</button></div>
     <div id="bkHost"></div>
   </section>
 `;
@@ -2808,7 +3048,7 @@ function generate(){
   // Every other skill gets the same clock: it starts with the scenario and stops when the result is saved.
   cur.clk = CLK_MODES.includes(mode) ? {t0:Date.now(), lim:rptLim(mode), used:null} : null; drawClk();
   if(cur.range && !typedRpt){ const go=()=>{ const ok=rangeOk($('rgIn').value, cur.range.exact), res=$('rgRes');
-      res.innerHTML = !$('rgIn').value.trim() ? '<span class="flag">Type your range in meters first.</span>' : ok ? `<b style="color:var(--good,#62C0A6)">Correct: about ${cur.range.dist} m.</b>` : `<b class="flag">Not quite.</b> Count the dots again, then use (height in inches \u00D7 25.4) \u00F7 mils.`; };
+      res.innerHTML = !$('rgIn').value.trim() ? '<span class="flag">Type your range in meters first.</span>' : ok ? `<b style="color:var(--good,#62C0A6)">Correct: about ${cur.range.dist} m.</b>` : `<b class="flag">Not quite.</b> You said ${esc($('rgIn').value.trim())}; it's about ${cur.range.dist} m. Count the dots again, then use (height in inches \u00D7 25.4) \u00F7 mils. Within 5% counts.`; };
     $('rgChk').onclick=go; $('rgIn').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); go(); } }); }
   root.querySelector('.opts').hidden = mode==='weapons';
   $('new').hidden = mode==='weapons';
@@ -2820,15 +3060,15 @@ function generate(){
   $('show').textContent='Show answer'; $('show').setAttribute('aria-expanded','false'); $('dToast').textContent='';
 }
 // Recall is graded on the model number, so the rest of the wording doesn't matter.
-const GRENADE_KEYS={m67:['m67'],mk3a2:['mk3a2','mk3'],m84:['m84'],m18:['m18'],anm14:['anm14','m14','th3'],m7a3:['m7a3','m7a2']};
+const GRENADE_KEYS={m67:['m67','67'],mk3a2:['mk3a2','mk3','3a2'],m84:['m84','84'],m18:['m18','18'],anm14:['anm14','m14','th3','14'],m7a3:['m7a3','m7a2','7a3','7a2']};
 function grenadeMatch(v,id){ const t=String(v||'').toLowerCase().replace(/[^a-z0-9]/g,''); if(!t) return false;
   const mine=GRENADE_KEYS[id]||[];
   const other=Object.keys(GRENADE_KEYS).some(o=>o!==id && GRENADE_KEYS[o].some(k=>t.includes(k) && !mine.some(m=>m.includes(k))));
   return mine.some(k=>t.includes(k)) && !other; }
 function wireGrenadeQuiz(){
   $('gqCheck').onclick=()=>{ let right=0; const sels=[...root.querySelectorAll('.gq-sel')];
-    sels.forEach(s=>{ const ok=grenadeMatch(s.value, s.dataset.id); if(ok) right++; const m=s.nextElementSibling; m.textContent=ok?'Correct':(s.value.trim()?'Wrong':'No answer'); m.className='gq-mark '+(ok?'ok':'bad'); });
-    $('gqResult').innerHTML=`<b class="${right===sels.length?'':'flag'}">${right} of ${sels.length} correct: ${right===sels.length?'Go':'No-Go'}.</b> Open "Show answer" to see the key.`;
+    sels.forEach(s=>{ const ok=grenadeMatch(s.value, s.dataset.id); if(ok) right++; const m=s.nextElementSibling; const g=GRENADES.find(x=>x.name===s.dataset.ans)||{}; m.textContent=ok?'Correct':`${s.value.trim()?'Wrong':'No answer'}: this is the ${s.dataset.ans}. ${g.d||''}`; m.className='gq-mark '+(ok?'ok':'bad'); });
+    $('gqResult').innerHTML=`<b class="${right===sels.length?'':'flag'}">${right} of ${sels.length} correct: ${right===sels.length?'Go':'No-Go'}.</b> ${right===sels.length?'':' Each miss shows what it is and how to tell.'}`;
     if(!cur.checked){ cur.checked=true; const [ok, det]=clkResult(right===sels.length, `${right} of ${sels.length}`); precord('grenade', ok, det); if(!ok && right===sels.length) $('gqResult').innerHTML+=' <b class="flag">Over the time limit: No-Go.</b>'; } };
 }
 // 9-line, SPOT, SALUTE: type each line, the tool checks what it can, you mark the wording lines yourself.
@@ -2862,11 +3102,11 @@ function drawRpt(){
   }
   const left=key.filter((_,i)=>!R.marks[i]).length, bad=key.filter((_,i)=>R.marks[i]==='bad').length, over=!!(R.lim && R.used>R.lim);
   const overTxt = over ? `Over the time limit (${mss(R.used)}, limit ${mss(R.lim)})` : '';
-  box.innerHTML=`<h3 class="pg-h" style="margin-top:4px">Your report</h3>
+  box.innerHTML=`<h3 class="pg-h" style="margin-top:4px">Your report</h3>${missBox(key, R.typed, R.marks)}
     <ol class="rpt-lines graded">${key.map((l,i)=>{ const m=R.marks[i], auto=rptAuto(l,R.typed[i]);
       return `<li class="${m||'open'}"><span class="rn">${esc(String(l.n))}</span><div><div class="rl">${esc(l.label)}</div>
         <div class="rt">${R.typed[i]?esc(R.typed[i]):'<i>(blank)</i>'}</div>
-        ${m==='ok'&&auto!==null?'':`<div class="ra"><b>Answer:</b> ${esc(l.ans)}</div>${l.why&&m==='bad'?`<div class="rw">${l.why}</div>`:''}`}
+        ${m==='ok'&&auto!==null?'':`<div class="ra"><b>Answer:</b> ${esc(l.ans)}</div>${m==='bad'?`<div class="rw">${esc(lineReason(l,R.typed[i]))}${l.why?' '+l.why:''}</div>`:''}`}
         ${auto===null&&String(R.typed[i]||'').trim()?`<div class="rself"><span>${m?'You marked this':'Does yours match?'}</span><button class="btn sm" data-rm="${i}" data-v="ok" aria-pressed="${m==='ok'}">Right</button><button class="btn sm" data-rm="${i}" data-v="bad" aria-pressed="${m==='bad'}">Wrong</button></div>`:''}</div>
         <span class="rmark">${m==='ok'?'\u2713':m==='bad'?'\u2717':''}</span></li>`; }).join('')}</ol>
     <p class="rpt-time ${over?'flag':''}">${over?overTxt+'.':R.lim?`Time: ${mss(R.used)} of ${mss(R.lim)}.`:`Time: ${mss(R.used)}.`}</p>
@@ -2890,26 +3130,36 @@ function setMode(m){
   $('rand').checked=randPref[m==='grenade'?'grenade':'calls'];
   $('randLbl').textContent = m==='grenade' ? 'Randomize grenade order' : 'Randomize call signs and frequency';
   $('rangeOpt').hidden = m!=='spot';
-  mode=m;modeBtns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));$('mission').hidden=m!=='cff';showMission(false);
+  mode=m;modeBtns.forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.mode===m)));$('mission').hidden=true;$('cffHub').hidden=m!=='cff';
+  if(m==='cff' && cffLevel!=='drill'){ setCffLevel(cffLevel); return; }
+  showMission(false);
   const prog=m==='progress'; $('progressCard').hidden=!prog; root.querySelector('section.card:not(#missionCard):not(#progressCard)').hidden=prog; root.querySelector('.opts').hidden=prog||m==='weapons';
   if(prog){ $('rangeOpt').hidden=true; showProgress(); return; }
   generate();}
 function showProgress(){ const c=$('progressCard'); c.innerHTML=progressHtml(); const r=$('pgReset');
   if(r) r.onclick=()=>{ $('pgMsg').innerHTML='<p class="flag" style="margin:10px 0 6px">Clear all of your practice history on this device? This can\'t be undone.</p><div class="actions"><button class="btn primary" id="pgYes">Clear it</button><button class="btn" id="pgNo">Keep it</button></div>';
     $('pgYes').onclick=()=>{ pSave({log:[]}); showProgress(); }; $('pgNo').onclick=()=>{ $('pgMsg').innerHTML=''; }; }; }
-let mission=null;
-function startMission(){ mission=Bracket.create({fixed:!$('rand').checked, practice:true, onNew:startMission,
-  onResult:(r,I)=>precord('mission', r==='go', r==='go' ? (I.M.mode==='advanced'?'advanced':'standard')+(I.skipped?', adjust only':'') : (I.skipped?'adjust only, ':'')+'missed at '+String(I.errors[0]||'').split(':')[0].toLowerCase()) }); mission.mount($('bkHost')); }
+let mission=null, cffLevel='drill';
+const CFF_NOTES={drill:'The initial three-part call for fire from a written scenario. Check yourself against the answer.',
+  1:'Full fire mission. The scenario gives you the target grid, direction, and distance. Call for fire, read back the MTO, adjust the rounds, and end the mission.',
+  2:'Full fire mission. You get your own grid, the direction, and the distance. Plot the target on the map and send its 8-digit grid.',
+  3:'Full fire mission. You get your own grid and the direction, but no distance. Measure the target in mils through the binoculars, work out the distance, then plot it and send the grid.'};
+function setCffLevel(l){ cffLevel=l; root.querySelectorAll('[data-cl]').forEach(b=>b.setAttribute('aria-pressed', String(b.dataset.cl===String(l)))); $('cffNote').textContent=CFF_NOTES[l];
+  if(l==='drill'){ showMission(false); generate(); } else showMission(true); }
+function startMission(){ const lv=+cffLevel||1; mission=Bracket.create({fixed:!$('rand').checked, practice:true, level:lv, onNew:startMission,
+  onResult:(r,I)=>precord('mission', r==='go', `level ${I.M.level}, `+(r==='go' ? (I.M.mode==='advanced'?'advanced':'standard')+(I.skipped?', adjust only':'') : (I.skipped?'adjust only, ':'')+'missed at '+String(I.errors[0]||'').split(':')[0].toLowerCase())) }); mission.mount($('bkHost')); }
 function showMission(on){ $('missionCard').hidden=!on; root.querySelector('section.card:not(#missionCard)').hidden=on; root.querySelector('main').classList.toggle('wide',on); if(on) startMission(); }
-$('mission').onclick=()=>showMission(true);
-$('backScn').onclick=()=>showMission(false);
+$('mission').onclick=()=>setCffLevel('1');
+root.querySelectorAll('[data-cl]').forEach(b=>b.onclick=()=>setCffLevel(b.dataset.cl==='drill'?'drill':b.dataset.cl));
+$('cffNote').textContent=CFF_NOTES.drill;
 modeBtns.forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
 $('rand').onchange=generate;
 $('rangeChk').onchange=generate;
 $('new').onclick=generate;
 $('show').onclick=()=>{const a=$('answer');a.hidden=!a.hidden;$('show').textContent=a.hidden?'Show answer':'Hide answer';$('show').setAttribute('aria-expanded',String(!a.hidden));
   $('selfCheck').hidden = a.hidden || !['cff','tccc','fracture','burn'].includes(mode) || cur.checked; };
-root.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{ if(cur.checked) return; cur.checked=true; const [ok, det]=clkResult(b.dataset.sc==='1', 'self-checked'); precord(mode, ok, det); if(b.dataset.sc==='1' && !ok) $('dToast').textContent='Over the time limit, so this one counts as a miss.'; $('selfCheck').hidden=true; $('dToast').textContent='Saved to My progress.'; });
+root.querySelectorAll('[data-sc]').forEach(b=>b.onclick=()=>{ if(cur.checked) return; cur.checked=true; const [ok, det]=clkResult(b.dataset.sc==='1', 'self-checked'); precord(mode, ok, det); $('selfCheck').hidden=true;
+  $('dToast').textContent = b.dataset.sc==='1' && !ok ? 'Saved as a miss: you were over the time limit.' : ok ? 'Saved to My progress.' : 'Saved as a miss. Go back through the answer: the notes beside each step say why it matters, and "How to do each step" shows what it looks like.'; });
 $('copy').onclick=async()=>{
   try{await navigator.clipboard.writeText(cur.text);$('dToast').textContent='Scenario copied.';}
   catch(e){const r=document.createRange();r.selectNodeContents($('scenario'));const s=getSelection();s.removeAllRanges();s.addRange(r);$('dToast').textContent='Scenario selected. Press Ctrl+C (or \u2318C) to copy.';}
@@ -3668,15 +3918,16 @@ function wireRecorder(kind, getVal){
     const s=soldierById(sel.value); const v=getVal();
     if(!s){ toast('Choose the soldier being tested first.'); return; }
     if(v==null){ toast('Pick a result first.'); return; }
-    s[kind]=v; if(kind==='grenade') s.grenadeTime = skOver('grenade') ? 'over' : null;   // over the time limit = No-Go, whatever the count
+    s[kind]=v; if(kind==='cff') s.cffLevel = STATE.mission ? STATE.mission.level : 1;
+    if(kind==='grenade') s.grenadeTime = skOver('grenade') ? 'over' : null;   // over the time limit = No-Go, whatever the count
     s.updated=new Date().toISOString(); save();
-    const label = kind==='grenade' ? `${v}/${DATA.settings.grenadeTotal} (${grenadeGo(s)==='go'?'Go':'No-Go'}${s.grenadeTime==='over'?', over time':''})` : (v==='go'?'Go':'No-Go');
+    const label = kind==='grenade' ? `${v}/${DATA.settings.grenadeTotal} (${grenadeGo(s)==='go'?'Go':'No-Go'}${s.grenadeTime==='over'?', over time':''})` : (v==='go'?'Go':'No-Go')+(kind==='cff'?`, Level ${s.cffLevel||1}`:'');
     toast(`Recorded ${label} for ${s.name}.`); showExisting(kind);
   };
 }
 function showExisting(kind){
   const s=soldierById($('rec-'+kind).value), box=$('recMsg-'+kind);
-  box.innerHTML = s && s[kind]!=null ? `<div class="note info">${esc(s.name)} has a result on file for this event. There are no retests; saving again replaces it.</div>` : '';
+  box.innerHTML = s && s[kind]!=null ? `<div class="note info">${esc(s.name)} has a result on file for this event${kind==='cff'?` (${s.cff==='go'?'Go':'No-Go'}, Level ${+s.cffLevel||1})`:''}. There are no retests; saving again replaces it.</div>` : '';
 }
 function goButtons(kind){
   return `<div class="field"><span>Result</span><div class="seg" role="group" aria-label="Result"><button data-go="go" aria-pressed="false">Go</button><button data-go="nogo" aria-pressed="false">No-Go</button></div></div>
@@ -3696,7 +3947,7 @@ function wireCffModeBar(el){
   $('cffRand').onchange=e=>{ STATE.randomCalls=e.target.checked; STATE.cff=genCFF(!STATE.randomCalls); STATE.mission=null; render(); };
 }
 function newMissionFor(){
-  STATE.mission = Bracket.create({fixed:!STATE.randomCalls,
+  STATE.mission = Bracket.create({fixed:!STATE.randomCalls, level:STATE.cffLevel||1, onLevel:l=>{ STATE.cffLevel=l; },
     onResult:(r)=>{ const b=document.querySelector(`.recorder [data-go="${r}"]`); if(b) b.click(); },
     onNew:()=>{ STATE.mission=null; render(); }});
 }
@@ -3704,7 +3955,7 @@ function testCff(el){
   {
     if(!STATE.mission) newMissionFor();
     el.innerHTML = `<div class="stack"><div class="panel"><h2>Call for fire: full fire mission</h2>
-      <p class="sub">Seat the soldier with the written scenario. They either type each transmission, or read it aloud while you type exactly what they say. They have 5:00 for the three-part call for fire, then the MTO read-back, shot and splash, bracketing from the binocular view, fire for effect, and end of mission. Use Skip to adjusting fire to grade only the corrections. The first mistake ends the mission as a No-Go. The grader review opens after the mission ends.</p>
+      <p class="sub">Seat the soldier with the written scenario. They either type each transmission, or read it aloud while you type exactly what they say. Pick the level first: Level 1 gives the target grid, Level 2 has them plot it on the map from direction and distance, and Level 3 has them range it through the binoculars first. They have the time limit for the three-part call for fire, then the MTO read-back, shot and splash, bracketing from the binocular view, fire for effect, and end of mission. Use Skip to adjusting fire to grade only the corrections. The first mistake ends the mission as a No-Go. The grader review opens after the mission ends.</p>
       ${cffModeBar()}<div id="bkHost"></div>
       ${recorder('cff', goButtons('cff'))}</div></div>`;
     wireCffModeBar(el);
@@ -3988,16 +4239,51 @@ const normRpt = v => String(v||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
 function countMap(v){ const m={}; String(v||'').toUpperCase().replace(/(\d+)\s*([A-Z])\b/g,(_,n,l)=>{ m[l]=(m[l]||0)+ +n; return ''; }); return JSON.stringify(Object.keys(m).sort().map(k=>k+m[k])); }
 function letterSet(v){ return [...new Set(String(v||'').toUpperCase().split(/[^A-Z]+/).filter(t=>t.length===1))].sort().join(''); }
 // Returns true/false for lines the tool can grade, or null when the grader has to judge the wording.
+// Forgiving on format: case, spaces, punctuation, O for 0 / I or L for 1 in the digits, a 4-digit year, letter-number order.
+const RANGE_TOL=0.05;
+function normGrid(v){ const t=normRpt(v); const m=t.match(/^(\d{1,2}[A-Z])?([A-Z]{2})([0-9OIL]+)$/); return m ? (m[1]||'')+m[2]+m[3].replace(/O/g,'0').replace(/[IL]/g,'1') : t; }
+function normDtg(v){ let t=normRpt(v).replace(/^([0-9OIL]{6})/, d=>d.replace(/O/g,'0').replace(/[IL]/g,'1')); return t.replace(/(20)(\d\d)$/,'$2'); }
+function countMap2(v){ const m={}, u=String(v||'').toUpperCase();
+  u.replace(/(\d+)\s*[-x×]?\s*([A-Z])\b/g,(_,n,l)=>{ m[l]=(m[l]||0)+ +n; return ''; });
+  if(!Object.keys(m).length) u.replace(/\b([A-Z])\s*[-:]?\s*(\d+)/g,(_,l,n)=>{ m[l]=(m[l]||0)+ +n; return ''; });
+  return m; }
+const countTxt = m => Object.keys(m).sort().map(k=>m[k]+k).join(' ') || 'nothing';
+function lev(a,b){ if(a===b) return 0; const v=Array(b.length+1).fill(0).map((_,i)=>i); for(let i=1;i<=a.length;i++){ let p=v[0]; v[0]=i; for(let j=1;j<=b.length;j++){ const t=v[j]; v[j]=Math.min(v[j]+1, v[j-1]+1, p+(a[i-1]===b[j-1]?0:1)); p=t; } } return v[b.length]; }
+// Close enough on a wording line (a typo or two): counts as right without the grader marking it.
+function nearText(typed, ans){ const a=normRpt(typed), b=normRpt(ans); if(!a||!b||b.length<4) return false; return a===b || (lev(a,b)/Math.max(a.length,b.length)<=0.15); }
 function autoCheck(line, typed){
   if(!String(typed||'').trim()) return false;
   switch(line.check){
-    case 'grid': case 'dtg': return normRpt(typed)===normRpt(line.ans);
-    case 'count': return countMap(typed)===countMap(line.ans) && countMap(line.ans)!=='[]';
+    case 'grid': return normGrid(typed)===normGrid(line.ans);
+    case 'dtg': { const a=normDtg(typed), b=normDtg(line.ans); return a===b || a===b.replace(/\d\d$/,''); }
+    case 'count': { const a=countMap2(typed), b=countMap2(line.ans); return Object.keys(b).length>0 && countTxt(a)===countTxt(b); }
     case 'letters': return letterSet(line.ans)!=='' && [line.ans, ...(line.alts||[])].some(x=>letterSet(typed)===letterSet(x));
-    case 'freqcs': return line.parts.every(p=>normRpt(typed).includes(normRpt(p)));
-    case 'range': { const n=parseFloat(String(typed).replace(/[^0-9.]/g,'')); return isFinite(n) && Math.abs(n-line.exact)<=Math.max(2, line.exact*0.02); }
-    default: return null;
+    case 'freqcs': return line.parts.every(p=>normRpt(typed).replace(/O/g,'0').includes(normRpt(p).replace(/O/g,'0')));
+    case 'range': { const n=parseFloat(String(typed).replace(/[^0-9.]/g,'')); return isFinite(n) && Math.abs(n-line.exact)<=Math.max(5, line.exact*RANGE_TOL); }
+    default: return nearText(typed, line.ans) ? true : null;
   }
+}
+// Why a line is wrong, in plain words (the line's own "why" adds the reasoning behind the answer).
+function lineReason(line, typed){
+  const t=String(typed||'').trim(); if(!t) return 'You left this line blank.';
+  switch(line.check){
+    case 'grid': { const g=normGrid(t), a=normGrid(line.ans), gd=(g.match(/\d+$/)||[''])[0], ad=(a.match(/\d+$/)||[''])[0];
+      if(!/^\d{1,2}[A-Z]/.test(g) && /^\d{1,2}[A-Z]/.test(a)) return 'Start the grid with the grid zone (for example '+a.match(/^\d{1,2}[A-Z]/)[0]+') and the 100 km square.';
+      if(gd.length!==ad.length) return `The grid needs ${ad.length} digits; you sent ${gd.length}.`;
+      return 'The grid letters or digits don’t match.'; }
+    case 'dtg': return 'A date-time group is day, hour and minute (DDHHMM), the time zone letter, the month, and the year.';
+    case 'count': return `You sent ${countTxt(countMap2(t))}; the count is ${countTxt(countMap2(line.ans))}.`;
+    case 'letters': { const a=letterSet(line.ans).split(''), y=letterSet(t).split(''), miss=a.filter(x=>!y.includes(x)), extra=y.filter(x=>!a.includes(x));
+      return [miss.length?`Missing ${miss.join(', ')}.`:'', extra.length?`${extra.join(', ')} ${extra.length>1?'don’t':'doesn’t'} belong.`:''].filter(Boolean).join(' ') || 'The letters don’t match.'; }
+    case 'freqcs': { const miss=line.parts.filter(p=>!normRpt(t).includes(normRpt(p))); return `Missing ${miss.join(' and ')}. Send both the frequency and the call sign.`; }
+    case 'range': { const n=parseFloat(t.replace(/[^0-9.]/g,'')); return isFinite(n) ? `You said ${n} m; the range is about ${line.ans} (within ${Math.round(RANGE_TOL*100)}% counts).` : 'Give the range as a number of meters.'; }
+    default: return 'The wording doesn’t match the answer.';
+  }
+}
+// The "what you got wrong" box shown after a report is checked.
+function missBox(key, typed, marks){
+  const bad=key.map((l,i)=>[l,i]).filter(([l,i])=>marks[i]==='bad'); if(!bad.length) return '';
+  return `<div class="miss-box" role="alert"><b>What you got wrong (${bad.length})</b><ul>${bad.map(([l,i])=>`<li><b>${esc(String(l.n))}. ${esc(l.label)}:</b> ${esc(lineReason(l, typed[i]))} <span class="soft">Answer: ${esc(l.ans)}.</span>${l.why?` <span class="soft">Why: ${l.why}</span>`:''}</li>`).join('')}</ul></div>`;
 }
 function newReport(k){ return {sc:REPORT_GEN[k](!STATE.randomCalls), marks:{}, typed:{}, submitted:false, T:{startedAt:null, elapsed:0}}; }
 // Report time limits (m:ss in Settings \u2192 Time limits). Blank means no timer.
@@ -4056,11 +4342,11 @@ function testReport(el, k){
       <ol class="rk">${key.map((l,i)=>`<li><span class="n">${esc(l.n)}</span><label class="field" style="grid-column:2 / -1"><span>${esc(l.label)}</span><input class="input" data-ty="${i}" value="${esc(R.typed[i]||'')}" autocomplete="off" spellcheck="false"></label></li>`).join('')}</ol>
       <div class="row" style="margin-top:12px"><button class="btn primary" id="rpSubmit">Submit report</button></div>`;
   } else {
-    body = `<p class="sub">Grids, date-time groups, and the lettered and numbered lines were checked by the tool. Lines marked "check the wording" need you to compare what the soldier typed with the answer. You can change any mark.</p>
+    body = missBox(key, R.typed, R.marks) + `<p class="sub">Grids, date-time groups, and the lettered and numbered lines were checked by the tool. Lines marked "check the wording" need you to compare what the soldier typed with the answer. You can change any mark.</p>
       <ol class="rk">${key.map((l,i)=>{ const auto=autoCheck(l, R.typed[i]);
         return `<li class="${R.marks[i]||''}"><span class="n">${esc(l.n)}</span><div><div class="lbl">${esc(l.label)}${auto===null?' <span class="badge b-brass">check the wording</span>':''}</div>
           <div class="typed">${R.typed[i]?esc(R.typed[i]):'<span class="soft">(blank)</span>'}</div>
-          <div class="why"><b>Answer:</b> ${esc(l.ans)}${l.why?` <span>\u00B7 ${l.why}</span>`:''}</div></div>${markBtns(i)}</li>`; }).join('')}</ol>
+          <div class="why"><b>Answer:</b> ${esc(l.ans)}${l.why?` <span>\u00B7 ${l.why}</span>`:''}</div>${R.marks[i]==='bad'?`<div class="why flag">${esc(lineReason(l,R.typed[i]))}</div>`:''}</div>${markBtns(i)}</li>`; }).join('')}</ol>
       <div class="row" style="margin-top:12px"><button class="btn sm" id="rpEdit">Back to typing</button></div>`;
   }
   el.innerHTML = `<div class="stack">
@@ -4361,6 +4647,9 @@ function renderSettings(c){
       <h3>Other skills</h3>
       <p class="sub">Call for fire counts the initial call (the standard is 5:00). TCCC runs until line 5 of the 9-line is sent (the standard is 10:00).</p>
       <div class="grid">${OTHER_TIMED.map(k=>`<label class="field"><span>${esc(eventName(k).split(':')[0])} (m:ss)</span><input class="input" id="tl-${k}" inputmode="numeric" data-time="short" value="${S.timeLimits[k]?fmtTime(S.timeLimits[k]):''}" placeholder="no limit"></label>`).join('')}</div>
+      <h3>Call for fire: plotting</h3>
+      <p class="sub">On Levels 2 and 3 the soldier plots the target on a map and sends its grid. Both the plot and the grid have to land within this distance of the real target.</p>
+      <div class="grid"><label class="field"><span>Target grid tolerance (m)</span><input class="input" id="s-cffTol" inputmode="numeric" value="${S.cffTol||250}"></label></div>
       ${saveRow()}`)}
     ${!showAccess?'':sec('access', syncActive()?(isCaptain()?'Grader sign-ins':'Sign-in access'):'PINs', syncActive()?(isCaptain()?'Add graders, reset their PINs, and change the shared grader PIN.':'Who can sign in, what each person can do, and resetting someone\'s PIN.'):'The admin and grader PINs on this device.', `${syncActive()?syncAccessHtml():`<div>
       <p class="sub">Both PINs are saved in the .json, so they carry over to any device that imports your roster fresh. They keep casual users out of the admin view; they don't encrypt the data.</p>
@@ -4398,8 +4687,9 @@ function renderSettings(c){
     const en={}; c.querySelectorAll('[data-en]').forEach(b=>en[b.dataset.en]=b.checked);
     if(!Object.values(en).some(Boolean)) msgs.push('Turn on at least one event.');
     const tl={}; [...WEAPON_KEYS, ...REPORT_KEYS, ...OTHER_TIMED].forEach(k=>{ const raw=$('tl-'+k).value.trim(); if(!raw){ tl[k]=null; return; } const v=parseTime(raw); if(!(v>0)) msgs.push(`${eventName(k).split(' clear,')[0]} time limit must be m:ss, or blank for none.`); tl[k]=v; });
+    const cffTol=Math.round(Number($('s-cffTol').value)); if(!(cffTol>=10 && cffTol<=2000)) msgs.push('Call for fire grid tolerance must be 10 to 2000 m.');
     if(msgs.length){ $('setMsg').innerHTML=`<div class="note warn"><ul class="plain">${msgs.map(m=>`<li>${esc(m)}</li>`).join('')}</ul></div>`; $('setMsg').scrollIntoView({block:'center'}); return; }
-    Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, physMode:(c.querySelector('input[name=physMode]:checked')||{}).value==='points'?'points':'mix', cftBest:best, cftZero:zero, avgTimes:avgT, countSelfTimes:$('av-self').checked, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
+    Object.assign(S,{weights:w, goPoints:go, cutLine:cut, minFemale:minf, grenadeGo:gGo, grenadeTotal:gTot, physWeights:pw, physMode:(c.querySelector('input[name=physMode]:checked')||{}).value==='points'?'points':'mix', cftBest:best, cftZero:zero, avgTimes:avgT, countSelfTimes:$('av-self').checked, enabled:Object.assign({}, DEFAULT_ENABLED, en), timeLimits:tl, cffTol, circleBonus:circ, aftFailCut:$('s-aftCut').checked});
     rebuildRegistry(); STATE.grid=null; save(); toast('Settings saved. Rankings updated.'); render();
   };
   $('saveSet2').onclick=()=>$('saveSet').click();
@@ -5364,8 +5654,29 @@ function wireShare(c){
 
 /* ---------- updates: a pop-up once per new version, and the full list under More \u2192 Updates ---------- */
 // Newest first. Add an entry with each release; the pop-up shows it once on each device.
-const APP_VERSION='1.5';
+const APP_VERSION='1.8';
 const UPDATES = [
+  {v:'1.8', date:'2026-11-10', items:[
+    'Every skill now tells you what you got wrong and why: a "What you got wrong" box on 9-line, SPOT and SALUTE (practice and test), the right answer and how to tell on Grenade ID, the correct next step on the weapons order drill, and a pointer back to the reasons on self-checked skills.',
+    'Grading is a little more forgiving on format: case, spacing and punctuation, O for 0, a 4-digit or missing year in a date-time group, counts written either way (2A or A2), small typos on wording lines, ranges within 5%, and fire-mission deviations within 10 m.',
+    'Fix: a self-check over the time limit now says why it counted as a miss.',
+  ]},
+  {v:'1.7', date:'2026-11-09', items:[
+    'Binoculars now use a + reticle: 0 in the center, a long tick every 10 mils and a short tick every 5, out to both sides.',
+    'Level 3: drag the reticle to put the center of the + on one edge of the object, then read the other edge.',
+    'The map has an army-style protractor (mil scale around the edge, index lines through the center) with a swinging arm marked every 100 m. Drag it by its edge; it snaps onto your position.',
+    'A coordinate scale (1,000 m, ticks every 100 m) for reading grids off the map. Turn either tool on or off.',
+    'The map zooms (buttons or mouse wheel) and pans by dragging. Tap to plot.',
+    'Fire mission scenarios are shorter: the story comes first, and the numbers (grids, direction, distance, sizes, call signs) sit in a list underneath.',
+  ]},
+  {v:'1.6', date:'2026-11-09', items:[
+    'Call for fire has its own section in Practice: the initial call drill, plus full fire missions at three levels.',
+    'Level 1 is the mission as it was: the scenario gives the target grid.',
+    'Level 2: you get your own grid, the direction, and the distance. Plot the target on the map and send its 8-digit grid.',
+    'Level 3: no distance given. Measure the target in mils through the binoculars, use distance = width \u00D7 1000 \u00F7 mils, then plot it and send the grid.',
+    'Graders pick the level before the test, and the level is saved with the result.',
+    'Set how close the plot and grid have to be in Settings \u2192 Time limits \u2192 Call for fire: plotting (default 250 m).',
+  ]},
   {v:'1.5', date:'2026-11-02', items:[
     'Call for fire full mission: new Skip to adjusting fire button, on the test and in Practice. It fills in the call for fire and MTO and starts at shot and splash.',
     'Skipped missions are marked "adjust only" in the result and history, and the initial-call clock does not run.',
