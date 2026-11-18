@@ -871,6 +871,21 @@ details.manage{border-radius:var(--r-lg)}
 @media (max-resolution:1.5dppx){.app-logo{image-rendering:auto}}
 td .btn,td .btn.sm{min-height:0}
 .seg:not(.subtabs) button[aria-pressed="true"]{background:color-mix(in srgb,var(--navy) 18%,var(--panel));color:var(--ink);border-color:color-mix(in srgb,var(--navy) 70%,transparent)}
+.intro{position:fixed;inset:0;z-index:9999;background:#0E0F10;display:grid;place-items:center;overflow:hidden;cursor:pointer}
+.intro.done{animation:introOut .38s ease-in forwards}
+.intro-wrap{position:relative;display:grid;place-items:center;animation:introShake .3s .42s both}
+.intro-anv{width:180px;height:auto;image-rendering:pixelated;animation:introDrop .42s cubic-bezier(.55,0,.9,.4) both}
+.intro-t{position:absolute;top:calc(50% + 66px);left:0;right:0;text-align:center;color:#EDE6DA;font:800 28px/1 var(--serif);letter-spacing:.24em;white-space:nowrap;animation:introTxt .45s .5s cubic-bezier(.2,.8,.2,1) both}
+.intro-s{position:absolute;top:calc(50% + 110px);left:0;right:0;text-align:center;color:#C25B2C;font:600 12px var(--sans);letter-spacing:.3em;animation:introFade .4s .8s both}
+.intro-flash{position:absolute;inset:0;background:#FFE3C2;opacity:0;pointer-events:none;animation:introFlash .35s .42s forwards}
+.intro-spark{position:absolute;left:50%;top:calc(50% + 20px);width:5px;height:5px;border-radius:50%;background:#FFB347;box-shadow:0 0 8px #FF8A1F;opacity:0}
+@keyframes introDrop{0%{opacity:0;transform:translateY(-300px) scale(1.25)}15%{opacity:1}100%{opacity:1;transform:none}}
+@keyframes introShake{0%,100%{transform:none}20%{transform:translate(-5px,3px)}40%{transform:translate(4px,-2px)}60%{transform:translate(-3px,1px)}80%{transform:translate(2px,0)}}
+@keyframes introTxt{from{opacity:0;transform:scale(1.5);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
+@keyframes introFade{from{opacity:0}to{opacity:1}}
+@keyframes introFlash{0%{opacity:.85}100%{opacity:0}}
+@keyframes introOut{to{opacity:0;transform:scale(1.04)}}
+@media (max-width:380px){.intro-t{font-size:23px}}
 </style>
 
 <div id="app"></div>
@@ -1039,6 +1054,9 @@ const DEFAULT_SETTINGS = {
   cftBest:1200, cftZero:1801, cutLine:14, minFemale:3, grenadeTotal:6, grenadeGo:6,
   grenadeList:DEFAULT_GRENADES, circleBonus:25, aftFailCut:true,
   enabled:Object.assign({}, DEFAULT_ENABLED), timeLimits:{m249:150, m240b:150, m4:150, cff:300, tccc:600}, cffTol:250,
+  ptTests:{active:'aft', tests:[
+    {id:'aft', name:'AFT (Army Fitness Test)', events:[{n:'3-rep max deadlift',u:'lb',max:100},{n:'Hand-release push-ups',u:'reps',max:100},{n:'Sprint-drag-carry',u:'m:ss',max:100},{n:'Plank',u:'m:ss',max:100},{n:'2-mile run',u:'m:ss',max:100}]},
+    {id:'acft', name:'ACFT (old test)', events:[{n:'3-rep max deadlift',u:'lb',max:100},{n:'Standing power throw',u:'m',max:100},{n:'Hand-release push-ups',u:'reps',max:100},{n:'Sprint-drag-carry',u:'m:ss',max:100},{n:'Plank',u:'m:ss',max:100},{n:'2-mile run',u:'m:ss',max:100}]}]},
   avgTimes:{run:{dist:2, best:720, zero:1080}, ruck:{dist:12, best:9000, zero:12600}},
   settingsVersion:5, adminPinHash:null, testerPinHash:null,
 };
@@ -1082,6 +1100,7 @@ function migrateSettings(S){
   const num=(v,d)=>{ const n=Number(v); return isFinite(n)?n:d; }, D=DEFAULT_SETTINGS;
   ['goPoints','cutLine','minFemale','grenadeGo','grenadeTotal','circleBonus','cftBest','cftZero','cffTol'].forEach(k=>{ if(k in S) S[k]=num(S[k], D[k]); });
   if(!(S.cffTol>0)) S.cffTol=250;
+  if(!S.ptTests || !Array.isArray(S.ptTests.tests) || !S.ptTests.tests.length) S.ptTests=clone(D.ptTests);
   ['weights','physWeights','timeLimits'].forEach(g=>{ const o=S[g]||{}; Object.keys(o).forEach(k=>{ o[k] = o[k]==null ? null : num(o[k], null); }); });
   if(S.physMode!=='points') S.physMode='mix';
   if(Array.isArray(S.customTests)) S.customTests.forEach(t=>{ ['name','short'].forEach(k=>{ if(t[k]!=null) t[k]=plainText(t[k]); }); (t.events||[]).forEach(e=>{ ['name','unit'].forEach(k=>{ if(e[k]!=null) e[k]=plainText(e[k]); }); }); });
@@ -3273,7 +3292,7 @@ function renderScreen(){
   if(r==='grader' && !STATE.graderEvents){ renderPick(app); return; }
   const c=shell(app, r, `${ROLE_LABEL[r]||r}${STATE.session.preview?' (preview)':''} \u00B7 ${r==='btcap'?bataanMembers().length+' on Bataan':tryoutSoldiers().length+' in tryout'}`);
   if(!c) return;
-  ({home:renderHome, people:renderPeople, grade:renderGrade, data:renderData, settings:renderSettings, bataan:renderBataan, btset:renderBtSettings, btpeople:renderBtPeople})[STATE.tab](c);
+  ({home:renderHome, people:renderPeople, grade:renderGrade, data:renderData, settings:renderSettings, bataan:renderBataan, btset:renderBtSettings, btpeople:renderBtPeople, pt:renderPtAdmin})[STATE.tab](c);
   tuckText(c);
 }
 
@@ -5238,6 +5257,139 @@ function exportHealthCsv(){
   offerFile(`unit_health_summary_${stamp()}.csv`, rows.map(r=>r.map(v=>`"${String(v==null?'':v).replace(/"/g,'""')}"`).join(',')).join('\n'), 'text/csv');
 }
 
+/* ---------- PT tests and scores ----------
+   A logged score is a time log {kind:'pt'} that copies the test's name and events at the time it's logged,
+   so changing or deleting a test later never changes anyone's old scores. */
+const PT_UNITS=['reps','lb','m:ss','m','points'];
+const ptCfg = () => DATA.settings.ptTests || (DATA.settings.ptTests=clone(DEFAULT_SETTINGS.ptTests));
+const ptTest = id => ptCfg().tests.find(t=>t.id===id);
+const ptMax = t => (t.events||[]).reduce((a,e)=>a+(+e.max||0),0);
+const ptLogsOf = sid => timeLogs().filter(t=>t.kind==='pt' && t.sid===sid).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:(a.at||0)-(b.at||0));
+const ptOutOf = t => (t.ev||[]).reduce((a,e)=>a+(+e.max||0),0);
+function ptHistoryHtml(L, canDel){
+  if(!L.length) return '<p class="sub" style="margin:0">No PT tests logged yet.</p>';
+  const del=STATE.ptDel;
+  return `<div class="scroll"><table><thead><tr><th>Date</th><th>Test</th><th class="num">Total</th><th>Events (points)</th>${canDel?'<th></th>':''}</tr></thead><tbody>
+    ${L.slice().reverse().map(t=>`<tr><td>${esc(tlDate(t.date))}</td><td>${esc((t.test||{}).name||'')}</td><td class="num"><b>${t.total}</b><span class="soft"> / ${ptOutOf(t)}</span></td>
+      <td style="font-size:13px">${(t.ev||[]).map(e=>`${esc(e.n)}${e.raw?` <span class="soft">(${esc(e.raw)})</span>`:''}: <b>${e.pts}</b>`).join(' · ')}</td>
+      ${canDel?`<td style="white-space:nowrap">${del===t.id?`<button class="btn danger sm" data-ptdelyes="${esc(t.id)}">Delete</button> <button class="btn sm" data-ptdelno="1">Keep</button>`:`<button class="btn sm" data-ptdel="${esc(t.id)}">Delete</button>`}</td>`:''}</tr>`).join('')}
+  </tbody></table></div>`;
+}
+function ptTrendHtml(L){
+  if(L.length<2) return '';
+  const tests=[...new Set(L.map(t=>(t.test||{}).name))];
+  return `<h3 class="chart-h">Total score over time</h3>${lineChart(L.map(t=>tlDate(t.date)), tests.map(n=>({label:n, data:L.map(t=>(t.test||{}).name===n?t.total:null)})))}`;
+}
+function ptFormHtml(f){
+  const t=ptTest(f.test)||ptTest(ptCfg().active)||ptCfg().tests[0];
+  return `<div class="tl-form" id="ptForm"><div class="grid">
+      <label class="field"><span>Test</span><select class="input" id="pt_test">${ptCfg().tests.map(x=>`<option value="${esc(x.id)}" ${x.id===t.id?'selected':''}>${esc(x.name)}${x.id===ptCfg().active?' (current)':''}</option>`).join('')}</select></label>
+      <label class="field"><span>Date</span><input class="input" type="date" id="pt_date" value="${esc(f.date||todayISO())}" max="${todayISO()}"></label></div>
+    <p class="sub" style="margin:10px 0 6px">Enter each event's result and the points from your scorecard.</p>
+    <div class="scroll"><table><thead><tr><th>Event</th><th>Result</th><th class="num">Points</th></tr></thead><tbody>
+      ${t.events.map((e,i)=>`<tr><td>${esc(e.n)}</td><td><input class="input" id="pt_raw${i}" placeholder="${esc(e.u==='m:ss'?'e.g. 1:52':e.u)}" style="max-width:140px"></td><td class="num"><input class="input" id="pt_pts${i}" inputmode="numeric" placeholder="0–${+e.max||100}" style="max-width:90px;text-align:right"></td></tr>`).join('')}
+    </tbody></table></div>
+    <p class="tl-pace" id="pt_total" aria-live="polite"></p>
+    <div class="row" style="margin-top:6px"><button class="btn primary" id="pt_save">Save score</button><button class="btn" id="pt_cancel">Cancel</button><span id="pt_msg" class="sub" style="margin:0"></span></div></div>`;
+}
+function wirePtForm(s){
+  const f=STATE.ptForm; if(!f || !$('ptForm')) return;
+  const t=ptTest(f.test)||ptTest(ptCfg().active)||ptCfg().tests[0];
+  $('pt_test').onchange=()=>{ f.test=$('pt_test').value; f.date=$('pt_date').value; render(); };
+  $('pt_cancel').onclick=()=>{ STATE.ptForm=null; render(); };
+  const sum=()=>{ const n=t.events.reduce((a,e,i)=>a+(+$('pt_pts'+i).value||0),0); $('pt_total').innerHTML=`Total: <b>${n}</b> / ${ptMax(t)}`; };
+  t.events.forEach((e,i)=>$('pt_pts'+i).addEventListener('input',sum));
+  $('pt_save').onclick=()=>{
+    const msg=$('pt_msg'), ev=[];
+    for(let i=0;i<t.events.length;i++){ const e=t.events[i], raw=$('pt_raw'+i).value.trim().slice(0,20), pv=$('pt_pts'+i).value.trim(), max=+e.max||100;
+      if(pv==='' && !raw) continue;
+      const p=Number(pv); if(pv==='' || !Number.isFinite(p) || p<0 || p>max){ $('pt_pts'+i).focus(); msg.innerHTML=`<span style="color:var(--alert)">Points for ${esc(e.n)} must be 0 to ${max}.</span>`; return; }
+      ev.push({n:e.n, u:e.u, max, raw, pts:Math.round(p)}); }
+    if(!ev.length){ msg.innerHTML='<span style="color:var(--alert)">Enter points for at least one event.</span>'; return; }
+    const date=$('pt_date').value||todayISO(); if(date>todayISO()){ msg.innerHTML='<span style="color:var(--alert)">The date can’t be in the future.</span>'; return; }
+    const e={id:uid(), kind:'pt', sid:s.id, date, test:{id:t.id, name:t.name}, ev, total:ev.reduce((a,x)=>a+x.pts,0), at:Date.now()};
+    if(myRole()==='soldier') e.self=true;
+    timeLogs().push(e); STATE.ptForm=null; save(); toast(`Saved: ${t.name}, ${e.total} points.`); render();
+  };
+}
+function wirePtHistory(c){
+  c.querySelectorAll('[data-ptdel]').forEach(b=>b.onclick=()=>{ STATE.ptDel=b.dataset.ptdel; render(); });
+  c.querySelectorAll('[data-ptdelno]').forEach(b=>b.onclick=()=>{ STATE.ptDel=null; render(); });
+  c.querySelectorAll('[data-ptdelyes]').forEach(b=>b.onclick=()=>{ DATA.timeLogs=timeLogs().filter(t=>t.id!==b.dataset.ptdelyes); STATE.ptDel=null; save(); toast('Deleted.'); render(); });
+}
+// Soldier: Activity = PT scores and recent activity, then everything from Home.
+function renderActivity(c, s){
+  const L=ptLogsOf(s.id), last=L[L.length-1], prev=L.length>1?L[L.length-2]:null, best=L.length?L.reduce((a,b)=>b.total/ptOutOf(b)>a.total/ptOutOf(a)?b:a):null;
+  const sameTest=last&&prev&&(last.test||{}).id===(prev.test||{}).id, ch=sameTest?last.total-prev.total:null;
+  const recent=[
+    ...timeLogs().filter(t=>t.sid===s.id && ['run','ruck','weight','pt'].includes(t.kind)).map(t=>({d:t.date, what:t.kind==='pt'?`PT test: ${(t.test||{}).name||''}, ${t.total} points`:t.kind==='weight'?`Weigh-in: ${t.lb} lb`:`${t.kind==='run'?'Run':'Ruck'}: ${tlDist(t.dist)} mi in ${fmtLong(t.sec)}`})),
+    ...(s.scans||[]).map(x=>({d:x.date, what:'InBody scan'})),
+    ...(s.practice||[]).filter(p=>p.t).map(p=>({d:new Date(p.t).toISOString().slice(0,10), what:`Practice: ${(()=>{ try{ return eventName(p.task); }catch(e){ return ''; } })()||p.task} (${p.ok?'Go':'No-Go'})`}))
+  ].filter(x=>x.d).sort((a,b)=>a.d<b.d?1:-1).slice(0,12);
+  c.innerHTML=`<div class="stack">
+    <div class="panel"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">PT scores</h2>${STATE.ptForm?'':'<button class="btn primary sm" id="ptOpen">Log a PT test</button>'}</div>
+      ${STATE.ptForm?ptFormHtml(STATE.ptForm):''}
+      ${last?`<div class="bt-tiles" style="margin-top:12px"><div><span>Latest</span><b>${last.total}</b><small>of ${ptOutOf(last)} · ${esc(tlDate(last.date))}</small></div>
+        <div><span>Change</span><b>${ch==null?'–':(ch>0?'+':'')+ch}</b><small>${ch==null?'needs two of the same test':'since the one before'}</small></div>
+        <div><span>Best</span><b>${best.total}</b><small>${esc((best.test||{}).name||'')}</small></div><div><span>Tests logged</span><b>${L.length}</b></div></div>`:''}
+      ${ptTrendHtml(L)}
+      <h3 class="chart-h">History</h3>${ptHistoryHtml(L, true)}
+    </div>
+    <div class="panel"><h2>Recent activity</h2>${recent.length?`<ol class="plain" style="margin:0;line-height:1.9">${recent.map(x=>`<li><span class="soft mono" style="display:inline-block;min-width:96px">${esc(tlDate(x.d))}</span> ${esc(x.what)}</li>`).join('')}</ol>`:'<p class="sub" style="margin:0">Nothing yet.</p>'}</div>
+    <div id="actHome"></div>
+  </div>`;
+  const o=$('ptOpen'); if(o) o.onclick=()=>{ STATE.ptForm={test:ptCfg().active}; render(); };
+  wirePtForm(s); wirePtHistory(c);
+  renderSoldierHome($('actHome'), s);
+}
+// Admin and battalion leadership: the PT tests soldiers log against, and everyone's latest scores.
+function renderPtAdmin(c){
+  const P=ptCfg(), ed=STATE.ptEdit;
+  const editor = ed ? `<div class="tl-form" id="ptEd"><h3 style="margin:0 0 8px">${ed.id?'Change test':'New PT test'}</h3>
+      <label class="field"><span>Name</span><input class="input" id="pte_name" value="${esc(ed.name||'')}" placeholder="e.g. AFT (Army Fitness Test)"></label>
+      <div class="scroll" style="margin-top:10px"><table><thead><tr><th>Event</th><th>Unit</th><th class="num">Max points</th><th></th></tr></thead><tbody>
+      ${ed.events.map((e,i)=>`<tr><td><input class="input" id="pte_n${i}" value="${esc(e.n)}"></td><td><select class="input" id="pte_u${i}">${PT_UNITS.map(u=>`<option ${u===e.u?'selected':''}>${u}</option>`).join('')}</select></td>
+        <td class="num"><input class="input" id="pte_m${i}" inputmode="numeric" value="${esc(String(e.max??100))}" style="max-width:90px;text-align:right"></td><td><button class="btn sm" data-pterm="${i}">Remove</button></td></tr>`).join('')}
+      </tbody></table></div>
+      <div class="row" style="margin-top:8px"><button class="btn sm" id="pteAdd">+ Add event</button></div>
+      <p class="sub" style="margin:10px 0 0;font-size:13px">Changing a test never changes scores already logged. They keep the events and points they were logged with.</p>
+      <div class="row" style="margin-top:10px"><button class="btn primary" id="pteSave">Save test</button><button class="btn" id="pteCancel">Cancel</button><span id="pte_msg" class="sub" style="margin:0"></span></div></div>` : '';
+  const M=DATA.soldiers.map(x=>({x, L:ptLogsOf(x.id)})).filter(r=>r.L.length).sort((a,b)=>a.x.name.localeCompare(b.x.name));
+  c.innerHTML=`<div class="stack">
+    <div class="panel"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">PT tests</h2>${ed?'':'<button class="btn primary sm" id="pteNew">Add a test</button>'}</div>
+      <p class="sub">Soldiers log their scores against these. The current test is picked first when they log.</p>
+      <ul class="plain" style="margin:0">${P.tests.map(t=>`<li class="row" style="justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)">
+        <div><b>${esc(t.name)}</b> ${t.id===P.active?'<span class="badge b-good">Current</span>':''}<div class="soft" style="font-size:13px">${t.events.map(e=>esc(e.n)).join(' · ')} · ${ptMax(t)} points</div></div>
+        <div class="row" style="gap:6px">${t.id===P.active?'':`<button class="btn sm" data-ptact="${esc(t.id)}">Make current</button>`}<button class="btn sm" data-ptedit="${esc(t.id)}">Change</button>${t.id===P.active?'':(STATE.ptTDel===t.id?`<button class="btn danger sm" data-pttdelyes="${esc(t.id)}">Delete</button><button class="btn sm" data-pttdelno="1">Keep</button>`:`<button class="btn sm" data-pttdel="${esc(t.id)}">Delete</button>`)}</div></li>`).join('')}</ul>
+      ${editor}
+    </div>
+    <div class="panel"><h2>Soldiers' PT scores</h2><p class="sub">Latest score for everyone who has logged one. Old scores stay as they were logged, even after a test changes.</p>
+      ${M.length?`<div class="scroll"><table><thead><tr><th>Name</th><th>Latest</th><th>Test</th><th class="num">Total</th><th class="num">Change</th><th class="num">Tests</th></tr></thead><tbody>
+      ${M.map(({x,L})=>{ const a=L[L.length-1], b=L[L.length-2], d=b&&(a.test||{}).id===(b.test||{}).id?a.total-b.total:null;
+        return `<tr><td><button class="linkish" data-ptwho="${x.id}">${esc(x.name)}</button></td><td>${esc(tlDate(a.date))}</td><td>${esc((a.test||{}).name||'')}</td><td class="num"><b>${a.total}</b><span class="soft"> / ${ptOutOf(a)}</span></td><td class="num">${d==null?'–':`<span class="${d>0?'b-good':d<0?'flag':''}">${d>0?'+':''}${d}</span>`}</td><td class="num">${L.length}</td></tr>
+        ${STATE.ptWho===x.id?`<tr><td colspan="6">${ptTrendHtml(L)}${ptHistoryHtml(L,false)}</td></tr>`:''}`; }).join('')}</tbody></table></div>`:'<p class="sub" style="margin:0">Nobody has logged a PT test yet.</p>'}
+    </div></div>`;
+  const keepEd=()=>{ if(!ed) return; ed.name=$('pte_name').value; ed.events=ed.events.map((e,i)=>({n:$('pte_n'+i).value, u:$('pte_u'+i).value, max:$('pte_m'+i).value})); };
+  const on=(id,fn)=>{ const b=$(id); if(b) b.onclick=fn; };
+  on('pteNew',()=>{ STATE.ptEdit={name:'', events:[{n:'',u:'reps',max:100}]}; render(); });
+  on('pteCancel',()=>{ STATE.ptEdit=null; render(); });
+  on('pteAdd',()=>{ keepEd(); ed.events.push({n:'',u:'reps',max:100}); render(); });
+  c.querySelectorAll('[data-pterm]').forEach(b=>b.onclick=()=>{ keepEd(); ed.events.splice(+b.dataset.pterm,1); render(); });
+  on('pteSave',()=>{ keepEd(); const name=ed.name.trim().slice(0,60), ev=ed.events.map(e=>({n:String(e.n).trim().slice(0,40), u:PT_UNITS.includes(e.u)?e.u:'reps', max:Math.round(Number(e.max))})).filter(e=>e.n);
+    const bad=m=>{ $('pte_msg').innerHTML=`<span style="color:var(--alert)">${m}</span>`; };
+    if(!name) return bad('Give the test a name.'); if(!ev.length) return bad('Add at least one event.');
+    if(ev.some(e=>!(e.max>0 && e.max<=1000))) return bad('Max points must be 1 to 1000.');
+    const tests=P.tests.map(t=>t.id===ed.id?Object.assign({},t,{name,events:ev}):t);
+    if(!ed.id) tests.push({id:'pt'+uid().slice(0,8), name, events:ev});
+    DATA.settings.ptTests=Object.assign({},P,{tests}); STATE.ptEdit=null; save(); toast(ed.id?'Test changed. Old scores are unchanged.':'Test added.'); render(); });
+  c.querySelectorAll('[data-ptedit]').forEach(b=>b.onclick=()=>{ const t=ptTest(b.dataset.ptedit); STATE.ptEdit=clone(t); render(); });
+  c.querySelectorAll('[data-ptact]').forEach(b=>b.onclick=()=>{ DATA.settings.ptTests=Object.assign({},P,{active:b.dataset.ptact}); save(); toast('Current test changed.'); render(); });
+  c.querySelectorAll('[data-pttdel]').forEach(b=>b.onclick=()=>{ STATE.ptTDel=b.dataset.pttdel; render(); });
+  c.querySelectorAll('[data-pttdelno]').forEach(b=>b.onclick=()=>{ STATE.ptTDel=null; render(); });
+  c.querySelectorAll('[data-pttdelyes]').forEach(b=>b.onclick=()=>{ DATA.settings.ptTests=Object.assign({},P,{tests:P.tests.filter(t=>t.id!==b.dataset.pttdelyes)}); STATE.ptTDel=null; save(); toast('Test removed. Scores logged with it are kept.'); render(); });
+  c.querySelectorAll('[data-ptwho]').forEach(b=>b.onclick=()=>{ STATE.ptWho=STATE.ptWho===b.dataset.ptwho?null:b.dataset.ptwho; render(); });
+}
+
 /* ---------- soldier session ---------- */
 function meSoldier(){ return soldierById(STATE.session.soldierId); }
 function soldierExport(){ const s=meSoldier(); if(!s) return;
@@ -5248,6 +5400,7 @@ function renderSoldierApp(app){
   if(STATE.tab==='mydash') renderSoldierHome(c,s);
   else if(STATE.tab==='myhealth'){ c.innerHTML=`<div class="stack">${weightPanelHtml(s)}${healthProfileHtml(s,false)}</div>`; wireWeightPanel(s); wireHealthProfile(s,false); }
   else if(STATE.tab==='mylog') renderMyLog(c,s);
+  else if(STATE.tab==='activity') renderActivity(c,s);
   else if(STATE.tab==='myresults') renderMyResults(c,s);
   else if(STATE.tab==='mytimes') renderMyTimes(c,s);
   else if(STATE.tab==='bataan') renderBataan(c);
@@ -5609,15 +5762,15 @@ function navFor(role){
   const news = whatsNewReady() ? [{id:'news', label:'Updates', icon:'news'}] : [];
   if(syncActive()) news.unshift({id:'mypin', label:'Change my PIN', icon:'settings'});
   news.push(themeA);
-  news.unshift(...syncOtherProfiles().map(u=>({id:'sw:'+u.id, label:`Switch to ${ROLE_LABEL[u.role]||u.role}`, icon:'one'})));
+  if(syncOtherProfiles().length) news.unshift({id:'switch', label:'Switch profile', icon:'one'});
   if(role==='admin' || role==='leader' || role==='captain') return {
-    tabs:[['home','Home'],['people','People'],['grade','Grade'],['cal','Calendar'],...(role==='captain'?[]:[['bataan','Bataan']]),['ref','Reference'],['data','Export / import'],...(role==='leader'?[]:[['settings','Settings']])],
+    tabs:[['home','Home'],['people','People'],['grade','Grade'],['cal','Calendar'],...(role==='captain'?[]:[['bataan','Bataan'],['pt','PT tests']]),['ref','Reference'],['data','Export / import'],...(role==='leader'?[]:[['settings','Settings']])],
     primary:['home','people','grade','cal','bataan'], bar:['home','people','grade','cal',...(role==='captain'?[]:['bataan'])], actions:[shareA, ...news, outA]};
   if(role==='btcap') return {
     tabs:[['bataan','Bataan'],['btpeople','People'],['cal','Calendar'],['btset','Settings']],
     primary:['bataan','btpeople','cal','btset'], bar:['bataan','btpeople','cal','btset'], actions:[shareA, ...news, outA]};
   if(role==='soldier'){ const bt=isBataan(meSoldier()); return {
-    tabs:[['mydash','Home'],['myhealth','My health'],...(meSoldier() && isRCs(meSoldier()) && meSoldier().tryout!==false?[['myresults','My tryout results']]:[]),['cal','Calendar'],...(bt?[['bataan','Bataan']]:[]),['mypractice','Practice'],['ref','Reference']],
+    tabs:[['mydash','Home'],['activity','Activity'],['myhealth','My health'],...(meSoldier() && isRCs(meSoldier()) && meSoldier().tryout!==false?[['myresults','My tryout results']]:[]),['cal','Calendar'],...(bt?[['bataan','Bataan']]:[]),['mypractice','Practice'],['ref','Reference']],
     hidden:{mylog:'myhealth', mytimes:'mydash'}, bar:['mydash','myhealth','cal',...(bt?['bataan']:[]),'mypractice'], actions:[{id:'myexport', label:'Export my data', icon:'export'}, shareA, ...news, outA]}; }
   if(role==='practice') return {
     tabs:[['practice','Practice'],['ref','Reference']], bar:['practice','ref'], barActions:[shareA, {id:'signout', label:'Exit', icon:'signout'}], actions:[...news]};
@@ -5625,7 +5778,7 @@ function navFor(role){
     tabs:[['grade','Grade'],['cal','Calendar'],['ref','Reference'],['data','Export / import']],
     primary:['grade','cal','ref'], bar:['grade','cal','ref'], actions:[{id:'events', label:'Change events', icon:'events'}, shareA, ...news, outA]};
 }
-const TAB_ICON = {btpeople:'one',btset:'settings',bataan:'bataan',home:'dash',people:'one',grade:'tests',mydash:'dash',cal:'cal',dash:'dash',rank:'rank',team:'team',one:'one',health:'health',tests:'tests',ref:'ref',data:'data',settings:'settings',myhealth:'health',mylog:'mylog',myresults:'myresults',mytimes:'mytimes',mypractice:'practice',practice:'practice'};
+const TAB_ICON = {activity:'dash',pt:'tests',btpeople:'one',btset:'settings',bataan:'bataan',home:'dash',people:'one',grade:'tests',mydash:'dash',cal:'cal',dash:'dash',rank:'rank',team:'team',one:'one',health:'health',tests:'tests',ref:'ref',data:'data',settings:'settings',myhealth:'health',mylog:'mylog',myresults:'myresults',mytimes:'mytimes',mypractice:'practice',practice:'practice'};
 
 // Draws the frame and returns the content element, or null when the frame handled the screen itself (Reference, Share).
 function shell(app, role, who){
@@ -5681,7 +5834,7 @@ function shell(app, role, who){
   return c;
 }
 function shellAction(id, role){
-  if(id.startsWith('sw:')) return syncSwitch(id.slice(3));
+  if(id==='switch') return showSwitch();
   if(id==='signout') return signOut();
   if(id==='share'){ STATE.tab='share'; render(); window.scrollTo(0,0); return; }
   if(id==='news') return showWhatsNew(true);
@@ -5745,8 +5898,16 @@ function wireShare(c){
 
 /* ---------- updates: a pop-up once per new version, and the full list under More \u2192 Updates ---------- */
 // Newest first. Add an entry with each release; the pop-up shows it once on each device.
-const APP_VERSION='2.2.1';
+const APP_VERSION='2.5.1';
 const UPDATES = [
+  {v:'2.5.1', date:'2026-11-18', items:['Launch animation is a touch shorter.']},
+  {v:'2.5', date:'2026-11-18', items:['New launch animation: the anvil drops and strikes, then the name slams in. About 2 seconds; tap to skip. Skipped if your phone is set to reduce motion.']},
+  {v:'2.4', date:'2026-11-18', items:[
+    'New Activity tab for soldiers: log PT tests (each event\u2019s result and points), see your latest, best, and change, a chart of your totals, your recent activity, and everything from Home.',
+    'New PT tests tab for leadership and the admin: add a test, change one, pick the current one, and see everyone\u2019s latest PT score. Old scores always keep the events and points they were logged with.',
+  ]},
+  {v:'2.3', date:'2026-11-18', items:['Bataan Team Captain (and leadership): "Log for someone" at the top of the Bataan page puts in a run or ruck for anyone on the team, and each one in "All runs and rucks" now has Edit.']},
+  {v:'2.2.2', date:'2026-11-18', items:['Menu: one "Switch profile" button (pick which profile in the next step) next to Sign out, and a "Working on it" message while it switches.']},
   {v:'2.2.1', date:'2026-11-18', items:['Polish: buttons react when you hover or tap, text boxes show a soft ring when selected, bottom of each page clears the phone tab bar, Practice follows your color scheme, slightly brighter accent colors, and error messages show in red.']},
   {v:'2.2', date:'2026-11-18', items:[
     'Switch profiles without signing out: if you have more than one sign-in (for example Soldier and Bataan Team Captain), the Menu has "Switch to \u2026".',
@@ -6047,9 +6208,9 @@ function syncDiff(A, B, role){
     if(role==='grader' || tab==='practice' || (role==='btcap' && tab==='soldiers')) return;
     Object.keys(a).forEach(id=>{ if(!b[id]) ops.push({op:'del', tab, id}); });
   });
-  if(role==='admin' || role==='captain' || role==='btcap'){   // the RC Team Captain: tryout settings, never app content (c: keys); the Bataan Team Captain: race day only
+  if(role==='admin' || role==='captain' || role==='btcap' || role==='leader'){   // the RC Team Captain: tryout settings, never app content (c: keys); the Bataan Team Captain: race day only
     const patch={}; let n=0;
-    new Set([...Object.keys(A.settings||{}), ...Object.keys(B.settings||{})]).forEach(k=>{ if(role==='captain' && (k.indexOf('c:')===0 || k==='bataan')) return; if(role==='btcap' && k!=='bataan') return; if(!same((A.settings||{})[k], (B.settings||{})[k])){ const v=(B.settings||{})[k]; patch[k]=v===undefined?null:v; n++; } });
+    new Set([...Object.keys(A.settings||{}), ...Object.keys(B.settings||{})]).forEach(k=>{ if(role==='captain' && (k.indexOf('c:')===0 || k==='bataan' || k==='ptTests')) return; if(role==='btcap' && k!=='bataan') return; if(role==='leader' && k!=='ptTests') return; if(!same((A.settings||{})[k], (B.settings||{})[k])){ const v=(B.settings||{})[k]; patch[k]=v===undefined?null:v; n++; } });
     if(n) ops.push({op:'settings', patch});
   }
   return ops;
@@ -6225,7 +6386,32 @@ function syncOtherProfiles(){
   const p=syncPeople().find(x=>Object.values(x.ids).some(u=>u.id===me.id));
   return p ? p.roles.map(r=>p.ids[r]).filter(u=>u.id!==me.id) : [];
 }
+// Pick which of your other sign-ins to switch to.
+function showSwitch(){
+  const P=syncOtherProfiles(); if(!P.length || document.getElementById('swSheet')) return;
+  const w=document.createElement('div'); w.className='sheet-wrap news-wrap'; w.id='swSheet';
+  w.innerHTML=`<div class="sheet news" role="dialog" aria-modal="true" aria-labelledby="swH"><h2 id="swH">Switch profile</h2>
+    <p class="sub">You're signed in as <b>${esc(ROLE_LABEL[SYNC.cfg.user.role]||SYNC.cfg.user.role)}</b>.</p>
+    <div class="stack" style="gap:10px">${P.map(u=>`<button class="btn" data-swto="${esc(u.id)}">${esc(ROLE_LABEL[u.role]||u.role)}</button>`).join('')}
+    <button class="btn" id="swCancel">Cancel</button></div></div>`;
+  document.body.appendChild(w);
+  const close=()=>w.remove();
+  w.onclick=e=>{ if(e.target===w) close(); }; w.querySelector('#swCancel').onclick=close;
+  w.querySelectorAll('[data-swto]').forEach(b=>b.onclick=()=>{ close(); syncSwitch(b.dataset.swto); });
+  (w.querySelector('[data-swto]')).focus();
+}
+// "Working on it" cover while a switch talks to the sheet.
+function busyCover(on, msg){
+  let el=document.getElementById('busyCover');
+  if(!on){ if(el) el.remove(); return; }
+  if(!el){ el=document.createElement('div'); el.id='busyCover'; el.className='sheet-wrap news-wrap'; el.setAttribute('role','status'); el.setAttribute('aria-live','polite'); document.body.appendChild(el); }
+  el.innerHTML=`<div class="sheet news" style="text-align:center"><p style="margin:0;font-weight:600">${esc(msg||'Working on it…')}</p></div>`;
+}
 async function syncSwitch(uid){
+  busyCover(true, 'Working on it… switching your profile.');
+  try{ await syncSwitchRun(uid); } finally { busyCover(false); }
+}
+async function syncSwitchRun(uid){
   const u=(SYNC.names||[]).find(x=>x.id===uid); if(!u) return;
   if(SYNC.queue.length){ await syncFlush(); if(SYNC.queue.length) return toast('Your changes haven’t reached the sheet yet. Get signal, wait for "Synced", then switch.'); }
   let r; try{ r=await syncApi('switch',{token:SYNC.cfg.token, userId:uid, keep:!!SYNC.cfg.keep}); }catch(e){ return toast('No connection. Try again when you have signal.'); }
@@ -7265,14 +7451,15 @@ function btCanPhoto(){ return typeof syncActive==='function' && syncActive() && 
 function btFormHtml(f){
   const kind=f.kind||'run', ruck=kind==='ruck';
   return `<div class="bt-form" id="btForm">
-    <h3 style="margin:0 0 8px">${f.asg?`Log: ${esc(wkText(f.wk))}, ${esc(calDayLabel(f.asgDay))}`:'Log a run or ruck'}${f.sid && myRole()!=='soldier'?` for ${esc((soldierById(f.sid)||{}).name||'')}`:''}</h3>
+    <h3 style="margin:0 0 8px">${f.edit?'Edit run or ruck':f.asg?`Log: ${esc(wkText(f.wk))}, ${esc(calDayLabel(f.asgDay))}`:'Log a run or ruck'}${f.sid && myRole()!=='soldier' && !f.any?` for ${esc((soldierById(f.sid)||{}).name||'')}`:''}</h3>
+    ${f.any?`<label class="field" style="margin-bottom:10px"><span>Who</span><select class="input" id="bt_sid">${f.sid?'':'<option value="">Pick a person</option>'}${bataanMembers().map(x=>`<option value="${x.id}" ${x.id===f.sid?'selected':''}>${esc(x.name)}</option>`).join('')}</select></label>`:''}
     ${f.asg?'':`<div class="seg" role="group" aria-label="Run or ruck" style="margin-bottom:10px">${Object.entries(BT_KINDS).map(([k,l])=>`<button type="button" data-btkind="${k}" aria-pressed="${kind===k}">${l}</button>`).join('')}</div>`}
     <div class="grid">
       <label class="field"><span>Date</span><input class="input" type="date" id="bt_date" value="${esc(f.date||todayISO())}"></label>
       <label class="field"><span>Distance (miles)</span><input class="input" inputmode="decimal" id="bt_dist" value="${esc(f.dist||'')}" placeholder="${ruck?'e.g. 8':'e.g. 4'}"></label>
       <label class="field"><span>Time (${ruck?'h:mm:ss':'m:ss or h:mm:ss'})</span><input class="input" id="bt_time" inputmode="numeric" data-time="long" autocomplete="off" value="${esc(f.time||'')}" placeholder="${ruck?'2:05:30':'32:10'}"></label>
       ${ruck?`<label class="field"><span>Pack weight (lb)</span><input class="input" inputmode="numeric" id="bt_lb" value="${esc(f.lb||'')}" placeholder="e.g. 35"></label>`:''}
-      <label class="field"><span>Note (optional)</span><input class="input" id="bt_note" placeholder="e.g. hills, boots, hot spots"></label>
+      <label class="field"><span>Note (optional)</span><input class="input" id="bt_note" value="${esc(f.note||'')}" placeholder="e.g. hills, boots, hot spots"></label>
       ${btCanPhoto()?`<label class="field tl-photo"><span>Photo (optional)</span><input type="file" accept="image/*" id="bt_photo"><span class="soft" style="font-size:12px">A watch or app screenshot works well.</span></label>`:''}
     </div>
     <p class="tl-pace" id="bt_pace" aria-live="polite"></p>
@@ -7282,7 +7469,7 @@ function btFormHtml(f){
 function wireBtForm(c){
   const f=STATE.bt && STATE.bt.form; if(!f || !c.querySelector('#btForm')) return;
   const v=id=>{ const el=$(id); return el?el.value.trim():''; };
-  const keep=()=>{ f.date=v('bt_date'); f.dist=v('bt_dist'); const lb=$('bt_lb'); if(lb) f.lb=lb.value.trim(); };
+  const keep=()=>{ f.date=v('bt_date'); f.dist=v('bt_dist'); f.time=v('bt_time'); f.note=v('bt_note'); const lb=$('bt_lb'); if(lb) f.lb=lb.value.trim(); const w=$('bt_sid'); if(w) f.sid=w.value; };
   c.querySelectorAll('[data-btkind]').forEach(b=>b.onclick=()=>{ keep(); f.kind=b.dataset.btkind; render(); });
   const pace=()=>{ const p=btPace(parseLong(v('bt_time')), +v('bt_dist')); const o=$('bt_pace'); if(o) o.innerHTML=p?`Pace: <b>${btPaceTxt(p)}</b>`:''; };
   ['bt_time','bt_dist'].forEach(id=>{ const el=$(id); if(el) el.addEventListener('input',()=>setTimeout(pace,0)); });
@@ -7291,11 +7478,14 @@ function wireBtForm(c){
     const msg=$('bt_msg'), bad=(id,t)=>{ const el=$(id); if(el){ el.classList.add('bad'); el.focus(); } msg.innerHTML=`<span style="color:var(--alert)">${t}</span>`; };
     c.querySelectorAll('#btForm .input.bad').forEach(el=>el.classList.remove('bad'));
     const kind=f.kind||'run', d=+v('bt_dist'), sec=parseLong(v('bt_time')), lbRaw=v('bt_lb');
+    if(f.any){ f.sid=v('bt_sid'); if(!f.sid) return bad('bt_sid','Pick who this is for.'); }
     if(!(d>0 && d<100)) return bad('bt_dist','Enter the distance in miles, like 4 or 12.');
     if(sec==null || isNaN(sec) || sec<=0) return bad('bt_time','Enter the time like 32:10 or 2:05:30. Digits only works too.');
     if(kind==='ruck' && lbRaw && !(+lbRaw>0 && +lbRaw<200)) return bad('bt_lb','Pack weight is in pounds, like 35. Leave it blank for none.');
     { const pr=tlProblem(kind, d, sec, v('bt_date')||todayISO()); if(pr) return bad(pr.includes('date')?'bt_date':'bt_time', pr); }
-    const e={id:uid(), kind, date:v('bt_date')||todayISO(), sid:f.sid, dist:Math.round(d*100)/100, sec, at:Date.now()};
+    const old=f.edit && timeLogs().find(t=>t.id===f.edit);
+    const e=old ? Object.assign({}, old, {kind, date:v('bt_date')||old.date, sid:f.sid, dist:Math.round(d*100)/100, sec}) : {id:uid(), kind, date:v('bt_date')||todayISO(), sid:f.sid, dist:Math.round(d*100)/100, sec, at:Date.now()};
+    delete e.lb; delete e.note;
     if(kind==='ruck' && lbRaw) e.lb=+lbRaw;
     if(f.asg){ e.asg=f.asg; e.asgDay=f.asgDay; }
     const note=v('bt_note'); if(note) e.note=note;
@@ -7304,6 +7494,7 @@ function wireBtForm(c){
     const pf=$('bt_photo'), file=pf && pf.files && pf.files[0];
     let photo=null;
     if(file){ msg.textContent='Preparing photo\u2026'; try{ photo=await shrinkPhoto(file); }catch(err){ return bad('bt_photo','That picture couldn\'t be read. Try a different one.'); } }
+    if(old){ DATA.timeLogs=timeLogs().map(t=>t.id===old.id?e:t); STATE.bt.form=null; save(); toast(`Updated: ${BT_KINDS[kind].toLowerCase()} ${tlDist(e.dist)} mi in ${fmtLong(sec)}.`); render(); return; }
     timeLogs().push(e); STATE.bt.form=null; save();
     if(photo) syncQueuePhoto(e.id, photo);
     toast(`Saved: ${BT_KINDS[kind].toLowerCase()} ${tlDist(e.dist)} mi in ${fmtLong(sec)} (${btPaceTxt(btPace(sec,e.dist))})${photo?', with photo':''}.`); render();
@@ -7433,13 +7624,15 @@ function btLogTable(L, mine){
     <div class="scroll"><table><thead><tr><th>Date</th>${mine?'':'<th>Name</th>'}<th>Type</th><th class="num">Miles</th><th class="num">Time</th><th class="num">Pace</th><th class="num">Pack</th><th>For</th><th>Photo</th><th></th></tr></thead>
     <tbody>${rows.map(t=>{ const a=t.asg?calList().find(e=>e.id===t.asg):null, can=!mine||t.self;
       return `<tr><td>${esc(tlDate(t.date))}</td>${mine?'':`<td>${esc((soldierById(t.sid)||{}).name||'')}</td>`}<td>${BT_KINDS[t.kind]}</td><td class="num">${tlDist(t.dist)}</td><td class="num">${fmtLong(t.sec)}</td><td class="num">${btPaceTxt(btPace(t.sec,t.dist))}</td><td class="num">${+t.lb?(+t.lb)+' lb':''}</td><td>${a?esc(wkText(a.wk)):'<span class="soft">extra</span>'}${t.note?` <span class="soft">\u00B7 ${esc(t.note)}</span>`:''}</td><td>${btPhotoCell(t)}</td>
-        <td style="white-space:nowrap">${!can?'':del===t.id?`<button class="btn danger sm" data-btdelyes="${esc(t.id)}">Delete</button> <button class="btn sm" data-btdelno="1">Keep</button>`:`<button class="btn sm" data-btdel="${esc(t.id)}" aria-label="Delete">Delete</button>`}</td></tr>`; }).join('')}</tbody></table></div></details>`;
+        <td style="white-space:nowrap">${!can?'':del===t.id?`<button class="btn danger sm" data-btdelyes="${esc(t.id)}">Delete</button> <button class="btn sm" data-btdelno="1">Keep</button>`:`${mine?'':`<button class="btn sm" data-btlogedit="${esc(t.id)}">Edit</button> `}<button class="btn sm" data-btdel="${esc(t.id)}" aria-label="Delete">Delete</button>`}</td></tr>`; }).join('')}</tbody></table></div></details>`;
 }
 function btPhotoCell(t){ return t.photo ? `<button class="btn sm" data-tlphoto="${esc(t.photo)}">Photo</button>` : (typeof syncPhotoPending==='function' && syncPhotoPending(t.id)) ? '<span class="soft" style="font-size:12.5px">sending\u2026</span>' : ''; }
 function wireBtLogTable(c){
   c.querySelectorAll('[data-tlphoto]').forEach(b=>b.onclick=()=>showPhoto(b.dataset.tlphoto));
   const d=c.querySelector('#btAll'); if(d) d.ontoggle=()=>{ STATE.bt.showAll=d.open; };
   c.querySelectorAll('[data-btdel]').forEach(b=>b.onclick=()=>{ STATE.bt.del=b.dataset.btdel; render(); });
+  c.querySelectorAll('[data-btlogedit]').forEach(b=>b.onclick=()=>{ const t=timeLogs().find(x=>x.id===b.dataset.btlogedit); if(!t) return;
+    btOpenForm({any:true, edit:t.id, sid:t.sid, kind:t.kind, date:t.date, dist:String(t.dist), time:fmtLong(t.sec), lb:t.lb?String(t.lb):'', note:t.note||''}); const el=$('btForm'); if(el) el.scrollIntoView({block:'center'}); });
   c.querySelectorAll('[data-btdelno]').forEach(b=>b.onclick=()=>{ STATE.bt.del=null; render(); });
   c.querySelectorAll('[data-btdelyes]').forEach(b=>b.onclick=()=>{ DATA.timeLogs=timeLogs().filter(t=>t.id!==b.dataset.btdelyes); STATE.bt.del=null; save(); toast('Deleted.'); render(); });
 }
@@ -7479,10 +7672,12 @@ function renderBataanStaff(c, B){
       <h3 class="chart-h">Miles each week</h3>${barChart(weeks.map(wl), weeks.map(w=>Math.round(btMiles(P.L.filter(t=>btMon(t.date)===w))*10)/10), {label:'Miles', short:true})}
       ${btPersonWorkHtml(pick, P.L)}
       <div class="row" style="margin-top:10px"><button class="btn sm" data-btlogfor="${pick.id}">Log a run or ruck for them</button></div>
-      ${B.form && B.form.sid===pick.id ? btFormHtml(B.form) : ''}
+      ${B.form && !B.form.any && B.form.sid===pick.id ? btFormHtml(B.form) : ''}
     </div>`; })() : '';
   c.innerHTML=`<div class="stack bataan">
     ${btMeterHtml(false)}
+    ${M.length?`<div class="panel"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Log for someone</h2>${B.form&&B.form.any?'':'<button class="btn primary sm" id="btLogAny">Log a run or ruck</button>'}</div>
+      <p class="sub" style="margin:6px 0 0">Put in a run or ruck for anyone on the team. To fix one, use Edit in "All runs and rucks" below.</p>${B.form&&B.form.any?btFormHtml(B.form):''}</div>`:''}
     ${btTeamHtml(B)}
     ${btWeeklyHtml(M)}
     <div class="panel"><div class="row" style="justify-content:space-between;align-items:center;margin-bottom:8px"><h2 style="margin:0">Week plan</h2>${btWeekNav(B)}</div>
@@ -7494,7 +7689,7 @@ function renderBataanStaff(c, B){
     <div class="panel"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">Team this week</h2><button class="btn sm" id="btXl">Export to Excel (.xlsx)</button></div>
       <p class="sub" style="margin:4px 0 10px">${M.length?`${M.length} on the Bataan team. Times show when someone logs an assigned workout; "missed" means the day passed with nothing logged.`:`No one is on the Bataan team yet. ${manage?'Add people under Team above.':'The system admin or the Bataan Team Captain adds people.'}`}</p>
       ${board}
-      ${B.form && !B.form.asg && B.form.sid && !pick ? btFormHtml(B.form) : ''}
+      ${B.form && !B.form.any && !B.form.asg && B.form.sid && !pick ? btFormHtml(B.form) : ''}
     </div>
     ${M.length?btLatestHtml(M, logsBy):''}
     ${M.length?`<div class="panel"><h2>Trends</h2>
@@ -7515,6 +7710,7 @@ function renderBataanStaff(c, B){
   c.querySelectorAll('[data-btres]').forEach(b=>b.onclick=()=>{ B.asg = B.asg===b.dataset.btres ? null : b.dataset.btres; render(); const p=$('btAsgBox'); if(p) p.scrollIntoView({block:'start', behavior:'smooth'}); });
   c.querySelectorAll('[data-btasgclose]').forEach(b=>b.onclick=()=>{ B.asg=null; render(); });
   c.querySelectorAll('[data-btlogfor]').forEach(b=>b.onclick=()=>btOpenForm({sid:b.dataset.btlogfor, kind:'run'}));
+  const la=c.querySelector('#btLogAny'); if(la) la.onclick=()=>btOpenForm({any:true, kind:'run'});
   c.querySelectorAll('[data-btedit]').forEach(b=>b.onclick=()=>{ const [id,day]=b.dataset.btedit.split('|'), e=calList().find(x=>x.id===id); if(!e) return;
     if(e.repeat&&e.repeat.days&&e.repeat.days.length){ STATE.cal=STATE.cal||{}; calUnhide('bataan'); STATE.cal.day=day; STATE.cal.month=day.slice(0,7); STATE.tab='cal'; render(); window.scrollTo(0,0); toast('Repeating workout: change it here in the calendar.'); return; }
     calEdit(e); });
@@ -8103,8 +8299,22 @@ function gradeResults(el){
   if(m==='team') renderTeam(body); else renderOne(body);
 }
 
+
+/* ---------- launch animation: the anvil drops, strikes, and the name slams in (about 2 s, tap to skip) ---------- */
+function playIntro(){
+  if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const st=document.createElement('div'); st.className='intro'; st.setAttribute('aria-hidden','true');
+  st.innerHTML=`<div class="intro-wrap"><img class="intro-anv" src="${LOGO_SRC}" alt=""></div><div class="intro-t">RUSTY ANVIL</div><div class="intro-s">UCM ARMY ROTC</div><div class="intro-flash"></div>`;
+  document.body.appendChild(st);
+  const end=()=>{ if(!st.isConnected || st.classList.contains('done')) return; st.classList.add('done'); setTimeout(()=>st.remove(), 380); };
+  st.onclick=end;
+  setTimeout(()=>{ for(let i=0;i<18;i++){ const s=document.createElement('i'); s.className='intro-spark'; st.appendChild(s); const a=Math.PI*(1+Math.random()), d=60+Math.random()*110;
+    s.animate([{opacity:1,transform:'translate(0,0) scale(1)'},{opacity:0,transform:`translate(${Math.cos(a)*d}px,${Math.sin(a)*d}px) scale(.3)`}],{duration:450+Math.random()*250,easing:'cubic-bezier(.2,.8,.3,1)',fill:'forwards'}); } }, 420);
+  setTimeout(end, 1650);
+}
 load();
 rebuildRegistry();
 restoreSession();
 render();
+playIntro();
 </script>
