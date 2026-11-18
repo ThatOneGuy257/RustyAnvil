@@ -886,6 +886,17 @@ td .btn,td .btn.sm{min-height:0}
 @keyframes introFlash{0%{opacity:.85}100%{opacity:0}}
 @keyframes introOut{to{opacity:0;transform:scale(1.04)}}
 @media (max-width:380px){.intro-t{font-size:23px}}
+.act-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.act-box{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:var(--panelAlt);color:var(--ink);cursor:pointer;font:inherit;border-left:4px solid var(--tone,var(--line))}
+.act-box b{font:600 20px/1.15 var(--serif)}
+.act-k{font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--tone,var(--inkSoft))}
+.act-s{font-size:12.5px;color:var(--inkSoft);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.act-d{font-size:12px;color:var(--inkSoft);margin-top:4px}
+.act-box[aria-pressed="true"]{border-color:var(--tone,var(--navy));box-shadow:0 0 0 2px color-mix(in srgb,var(--tone,var(--navy)) 35%,transparent)}
+.act-box.t-run{--tone:#2E8B6E}.act-box.t-ruck{--tone:#C25B2C}.act-box.t-pt{--tone:#B8892B}.act-box.t-wt{--tone:#5B7DB1}.act-box.t-scan{--tone:#7B68A6}.act-box.t-go{--tone:#2E8B6E}.act-box.t-nogo{--tone:#C0392B}
+.act-det{margin-top:12px;padding:14px 16px;border-radius:12px;background:var(--panelAlt);border:1px solid var(--line)}
+.act-det .kv{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px solid color-mix(in srgb,var(--line) 60%,transparent)}
+.act-det .kv:last-child{border-bottom:0}.act-det .kv span:first-child{color:var(--inkSoft)}
 </style>
 
 <div id="app"></div>
@@ -5321,11 +5332,18 @@ function wirePtHistory(c){
 function renderActivity(c, s){
   const L=ptLogsOf(s.id), last=L[L.length-1], prev=L.length>1?L[L.length-2]:null, best=L.length?L.reduce((a,b)=>b.total/ptOutOf(b)>a.total/ptOutOf(a)?b:a):null;
   const sameTest=last&&prev&&(last.test||{}).id===(prev.test||{}).id, ch=sameTest?last.total-prev.total:null;
+  // Each recent thing is a box: a type, a headline number, and details shown when it's tapped.
+  const kv=(k,v)=>v==null||v===''?'':`<div class="kv"><span>${esc(k)}</span><span>${esc(String(v))}</span></div>`;
+  const pname=t=>{ try{ return eventName(t)||t; }catch(e){ return t; } };
   const recent=[
-    ...timeLogs().filter(t=>t.sid===s.id && ['run','ruck','weight','pt'].includes(t.kind)).map(t=>({d:t.date, what:t.kind==='pt'?`PT test: ${(t.test||{}).name||''}, ${t.total} points`:t.kind==='weight'?`Weigh-in: ${t.lb} lb`:`${t.kind==='run'?'Run':'Ruck'}: ${tlDist(t.dist)} mi in ${fmtLong(t.sec)}`})),
-    ...(s.scans||[]).map(x=>({d:x.date, what:'InBody scan'})),
-    ...(s.practice||[]).filter(p=>p.t).map(p=>({d:new Date(p.t).toISOString().slice(0,10), what:`Practice: ${(()=>{ try{ return eventName(p.task); }catch(e){ return ''; } })()||p.task} (${p.ok?'Go':'No-Go'})`}))
+    ...timeLogs().filter(t=>t.sid===s.id && ['run','ruck','weight','pt'].includes(t.kind)).map(t=> t.kind==='pt'
+      ? {d:t.date, k:'PT test', big:`${t.total}`, small:`of ${ptOutOf(t)} · ${(t.test||{}).name||''}`, tone:'pt', det:(t.ev||[]).map(e=>kv(e.n, `${e.pts} pts${e.raw?` (${e.raw})`:''}`)).join('')}
+      : t.kind==='weight' ? {d:t.date, k:'Weigh-in', big:`${t.lb} lb`, small:'', tone:'wt', det:kv('Weight', `${t.lb} lb`)+kv('Note', t.note)}
+      : {d:t.date, k:t.kind==='run'?'Run':'Ruck', big:`${tlDist(t.dist)} mi`, small:fmtLong(t.sec), tone:t.kind, det:kv('Distance', `${tlDist(t.dist)} mi`)+kv('Time', fmtLong(t.sec))+kv('Pace', btPaceTxt(btPace(t.sec,t.dist)))+kv('Pack', +t.lb?`${t.lb} lb`:'')+kv('Note', t.note)+kv('Logged by', t.self?'You':'Leadership')}),
+    ...(s.scans||[]).map(x=>({d:x.date, k:'InBody scan', big:x.pbf!=null&&x.pbf!==''?`${fmt1(numv(x.pbf))}%`:'Scan', small:'body fat', tone:'scan', det:kv('Weight', x.weightLb?`${fmt1(numv(x.weightLb))} lb`:'')+kv('Body fat', x.pbf!=null&&x.pbf!==''?`${fmt1(numv(x.pbf))}%`:'')+kv('Muscle (SMM)', x.smmLb?`${fmt1(numv(x.smmLb))} lb`:'')})),
+    ...(s.practice||[]).filter(p=>p.t).map(p=>({d:new Date(p.t).toISOString().slice(0,10), k:'Practice', big:p.ok?'Go':'No-Go', small:pname(p.task), tone:p.ok?'go':'nogo', det:kv('Skill', pname(p.task))+kv('Result', p.ok?'Go':'No-Go')+kv('Details', p.detail)}))
   ].filter(x=>x.d).sort((a,b)=>a.d<b.d?1:-1).slice(0,12);
+  const open=STATE.actOpen!=null && recent[STATE.actOpen] ? STATE.actOpen : null;
   c.innerHTML=`<div class="stack">
     <div class="panel"><div class="row" style="justify-content:space-between;align-items:center"><h2 style="margin:0">PT scores</h2>${STATE.ptForm?'':'<button class="btn primary sm" id="ptOpen">Log a PT test</button>'}</div>
       ${STATE.ptForm?ptFormHtml(STATE.ptForm):''}
@@ -5335,11 +5353,14 @@ function renderActivity(c, s){
       ${ptTrendHtml(L)}
       <h3 class="chart-h">History</h3>${ptHistoryHtml(L, true)}
     </div>
-    <div class="panel"><h2>Recent activity</h2>${recent.length?`<ol class="plain" style="margin:0;line-height:1.9">${recent.map(x=>`<li><span class="soft mono" style="display:inline-block;min-width:96px">${esc(tlDate(x.d))}</span> ${esc(x.what)}</li>`).join('')}</ol>`:'<p class="sub" style="margin:0">Nothing yet.</p>'}</div>
+    <div class="panel"><h2>Recent activity</h2>${recent.length?`<div class="act-grid">${recent.map((x,i)=>`<button type="button" class="act-box t-${x.tone}" data-actbox="${i}" aria-pressed="${open===i}">
+        <span class="act-k">${esc(x.k)}</span><b>${esc(x.big)}</b><span class="act-s">${esc(x.small)}</span><span class="act-d">${esc(tlDate(x.d))}</span></button>`).join('')}</div>
+      ${open!=null?`<div class="act-det"><div class="row" style="justify-content:space-between"><h3 style="margin:0">${esc(recent[open].k)} · ${esc(tlDate(recent[open].d))}</h3><button class="btn sm" data-actbox="${open}">Close</button></div>${recent[open].det||'<p class="sub" style="margin:0">No more details.</p>'}</div>`:''}`:'<p class="sub" style="margin:0">Nothing yet.</p>'}</div>
     <div id="actHome"></div>
   </div>`;
   const o=$('ptOpen'); if(o) o.onclick=()=>{ STATE.ptForm={test:ptCfg().active}; render(); };
   wirePtForm(s); wirePtHistory(c);
+  c.querySelectorAll('[data-actbox]').forEach(b=>b.onclick=()=>{ const i=+b.dataset.actbox; STATE.actOpen=STATE.actOpen===i?null:i; render(); });
   renderSoldierHome($('actHome'), s);
 }
 // Admin and battalion leadership: the PT tests soldiers log against, and everyone's latest scores.
@@ -5898,8 +5919,9 @@ function wireShare(c){
 
 /* ---------- updates: a pop-up once per new version, and the full list under More \u2192 Updates ---------- */
 // Newest first. Add an entry with each release; the pop-up shows it once on each device.
-const APP_VERSION='2.5.1';
+const APP_VERSION='2.5.2';
 const UPDATES = [
+  {v:'2.5.2', date:'2026-11-18', items:['Activity: recent activity is now boxes. Tap one to see its details.']},
   {v:'2.5.1', date:'2026-11-18', items:['Launch animation is a touch shorter.']},
   {v:'2.5', date:'2026-11-18', items:['New launch animation: the anvil drops and strikes, then the name slams in. About 2 seconds; tap to skip. Skipped if your phone is set to reduce motion.']},
   {v:'2.4', date:'2026-11-18', items:[
